@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link href="https://cdn.lineicons.com/4.0/lineicons.css"
+            rel="stylesheet" />
+        <link rel="stylesheet" href="../bootstrap/css/bootstrap.css" />
+        <link rel="stylesheet" href="/public/css/index.css">
+    </head>
+    <body>
+        <!-- Header -->
+        <nav class="navbar navbar-default no-margin p-0" style="top: 0;">
+            <div class="navbar-header fixed-brand w-100 p-3 bg-danger m-0">
+                <div
+                    class="d-flex justify-content-between text-center align-items-center ">
+                    <img src="/public/picture/bsu.png"
+                        style="width: 70px; height: 70px" alt>
+                    <h1 class="text-white">Faculty Evaluation Portal</h1>
+                    <img src="/public/picture/cics.png"
+                        style="width: 70px; height: 70px" alt>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <div class="wrapper">
+            <aside class="bg-light" id="sidebar">
+                <div class="d-flex justify-content-center p-3">
+                    <div class="sidebar-logo">
+                        <div
+                            class="d-flex flex-column justify-content-center align-items-center m-2">
+                            <div class="border p-2 bg-light p-2">
+                                <img src="../public/picture/user.jpg"
+                                    style="width: 150px; height: 150px" alt>
+                            </div>
+                            <div class="name text-center p-2">
+                                <h5 class="fw-bold">Last Name</h5>
+                                <h6>First Name</h6>
+                                <h6>Faculty No.</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">
+                            <span>Evaluate</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">
+                            <span>Classroom Evaluation</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">
+                            <span>Faculty Evaluation Result</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">
+
+                            <span>Faculty Peer to Peer Evaluation Result</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link collapsed has-dropdown"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#settings" aria-expanded="false"
+                            aria-controls="settings">
+                            <span>Settings</span>
+                        </a>
+                        <ul id="settings"
+                            class="sidebar-dropdown list-unstyled collapse"
+                            data-bs-parent="#sidebar">
+                            <li class="sidebar-item ">
+
+                                <a href="#" class="sidebar-link" data-bs-toggle="modal" data-bs-target="#changePassModal">Change
+                                    Password</a>
+                            </li>
+
+
+
+                        </ul>
+                    </li>
+                </ul>
+                <div class="sidebar-footer">
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link">Sign-out</a>
+                    </li>
+                </div>
+            </aside>
+            <div class="main p-3">
+                <div class="text-center">
+                    <h1>
+                        Sidebar Bootstrap 5
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="modal fade" id="changePassModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Change
+                Password</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form action="../controller/changepass.php" method="POST">
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Current Password</label>
+                  <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">New Password</label>
+                  <input type="password" class="form-control" name="newpass" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3">
+                  <label for="exampleInputPassword1" class="form-label">Re-enter New Password</label>
+                  <input type="password" class="form-control" name="conpass" id="exampleInputPassword1">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" name="changePass" class="btn btn-primary">Confirm</button>
+            </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+        <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

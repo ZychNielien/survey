@@ -1,0 +1,109 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+
+*,
+*::before,
+*::after {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+}
+body,
+input {
+  font-family: "Poppins", sans-serif;
+}
+
+a {
+  text-decoration: none;
+}
+
+li {
+  list-style: none;
+}
+
+/* Nav-bar */
+.wrapper {
+  display: flex;
+}
+.main {
+  width: 100%;
+  padding: 20px 30px;
+}
+#sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  z-index: 1000;
+  transition: all 0.25s ease-in-out;
+  background-color: #c30011;
+
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-nav {
+  padding: 2rem 0;
+  flex: 1 1 auto;
+}
+
+a.sidebar-link {
+  padding: 0.8rem 1.625rem;
+  color: #ffffff;
+  display: block;
+  white-space: wrap;
+}
+a.sidebar-link:hover {
+  background-color: #ffffff;
+  color: #c30011;
+  font-weight: bold;
+}
+
+.sidebar-link i {
+  font-size: 1.1rem;
+  margin-right: 0.75rem;
+}
+
+.sidebar-item {
+  position: relative;
+}
+
+#sidebar:not(.expand) .sidebar-item .sidebar-dropdown {
+  position: absolute;
+  top: 0px;
+  left: 260px;
+  padding: 0;
+  min-width: 15rem;
+  display: none;
+  background-color: #c30011;
+  border: 1px solid #c30011;
+}
+
+#sidebar:not(.expand) .sidebar-item:hover .has-dropdown + .sidebar-dropdown {
+  display: block;
+  max-height: 15em;
+  width: 100%;
+  opacity: 1;
+}
+
+.rating {
+  direction: rtl;
+  unicode-bidi: bidi-override;
+  color: #ddd; /* Personal choice */
+}
+.rating input {
+  display: none;
+}
+.rating label,
+.rating input {
+  margin: 0 10px;
+}
+
+.rating .ratingLabel:hover,
+.rating .ratingLabel:hover ~ .ratingLabel,
+.rating input:checked + .ratingLabel,
+.rating input:checked + .ratingLabel ~ .ratingLabel {
+  color: gold; /* Personal color choice. Lifted from Bootstrap 4 */
+  cursor: pointer;
+}
