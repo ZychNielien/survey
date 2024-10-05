@@ -135,15 +135,15 @@ include "components/navBar.php";
 
         $('#start-time-select').change(function () {
             updateEndTimeOptions();
-            checkStartTimeAvailability(); // Check availability when start time changes
+            checkStartTimeAvailability();
             updateSlotOptions();
         });
 
-        $('#end-time-select').change(checkSlotAvailability); // Check availability when end time changes
+        $('#end-time-select').change(checkSlotAvailability);
         $('#slot-select').change(checkSlotAvailability);
         $('#book-btn').click(openForm);
         $('#form').submit(submitForm);
-        // $('#clear-btn').click(clearBookings);
+
         $(document).on('click', '#confirm-cancel-btn', confirmCancelBooking);
     });
 
@@ -253,12 +253,12 @@ include "components/navBar.php";
         const startTime = parseInt($('#start-time-select').val());
         endTimeSelect.empty().append('<option value>Select End Time</option>');
 
-        // Limit end time to 3 hours from start time
+
         for (let hour = startTime + 1; hour <= startTime + 5 && hour <= 19; hour++) {
             endTimeSelect.append(`<option value="${hour}">${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}</option>`);
         }
 
-        endTimeSelect.prop('disabled', endTimeSelect.children().length === 1); // Disable if no options are available
+        endTimeSelect.prop('disabled', endTimeSelect.children().length === 1);
     }
 
     function updateSlotOptions() {
@@ -271,22 +271,22 @@ include "components/navBar.php";
         const selectedDate = new Date($('#date-select').val());
         const startTime = parseInt($('#start-time-select').val());
 
-        // Check if the start time is valid
+
         if (isNaN(startTime)) {
-            $('#book-btn').prop('disabled', true); // Disable book button if time is invalid
-            $('#slot-select').prop('disabled', true); // Disable slot selection if time is invalid
+            $('#book-btn').prop('disabled', true);
+            $('#slot-select').prop('disabled', true);
             return;
         }
 
-        // Construct keys for checking both slots
+
         const slotKey1 = `${startTime}-${selectedDate.getTime()}-1`;
         const slotKey2 = `${startTime}-${selectedDate.getTime()}-2`;
 
-        // Check if either of the slots is booked
+
         const isSlot1Booked = bookedSlots[slotKey1];
         const isSlot2Booked = bookedSlots[slotKey2];
 
-        // Call the slot availability check
+
         checkSlotAvailability();
     }
 
@@ -295,38 +295,38 @@ include "components/navBar.php";
         const startTime = parseInt($('#start-time-select').val());
         const endTime = parseInt($('#end-time-select').val());
 
-        // Check if start and end times are valid
+
         if (isNaN(startTime) || isNaN(endTime) || endTime <= startTime) {
-            $('#book-btn').prop('disabled', true); // Disable book button if times are invalid
-            $('#slot-select').prop('disabled', true); // Disable slot selection if times are invalid
+            $('#book-btn').prop('disabled', true);
+            $('#slot-select').prop('disabled', true);
             return;
         }
 
-        // Construct keys for checking the slots
+
         const slotKey1 = `${startTime}-${selectedDate.getTime()}-1`;
         const slotKey2 = `${startTime}-${selectedDate.getTime()}-2`;
 
-        // Check if either of the slots for the selected start and end times is booked
+
         const isSlot1Booked = bookedSlots[slotKey1];
         const isSlot2Booked = bookedSlots[slotKey2];
 
-        // Disable slots based on availability
+
         if (isSlot1Booked && isSlot2Booked) {
-            $('#slot-select').prop('disabled', true); // Disable both if both are booked
+            $('#slot-select').prop('disabled', true);
             $('#book-btn').prop('disabled', true);
             swal("Error!", "Both slots are already booked.", "error");
         } else {
-            // Enable the slot selection based on bookings
+
             $('#slot-select').prop('disabled', false);
             $('#book-btn').prop('disabled', false);
 
-            // Update slot options based on bookings
+
             $('#slot-select option').each(function () {
                 const slotValue = $(this).val();
                 if ((slotValue === '1' && isSlot1Booked) || (slotValue === '2' && isSlot2Booked)) {
-                    $(this).prop('disabled', true); // Disable the booked slot option
+                    $(this).prop('disabled', true);
                 } else {
-                    $(this).prop('disabled', false); // Enable the available slot option
+                    $(this).prop('disabled', false);
                 }
             });
         }
@@ -347,7 +347,7 @@ include "components/navBar.php";
         const selectedSlot = $('#slot-select').val();
         const evaluationStatus = $('#evaluationStatus').val();
 
-        // Validate end time
+
         if (isNaN(endTime) || endTime <= startTime) {
             Swal.fire("Error!", "Please select a valid end time.", "error");
             return;
@@ -355,7 +355,7 @@ include "components/navBar.php";
 
         let allAvailable = true;
 
-        // Check availability of the selected time slots
+
         for (let hour = startTime; hour < endTime; hour++) {
             const slotKey = `${hour}-${selectedDate.getTime()}-${selectedSlot}`;
 
@@ -370,7 +370,6 @@ include "components/navBar.php";
             return;
         }
 
-        // Create the booking and set isEvaluated to false
         for (let hour = startTime; hour < endTime; hour++) {
             const slotKey = `${hour}-${selectedDate.getTime()}-${selectedSlot}`;
             bookedSlots[slotKey] = {
@@ -382,10 +381,10 @@ include "components/navBar.php";
                 startTime,
                 endTime,
                 evaluationStatus,
-                isEvaluated: false // Add the isEvaluated property
+                isEvaluated: false
             };
         }
-        // Save bookings to localStorage or your backend
+
         saveBookings();
 
         Swal.fire("Success!", "Booking has been successfully made!", "success").then(() => {
@@ -394,22 +393,22 @@ include "components/navBar.php";
         });
 
         $('#reservationModal').modal('hide');
-        // Prepare data for POST request
+
         const bookingData = {
             course: course,
             name: name,
             room: room,
-            selected_date: selectedDate.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+            selected_date: selectedDate.toISOString().split('T')[0],
             start_time: startTime,
             end_time: endTime,
             selected_slot: selectedSlot,
             evaluation_status: evaluationStatus
         };
 
-        // Send booking data to the PHP backend
+
         $.ajax({
             type: 'POST',
-            url: '../../controller/classroomObservation.php', // Change this to the path of your PHP script
+            url: '../../controller/classroomObservation.php',
             data: bookingData,
             success: function (response) {
                 Swal.fire("Success!", "Booking has been successfully made!", "success").then(() => {
@@ -430,7 +429,7 @@ include "components/navBar.php";
 
 
     function openCancelModal(slotKey) {
-        slotToCancel = slotKey; // Store the slot key to be cancelled
+        slotToCancel = slotKey;
 
         if (bookedSlots[slotKey]) {
             const booking = bookedSlots[slotKey];
@@ -449,7 +448,7 @@ include "components/navBar.php";
                     focusCancel: true,
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        cancelBooking(slotToCancel); // Call the function to cancel the booking
+                        cancelBooking(slotToCancel);
                     }
                 });
             } else {
@@ -458,19 +457,17 @@ include "components/navBar.php";
         }
 
         function cancelBooking(slotKey) {
-            // Logic to remove the booking using the slotKey
+
             if (bookedSlots[slotKey]) {
                 const booking = bookedSlots[slotKey];
 
-                // Get the booked name from PHP and ensure it's properly quoted
                 const bookedName = "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>";
 
 
-                // Check if the booking name matches the user's G Suite account
                 if (booking.name === bookedName) {
-                    delete bookedSlots[slotKey]; // Remove the booking
-                    saveBookings(); // Save the updated bookings
-                    createReservationTable(); // Refresh the reservation table
+                    delete bookedSlots[slotKey];
+                    saveBookings();
+                    createReservationTable();
                     Swal.fire("Success!", "Booking has been canceled.", "success");
                 } else {
                     Swal.fire("Error!", "You cannot cancel this booking.", "error");
@@ -497,9 +494,9 @@ include "components/navBar.php";
             focusCancel: true,
         }).then((result) => {
             if (result.isConfirmed) {
-                bookedSlots = {}; // Clear all bookings
-                saveBookings(); // Save the changes (you should define this function)
-                createReservationTable(); // Refresh the reservation table (you should define this function)
+                bookedSlots = {};
+                saveBookings();
+                createReservationTable();
                 Swal.fire("Success!", "All bookings cleared.", "success");
             }
         });

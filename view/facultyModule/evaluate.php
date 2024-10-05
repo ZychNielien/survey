@@ -18,23 +18,17 @@ include "../../model/dbconnection.php";
 <style>
     .no-border {
         border: none;
-        /* Remove border */
         box-shadow: none;
-        /* Remove shadow/outline on focus */
     }
 
     .form-control[readonly] {
         background-color: transparent;
-        /* Set background color to transparent */
         color: #000;
-        /* Maintain text color for readability */
     }
 
     .form-control:focus {
         box-shadow: none;
-        /* Remove outline on focus */
         border-color: transparent;
-        /* Ensure border stays transparent */
     }
 </style>
 <section class="contentContainer">
@@ -72,7 +66,6 @@ include "../../model/dbconnection.php";
                         <?php
                         $facultyID = $userRow["faculty_Id"];
 
-                        // Query to get random faculty IDs based on the user's faculty ID
                         $sqlrandom = "SELECT * FROM `randomfaculty` WHERE faculty_Id = '$facultyID' AND doneStatus=0";
                         $sqlrandom_query = mysqli_query($con, $sqlrandom);
 
@@ -80,13 +73,12 @@ include "../../model/dbconnection.php";
                             while ($randomF = mysqli_fetch_assoc($sqlrandom_query)) {
                                 $randomFID = $randomF['random_Id'];
 
-                                // Query to get instructors based on the random faculty ID
                                 $instructorsql = "SELECT * FROM `instructor` WHERE faculty_Id = '$randomFID'";
                                 $instructorsql_query = mysqli_query($con, $instructorsql);
 
                                 if (mysqli_num_rows($instructorsql_query) > 0) {
                                     while ($instructorRow = mysqli_fetch_assoc($instructorsql_query)) {
-                                        // Output the table row for each instructor
+
                                         echo '
                                     <tr>
                                         <td><img src="../' . htmlspecialchars($instructorRow['image']) . '" style="height: 120px;"></td>
@@ -251,7 +243,6 @@ include "../../model/dbconnection.php";
                                             </table>
                                         </div>
 
-                                        <!-- HIDDEN INPUTS -->
                                         <div style="display: none;">
                                             <input type="text" class="form-control" name="doneStatus" value="1"
                                                 readonly>
@@ -269,23 +260,23 @@ include "../../model/dbconnection.php";
                                         $sql = "SELECT * FROM `facultycategories`";
                                         $result = mysqli_query($con, $sql);
 
-                                        // Check if query was successful
+
                                         if ($result) {
-                                            $totalCategories = mysqli_num_rows($result); // Count total categories
+                                            $totalCategories = mysqli_num_rows($result);
                                         } else {
                                             die("Query failed: " . mysqli_error($con));
                                         }
                                         function sanitizeColumnName($name)
                                         {
-                                            // Palitan ang whitespace at mga invalid characters
+
                                             return preg_replace('/[^a-zA-Z0-9_]/', '_', trim($name));
                                         }
                                         if ($result) {
-                                            $stepIndex = 2; // Initialize step index
+                                            $stepIndex = 2;
                                             while ($row = mysqli_fetch_array($result)) {
                                                 $categories = $row['categories'];
 
-                                                // Step for each category
+
                                                 echo '
                                             <div class="step step-' . $stepIndex . '">
                                                 <h3>' . htmlspecialchars($categories) . '</h3>
@@ -300,14 +291,14 @@ include "../../model/dbconnection.php";
                                                     <tbody>
                                         ';
 
-                                                // Fetching criteria for the current category only once
+
                                                 $sqlcriteria = "SELECT * FROM `facultycriteria` WHERE facultyCategories = '$categories'";
                                                 $resultCriteria = mysqli_query($con, $sqlcriteria);
 
                                                 if ($resultCriteria) {
-                                                    $criteriaCount = 1; // Counter for criteria numbering
+                                                    $criteriaCount = 1;
                                                     while ($criteriaRow = mysqli_fetch_array($resultCriteria)) {
-                                                        // Use the criteria ID for concatenation
+
                                                         $columnName = sanitizeColumnName($criteriaRow['facultyCategories']) . $criteriaRow['id'];
 
                                                         echo '
@@ -355,7 +346,7 @@ include "../../model/dbconnection.php";
                                             </div>
                                         ';
 
-                                                $stepIndex++; // Increment step index
+                                                $stepIndex++;
                                             }
                                         }
                                         ?>
@@ -468,37 +459,11 @@ include "../../model/dbconnection.php";
             <div class="modal-content">
 
                 <div class="modal-body officialviewmodal">
-                    <!-- Content will be populated by AJAX -->
                 </div>
 
             </div>
         </div>
     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 </section>
 
@@ -506,13 +471,12 @@ include "../../model/dbconnection.php";
 <script>
     $(document).ready(function () {
 
-        // Handle radio button click events for rating display
+
         $('input[type="radio"]').click(function () {
             const groupName = $(this).attr('name');
             const selectedValue = $(this).val();
             const displayText = $('#ratingValue-' + groupName);
 
-            // Update display text based on the selected value
             switch (selectedValue) {
                 case '1':
                     displayText.text('Poor');
@@ -534,11 +498,11 @@ include "../../model/dbconnection.php";
             }
         });
 
-        // Handle multi-step form logic
-        var currentStep = 1;
-        var totalSteps = <?php echo $totalCategories + 1; ?>; // PHP variable
 
-        // Hide all steps except the first one
+        var currentStep = 1;
+        var totalSteps = <?php echo $totalCategories + 1; ?>;
+
+
         $('#multi-step-form .step').slice(1).hide();
 
         function updateProgressBar() {
@@ -548,17 +512,17 @@ include "../../model/dbconnection.php";
 
         function displayStep(stepNumber) {
             if (stepNumber >= 1 && stepNumber <= totalSteps) {
-                $(".step").hide(); // Hide all steps
-                $(".step-" + stepNumber).show(); // Show current step
+                $(".step").hide();
+                $(".step-" + stepNumber).show();
                 currentStep = stepNumber;
-                updateProgressBar(); // Update progress bar
-                $("#current-step").text("Step " + currentStep); // Update step display
+                updateProgressBar();
+                $("#current-step").text("Step " + currentStep);
 
-                // Navigation button visibility
+
                 if (currentStep === totalSteps) {
                     $(".navigation-buttons .next-step").hide();
                     $(".navigation-buttons .btn-success").show();
-                    $(".comment").show(); // Show submit on last step
+                    $(".comment").show();
                 } else {
                     $(".navigation-buttons .next-step").show();
                     $(".navigation-buttons .btn-success").hide();
@@ -575,7 +539,7 @@ include "../../model/dbconnection.php";
             }
         }
 
-        // Handle next step click
+
         $(".next-step").click(function () {
             if (currentStep < totalSteps) {
                 currentStep++;
@@ -583,7 +547,6 @@ include "../../model/dbconnection.php";
             }
         });
 
-        // Handle previous step click
         $(".prev-step").click(function () {
             if (currentStep > 1) {
                 currentStep--;
@@ -591,10 +554,9 @@ include "../../model/dbconnection.php";
             }
         });
 
-        // Initialize display for the first step
+
         displayStep(currentStep);
 
-        // Handle Evaluate button click to display instructor's name in the input field
         $('.evaluate-btn').on('click', function () {
             var instructorFirstName = $(this).data('first-name');
             var instructorLastName = $(this).data('last-name');
@@ -602,7 +564,7 @@ include "../../model/dbconnection.php";
             var semester = $(this).data('semester');
             var academic = $(this).data('academic');
 
-            // Combine first and last names and set the value in the input field
+
             $('#instructorName').val(instructorFirstName + ' ' + instructorLastName);
             $('#randomID').val(random);
             $('#semester').val(semester);
@@ -612,24 +574,24 @@ include "../../model/dbconnection.php";
 
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
 
-    // Format the date as YYYY-MM-DD
+
     const formattedDate = `${year}-${month}-${day}`;
 
-    // Set the value of the date input to today's date
+
     document.getElementById('dateInput').value = formattedDate;
 
 
-    // FILTER 
+
     $("#filterButton").on("click", function () {
         var username = $("#usernameInput").val().toLowerCase();
         var semester = $("#semesterSelect").val();
         var year = $("#yearSelect").val();
 
-        $("#tableBody tr").show(); // Show all rows initially
-        $("#noResults").hide(); // Hide the no results message initially
+        $("#tableBody tr").show();
+        $("#noResults").hide();
 
         var filteredRows = $("#tableBody tr").filter(function () {
             var usernameMatch = username === "" || $(this).find("td:eq(0)").text().toLowerCase().indexOf(username) > -1;
@@ -638,11 +600,11 @@ include "../../model/dbconnection.php";
             return !(usernameMatch && semesterMatch && yearMatch);
         });
 
-        filteredRows.hide(); // Hide rows that do not match
+        filteredRows.hide();
 
-        // Check if there are any remaining visible rows
+
         if ($("#tableBody tr:visible").length === 0) {
-            $("#noResults").show(); // Show the no results message
+            $("#noResults").show();
         }
     });
 </script>

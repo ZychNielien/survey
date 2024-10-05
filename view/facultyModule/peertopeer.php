@@ -329,38 +329,32 @@ include "components/navBar.php"
                                     // PAGULIT ULIT NG MGA CRITERIA SA LOOB NG CATEGORY
                                     while ($criteriaRow = mysqli_fetch_array($resultCriteria)) {
 
-                                        // Sanitize ang column name para maiwasan ang SQL injection
                                         $columnName = sanitizeColumnName($criteriaRow['facultyCategories']);
                                         $finalColumnName = $columnName . $criteriaRow['id']; // Gumawa ng final column name
                     
-                                        // Kunin ang rating mula sa rating row gamit ang final column name
                                         $criteriaRating = $ratingRow[$finalColumnName] ?? null;
 
-                                        // Kung ang rating ay valid (hindi null), i-update ang kabuuang ratings at bilang
                                         if ($criteriaRating !== null) {
-                                            $totalRatings[$criteriaRating - 1]++; // I-increment ang bilang para sa tiyak na rating
-                                            $ratingCount++; // I-increment ang kabuuang bilang ng ratings
+                                            $totalRatings[$criteriaRating - 1]++;
+                                            $ratingCount++;
                                         }
                                     }
 
-                                    // Kalkulahin ang average rating para sa kasalukuyang kategorya
+
                                     if ($ratingCount > 0) {
-                                        $averageRating = 0; // I-initialize ang average rating para sa kasalukuyang kategorya
-                                        // Kalkulahin ang weighted average batay sa kabuuang ratings
+                                        $averageRating = 0;
                                         for ($i = 0; $i < 5; $i++) {
-                                            $averageRating += ($i + 1) * $totalRatings[$i]; // Weighted sum ng ratings
+                                            $averageRating += ($i + 1) * $totalRatings[$i];
                                         }
-                                        $averageRating /= $ratingCount; // Hatiin sa kabuuang bilang upang makuha ang average
-                                        $totalAverage += $averageRating; // Idagdag sa kabuuang average
-                                        $categoryCount++; // I-increment ang bilang ng kategorya
+                                        $averageRating /= $ratingCount;
+                                        $totalAverage += $averageRating;
+                                        $categoryCount++;
                                     }
                                 }
                             }
 
-                            // Kalkulahin ang final average rating sa lahat ng kategorya para sa kasalukuyang rating row
                             $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
 
-                            // Determine verbal interpretation
                             $verbalInterpretation = '';
                             switch (true) {
                                 case ($finalAverageRating >= 0 && $finalAverageRating < 1):
@@ -399,7 +393,7 @@ include "components/navBar.php"
             <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['commentText'] . '</p>
         </div>
     </div>';
-                            mysqli_data_seek($sql_query, 0); // Reset categories query
+                            mysqli_data_seek($sql_query, 0);
                         }
                 }
                 ?>

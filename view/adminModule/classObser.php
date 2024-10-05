@@ -21,34 +21,26 @@ include "components/navBar.php";
     <style>
         .no-border {
             border: none;
-            /* Remove border */
             box-shadow: none;
-            /* Remove shadow/outline on focus */
         }
 
         .form-control[readonly] {
             background-color: transparent;
-            /* Set background color to transparent */
             color: #000;
             padding: 0 !important;
             margin: 0;
-            /* Maintain text color for readability */
         }
 
         .form-control {
             background-color: transparent;
-            /* Set background color to transparent */
             color: #000;
             padding: 0 !important;
             margin: 0;
-            /* Maintain text color for readability */
         }
 
         .form-control:focus {
             box-shadow: none;
-            /* Remove outline on focus */
             border-color: transparent;
-            /* Ensure border stays transparent */
         }
     </style>
 
@@ -303,9 +295,9 @@ include "components/navBar.php";
                                     $sql = "SELECT * FROM `classroomcategories`";
                                     $result = mysqli_query($con, $sql);
 
-                                    // Check if query was successful
+
                                     if ($result) {
-                                        $totalCategories = mysqli_num_rows($result); // Count total categories
+                                        $totalCategories = mysqli_num_rows($result);
                                     } else {
                                         die("Query failed: " . mysqli_error($con));
                                     }
@@ -316,7 +308,7 @@ include "components/navBar.php";
                                     }
 
                                     if ($result) {
-                                        $stepIndex = 2; // Initialize step index
+                                        $stepIndex = 2;
                                         while ($row = mysqli_fetch_array($result)) {
                                             $columnComment = sanitizeColumnName($row['categories']) . $row['id'];
                                             $categories = $row['categories'];
@@ -397,17 +389,12 @@ include "components/navBar.php";
 
             </div>
         ';
-                                            //     <div class="mb-3 mx-2 comment">
-                                            //     <label for="">Comment:</label>
-                                            //     <textarea class="form-control" id="criteriaText" name="commentText" rows="3"
-                                            //         ></textarea>
-                                            // </div>
-                                            $stepIndex++; // Increment step index
+
+                                            $stepIndex++;
                                         }
                                     }
                                     ?>
 
-                                    <!-- New Step Outside PHP Code -->
                                     <div class="step step-<?php echo $stepIndex; ?>">
                                         <h4>Additional Step Title</h4>
                                         <table class="table table-striped table-bordered text-center align-middle">
@@ -435,7 +422,7 @@ include "components/navBar.php";
                                                     }
                                                 }
                                                 ?>
-                                                <!-- Add more rows as needed -->
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -509,8 +496,7 @@ include "components/navBar.php";
                     </thead>
                     <tbody id="tableBody">
                         <?php
-                        // Get selected faculty and admin IDs from the form
-                        
+
 
                         ?>
 
@@ -527,7 +513,6 @@ include "components/navBar.php";
             <div class="modal-content">
 
                 <div class="modal-body officialviewmodal">
-                    <!-- Content will be populated by AJAX -->
                 </div>
 
             </div>
@@ -551,17 +536,17 @@ include "components/navBar.php";
 
     $(document).ready(function () {
 
-        loadTableData(); // Load all results when the page loads
+        loadTableData();
 
         $('#searchButton').on('click', function () {
             var facultySelect = $('#facultySelect').val();
             var adminSelect = $('#adminSelect').val();
 
-            loadTableData(facultySelect, adminSelect); // Load filtered data when search is clicked
+            loadTableData(facultySelect, adminSelect);
         });
 
         function loadTableData(facultySelect = '', adminSelect = '') {
-            // Create a query string using jQuery param
+
             let params = $.param({
                 facultySelect: facultySelect,
                 adminSelect: adminSelect
@@ -589,7 +574,6 @@ include "components/navBar.php";
             const selectedValue = $(this).val();
             const displayText = $('#ratingValue-' + groupName);
 
-            // Update display text based on the selected value
             switch (selectedValue) {
                 case '1':
                     displayText.text('Poor');
@@ -614,22 +598,21 @@ include "components/navBar.php";
         $('#multi-step-form').on('submit', function (event) {
 
 
-            const slotKey = $('#slot-key').val(); // Get the slot key from the hidden input
-            const booking = bookedSlots[slotKey]; // Get the booking object
+            const slotKey = $('#slot-key').val();
+            const booking = bookedSlots[slotKey];
 
             if (booking) {
-                const startTime = booking.startTime; // Assuming these properties exist in the booking object
+                const startTime = booking.startTime;
                 const endTime = booking.endTime;
 
-                // Loop through the time slots from startTime to endTime and mark as evaluated
+
                 for (let hour = startTime; hour < endTime; hour++) {
-                    const timeSlotKey = `${hour}-${new Date(booking.selectedDate).getTime()}-${slotKey.split('-')[2]}`; // Construct the slot key
+                    const timeSlotKey = `${hour}-${new Date(booking.selectedDate).getTime()}-${slotKey.split('-')[2]}`;
                     if (bookedSlots[timeSlotKey]) {
-                        bookedSlots[timeSlotKey].isEvaluated = true; // Mark each slot as evaluated
+                        bookedSlots[timeSlotKey].isEvaluated = true;
                     }
                 }
 
-                // Save the updated bookedSlots object to local storage
                 saveBookings();
 
 
@@ -637,11 +620,9 @@ include "components/navBar.php";
         });
 
 
-        // Handle multi-step form logic
         var currentStep = 1;
-        var totalSteps = <?php echo $totalCategories + 2; ?>; // PHP variable
+        var totalSteps = <?php echo $totalCategories + 2; ?>;
 
-        // Hide all steps except the first one
         $('#multi-step-form .step').slice(1).hide();
 
         function updateProgressBar() {
@@ -651,16 +632,15 @@ include "components/navBar.php";
 
         function displayStep(stepNumber) {
             if (stepNumber >= 1 && stepNumber <= totalSteps) {
-                $(".step").hide(); // Hide all steps
-                $(".step-" + stepNumber).show(); // Show current step
+                $(".step").hide();
+                $(".step-" + stepNumber).show();
                 currentStep = stepNumber;
-                updateProgressBar(); // Update progress bar
-                $("#current-step").text("Step " + currentStep); // Update step display
+                updateProgressBar();
+                $("#current-step").text("Step " + currentStep);
 
-                // Navigation button visibility
                 if (currentStep === totalSteps) {
                     $(".navigation-buttons .next-step").hide();
-                    $(".navigation-buttons .btn-success").show(); // Show submit on last step
+                    $(".navigation-buttons .btn-success").show();
                 } else {
                     $(".navigation-buttons .next-step").show();
                     $(".navigation-buttons .btn-success").hide();
@@ -676,7 +656,7 @@ include "components/navBar.php";
             }
         }
 
-        // Handle next step click
+
         $(".next-step").click(function () {
             if (currentStep < totalSteps) {
                 currentStep++;
@@ -684,7 +664,6 @@ include "components/navBar.php";
             }
         });
 
-        // Handle previous step click
         $(".prev-step").click(function () {
             if (currentStep > 1) {
                 currentStep--;
@@ -692,15 +671,15 @@ include "components/navBar.php";
             }
         });
 
-        // Initialize display for the first step
+
         displayStep(currentStep);
 
         const today = new Date().toISOString().split('T')[0];
-        $('#view-date-select').val(today); // Set today's date in the date picker
-        loadBookings(); // Load bookings from local storage
-        createViewReservationTable(); // Create the initial view reservation table
+        $('#view-date-select').val(today);
+        loadBookings();
+        createViewReservationTable();
 
-        // Update table when a new date is selected
+
         $('#view-date-select').change(createViewReservationTable);
 
         function loadBookings() {
@@ -718,14 +697,13 @@ include "components/navBar.php";
             const selectedDate = new Date($('#view-date-select').val());
             const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-            // Create header row
+
             const headerRow = $('<tr>').css({
-                'background-color': '#b71c1c', // Dark red background for the header
+                'background-color': '#b71c1c',
                 'color': 'white',
                 'border': '2px solid white'
             }).append($('<th rowspan="2" style="vertical-align: middle">DATE / TIME</th>'));
 
-            // Display for 3 days
             for (let i = 0; i < 2; i++) {
                 const day = new Date(selectedDate);
                 day.setDate(selectedDate.getDate() + i);
@@ -736,27 +714,27 @@ include "components/navBar.php";
                     .attr('colspan', 2)
                     .html(`${dateHeader}<br>${dayHeader}`)
                     .css({
-                        'background-color': '#b71c1c', // Dark red background for the header
+                        'background-color': '#b71c1c',
                         'color': 'white',
                         'border': '2px solid white'
                     });
                 headerRow.append(dateCell);
             }
 
-            // Create slot header row
+
             const slotHeaderRow = $('<tr>').css({
-                'background-color': '#b71c1c', // Dark red background for the header
+                'background-color': '#b71c1c',
                 'color': 'white',
                 'border': '2px solid white'
             }).append($('<th style="display: none;"></th>'));
             for (let i = 0; i < 2; i++) {
                 slotHeaderRow.append($('<th>').css({
-                    'background-color': '#b71c1c', // Dark red background for the header
+                    'background-color': '#b71c1c',
                     'color': 'white',
                     'border': '2px solid white'
                 }).text('Slot 1'))
                     .append($('<th>').css({
-                        'background-color': '#b71c1c', // Dark red background for the header
+                        'background-color': '#b71c1c',
                         'color': 'white',
                         'border': '2px solid white'
                     }).text('Slot 2'));
@@ -766,7 +744,7 @@ include "components/navBar.php";
 
             for (let hour = 7; hour < 19; hour++) {
                 const row = $('<tr>').append($('<td>').addClass('py-3').css({
-                    'background-color': '#b71c1c', // Dark red background for the header
+                    'background-color': '#b71c1c',
                     'color': 'white',
                     'border': '2px solid white'
                 }).text(`${hour > 12 ? hour - 12 : hour}:00 to ${hour + 1 > 12 ? hour + 1 - 12 : hour + 1}:00 ${hour >= 12 ? 'PM' : 'AM'}`));
@@ -780,13 +758,13 @@ include "components/navBar.php";
                     const cell1 = $('<td>').css({
                         'border': '2px solid #fff',
                         'color': '#000',
-                        'background': '#c8e6c9' // Darker soft green for available slots
+                        'background': '#c8e6c9'
                     }).text('Available');
 
                     const cell2 = $('<td>').css({
                         'border': '2px solid #fff',
                         'color': '#000',
-                        'background': '#c8e6c9' // Darker soft green for available slots
+                        'background': '#c8e6c9'
                     }).text('Available');
 
                     if (bookedSlots[slotKey1]) {
@@ -795,13 +773,13 @@ include "components/navBar.php";
                             cell1.addClass('py-3').css({
                                 'border': '2px solid #fff',
                                 'color': '#000',
-                                'background': '#80deea' // Darker light blue background for evaluated bookings
-                            }).text(booking1.name); // Show name if evaluated
+                                'background': '#80deea'
+                            }).text(booking1.name);
                         } else {
                             cell1.addClass('py-3 booked-slot').css({
                                 'border': '2px solid #fff',
                                 'color': '#000',
-                                'background': '#ffab91' // Darker light coral background for un-evaluated bookings
+                                'background': '#ffab91'
                             }).html(`${booking1.name}<br>${booking1.room}`).data('slotKey', slotKey1);
                         }
                     }
@@ -812,18 +790,18 @@ include "components/navBar.php";
                             cell2.addClass('py-3').css({
                                 'border': '2px solid #fff',
                                 'color': '#000',
-                                'background': '#80deea' // Darker light blue background for evaluated bookings
-                            }).text(booking2.name); // Show name if evaluated
+                                'background': '#80deea'
+                            }).text(booking2.name);
                         } else {
                             cell2.addClass('py-3 booked-slot').css({
                                 'border': '2px solid #fff',
                                 'color': '#000',
-                                'background': '#ffab91' // Darker light coral background for un-evaluated bookings
+                                'background': '#ffab91'
                             }).html(`${booking2.name}<br>${booking2.room}`).data('slotKey', slotKey2);
                         }
                     }
 
-                    // Append the cells to the row
+
                     row.append(cell1).append(cell2);
                 }
 
@@ -832,17 +810,16 @@ include "components/navBar.php";
         }
 
 
-        // Handle booked slot click to open details modal
         $(document).on('click', '.booked-slot', function () {
             const slotKey = $(this).data('slotKey');
             const booking = bookedSlots[slotKey];
 
             if (booking) {
-                const today = new Date().toISOString().split('T')[0]; // Get today's date in 'YYYY-MM-DD' format
-                const bookingDate = new Date(booking.selectedDate).toISOString().split('T')[0]; // Format selectedDate to 'YYYY-MM-DD'
+                const today = new Date().toISOString().split('T')[0];
+                const bookingDate = new Date(booking.selectedDate).toISOString().split('T')[0];
 
-                if (bookingDate === today) { // Check if the booking is for today
-                    if (!booking.isEvaluated) { // Ensure the slot is not evaluated before opening
+                if (bookingDate === today) {
+                    if (!booking.isEvaluated) {
                         const dateConvert = new Date(booking.selectedDate);
                         const options = { year: 'numeric', month: 'long', day: 'numeric' };
                         const formattedDateText = dateConvert.toLocaleDateString('en-US', options);
@@ -852,9 +829,9 @@ include "components/navBar.php";
                         $('#booking-room').text(booking.room);
                         $('#facultyInput').val(booking.name);
                         $('#courseInput').val(booking.course);
-                        $('#slot-key').val(slotKey); // Store the slotKey in the hidden input
+                        $('#slot-key').val(slotKey);
                         $('#dateInput').val(formattedDateText);
-                        $('#cancel-booking-btn').data('slotKey', slotKey); // Store the slotKey in the cancel button
+                        $('#cancel-booking-btn').data('slotKey', slotKey);
                         $('#bookingDetailsModal').modal('show');
                         console.log(booking);
                     } else {
@@ -865,14 +842,14 @@ include "components/navBar.php";
                             confirmButtonText: 'OK'
                         });
                     }
-                } else if (bookingDate > today) { // Booking is for a future date
+                } else if (bookingDate > today) {
                     Swal.fire({
                         icon: 'info',
                         title: 'Observation Unavailable',
                         text: 'This classroom observation is scheduled for a future date. You can only manage observations set for today.',
                         confirmButtonText: 'Understood'
                     });
-                } else { // Booking is for a past date
+                } else {
                     Swal.fire({
                         icon: 'info',
                         title: 'Observation Unavailable',
@@ -888,7 +865,7 @@ include "components/navBar.php";
 
     $('input[type="radio"]').click(function () {
         const groupName = $(this).attr('name');
-        const selectedValue = $(this).val(); // Get the value of the selected radio button
+        const selectedValue = $(this).val();
         const displayText = $('#' + groupName + 'Display');
 
         if (selectedValue) {

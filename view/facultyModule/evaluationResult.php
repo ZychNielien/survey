@@ -324,7 +324,7 @@ include "../../model/dbconnection.php";
 <script>
     $(document).ready(function () {
         $('.dropdown-item').on('click', function (e) {
-            e.preventDefault(); // Prevent the default anchor click behavior
+            e.preventDefault();
             const selectedValue = $(this).data('value');
             const displayText = `${selectedValue} Star${selectedValue > 1 ? 's' : ''}`;
             $('#dropdownMenuButton').text(displayText);
