@@ -15,16 +15,6 @@ session_start();
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- JQUERY CDN -->
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-    crossorigin="anonymous"></script>
-  <!--  -->
-
-  <!-- LOCALSTORAGE JS -->
-  <script src="../../public/js/localStorage.js"></script>
-  <!--  -->
-
 </head>
 
 <body>
@@ -46,8 +36,7 @@ session_start();
 
             <div class="actual-form">
               <div class="input-wrap">
-                <input type="text" name="studentSRCode" id="studentSRCode" minlength="4" class="input-field"
-                  autocomplete="off" required />
+                <input type="text" name="studentSRCode" minlength="4" class="input-field" autocomplete="off" required />
                 <label>SR-Code</label>
               </div>
 
@@ -58,12 +47,12 @@ session_start();
                 <span class="password-toggle-icon"><i class="fa-solid fa-eye" id="passStudent"></i></span>
               </div>
 
-              <input type="submit" name="studentLogin" id="studentLogin" value="Sign In" class="sign-btn" />
+              <input type="submit" name="studentLogin" value="Sign In" class="sign-btn" />
 
             </div>
           </form>
 
-          <form action="../../controller/login.php" autocomplete="off" class="sign-up-form">
+          <form action="../../controller/login.php" method="POST" autocomplete="off" class="sign-up-form">
             <div class="logo">
               <img src="../../public/picture/bsu.png" alt="BatStateU-Logo" />
               <img src="../../public/picture/cics.png" alt="CICS-Logo" />
@@ -78,18 +67,18 @@ session_start();
             <div class="actual-form">
 
               <div class="input-wrap">
-                <input type="email" class="input-field" autocomplete="off" required />
+                <input type="text" class="input-field" autocomplete="off" name="gsuite" required />
                 <label>Gsuite</label>
               </div>
 
               <div class="input-wrap">
-                <input type="password" minlength="4" id="passFacultyInput" class="input-field" autocomplete="off"
-                  required />
+                <input type="password" name="password" minlength="2" id="passFacultyInput" class="input-field"
+                  autocomplete="off" required />
                 <label>Password</label>
                 <span class="password-toggle-icon"><i class="fa-solid fa-eye" id="passFaculty"></i></span>
               </div>
 
-              <input type="submit" name="facultyLogin" value="Sign In" class="sign-btn" />
+              <input type="submit" name="facultyadmin" value="Sign In" class="sign-btn" />
 
             </div>
           </form>

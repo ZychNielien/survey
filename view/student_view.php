@@ -18,6 +18,33 @@ include "../model/dbconnection.php";
   <link rel="shortcut icon" href="../public/picture/cics.png" type="image/x-icon" />
 
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.css" />
+  <link rel="stylesheet" href="../fontawesome/css/all.min.css">
+  <style>
+    /* STAR RATING ON EVERY FORM */
+    .rating {
+      direction: rtl;
+      unicode-bidi: bidi-override;
+      color: #ddd;
+      /* Personal choice */
+    }
+
+    .rating input {
+      display: none;
+    }
+
+    .rating label,
+    .rating input {
+      margin: 0 10px;
+    }
+
+    .rating .ratingLabel:hover,
+    .rating .ratingLabel:hover~.ratingLabel,
+    .rating input:checked+.ratingLabel,
+    .rating input:checked+.ratingLabel~.ratingLabel {
+      color: gold;
+      cursor: pointer;
+    }
+  </style>
 
   <!-- SWEETALERT2 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -28,6 +55,7 @@ include "../model/dbconnection.php";
   <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
     crossorigin="anonymous"></script>
   <script src="../bootstrap/js/bootstrap.min.js"></script>
+
   <!--  -->
 
   <!-- LOCALSTORAGE JS -->
