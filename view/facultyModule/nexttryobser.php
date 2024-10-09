@@ -1,5 +1,7 @@
 <?php
 include "components/navBar.php";
+
+
 ?>
 
 <head>
@@ -23,10 +25,6 @@ include "components/navBar.php";
         </div>
 
         <div class="form-group">
-            <label for="date-select">Select Date:</label>
-            <input type="date" class="form-control" id="date-select-auto">
-        </div>
-        <div class="form-group">
             <label for="start-time-select">Start Time:</label>
             <select class="form-control" id="start-time-select">
                 <option value>Select Start Time</option>
@@ -48,9 +46,9 @@ include "components/navBar.php";
                 <option value="2">Slot 2</option>
             </select>
         </div>
-
+        <button id="auto-book-btn" class="btn btn-primary">Auto Book</button>
         <button class="btn btn-success" id="book-btn" disabled>Book</button>
-        <button class="btn btn-danger" id="clear-btn">Clear All Reservations</button>
+        <!-- <button class="btn btn-danger" id="clear-btn">Clear All Reservations</button> -->
     </div>
 
     <table id="reservation-table" class="table table-bordered mt-2 "
@@ -67,7 +65,7 @@ include "components/navBar.php";
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="form">
+                    <form id="form" method="POST">
                         <div class="form-group">
                             <label for="course">Course Title:</label>
                             <input type="text" class="form-control" id="course" required>
@@ -76,6 +74,8 @@ include "components/navBar.php";
                             <label for="name">Instructor:</label>
                             <input type="text" class="form-control" id="name"
                                 value="<?php echo $userRow["first_name"] . ' ' . $userRow["last_name"]; ?>" required>
+                            <input type="text" class="form-control" id="fromFacultyID"
+                                value="<?php echo $userRow["faculty_Id"]; ?>" required>
                         </div>
                         <div class="form-group">
                             <label for="room">Room:</label>
@@ -117,13 +117,11 @@ include "components/navBar.php";
 
 
 <script>
-
     let bookedSlots = {};
     let slotToCancel = null;
 
     $(document).ready(function () {
         const today = new Date().toISOString().split('T')[0];
-        $('#date-select-auto').attr('min', today).val(today);
         $('#date-select').attr('min', today).val(today);
         loadBookings();
         createReservationTable();
@@ -145,9 +143,13 @@ include "components/navBar.php";
         $('#slot-select').change(checkSlotAvailability);
         $('#book-btn').click(openForm);
         $('#form').submit(submitForm);
-        $('#clear-btn').click(clearBookings);
+
+        // Add click event for auto-booking
+        $('#auto-book-btn').click(autoBookSlots);
+
         $(document).on('click', '#confirm-cancel-btn', confirmCancelBooking);
     });
+
 
     function loadBookings() {
         const storedBookings = localStorage.getItem('bookedSlots');
@@ -158,6 +160,49 @@ include "components/navBar.php";
 
     function saveBookings() {
         localStorage.setItem('bookedSlots', JSON.stringify(bookedSlots));
+    }
+
+
+    function autoBookSlots() {
+        const selectedDate = new Date($('#date-select').val());
+        const timeSlots = [
+            { start: 7, end: 9 },  // 7 AM to 9 AM
+            { start: 9, end: 11 }, // 9 AM to 11 AM
+            { start: 11, end: 13 }, // 11 AM to 1 PM
+            { start: 13, end: 15 }, // 1 PM to 3 PM
+            { start: 15, end: 17 }, // 3 PM to 5 PM
+            { start: 17, end: 19 }  // 5 PM to 7 PM
+        ];
+
+        timeSlots.forEach(slot => {
+            const slotKey1 = `${slot.start}-${selectedDate.getTime()}-1`;
+            const slotKey2 = `${slot.start}-${selectedDate.getTime()}-2`;
+
+            // Check if both slots are available
+            if (!bookedSlots[slotKey1] && !bookedSlots[slotKey2]) {
+                const bookingData = {
+                    course: 'Auto Booked Course', // Replace with your logic for course name
+                    name: 'Auto Booked Name', // Replace with your logic for name
+                    room: 'Auto Room', // Replace with your logic for room
+                    selected_date: selectedDate.toISOString().split('T')[0],
+                    start_time: slot.start,
+                    end_time: slot.end,
+                    selected_slot: 1, // Auto book slot 1
+                    evaluation_status: 'Not Evaluated' // Replace with your logic for evaluation status
+                };
+
+                // Book the slots
+                bookedSlots[slotKey1] = bookingData;
+                bookedSlots[slotKey2] = bookingData; // Book both slots for this time range
+
+                // Save to local storage
+                saveBookings();
+            }
+        });
+
+        Swal.fire("Success!", "Auto booking has been completed for available slots!", "success").then(() => {
+            createReservationTable();
+        });
     }
 
     function createReservationTable() {
@@ -194,21 +239,46 @@ include "components/navBar.php";
                 const slotKey1 = `${hour}-${dayOffset.getTime()}-1`;
                 const slotKey2 = `${hour}-${dayOffset.getTime()}-2`;
 
-                const cell1 = $('<td>').css('border', '2px solid white');
-                const cell2 = $('<td>').css('border', '2px solid white');
+                const cell1 = $('<td>').css({
+                    'border': '2px solid #fff',
+                    'color': '#000',
+                    'background': '#c1d7b5'
+                }).text('Available');
+
+                const cell2 = $('<td>').css({
+                    'border': '2px solid #fff',
+                    'color': '#000',
+                    'background': '#c1d7b5'
+                }).text('Available');
 
                 if (bookedSlots[slotKey1]) {
-                    cell1.addClass('bg-danger text-white py-3').html(`${bookedSlots[slotKey1].name}<br>${bookedSlots[slotKey1].room}`)
+                    cell1.addClass('py-3 booked-slot').css({
+                        'border': '2px solid #fff',
+                        'color': '#000',
+                        'background': '#f2b2b2'
+                    }).html(`${bookedSlots[slotKey1].name}<br>${bookedSlots[slotKey1].room}`)
                         .click(() => openCancelModal(slotKey1));
                 } else {
-                    cell1.addClass('bg-success text-white py-3').text('Available');
+                    cell1.addClass(' py-3').css({
+                        'border': '2px solid #fff',
+                        'color': '#000',
+                        'background': '#c1d7b5'
+                    }).text('Available');
                 }
 
                 if (bookedSlots[slotKey2]) {
-                    cell2.addClass('bg-danger text-white py-3').html(`${bookedSlots[slotKey2].name}<br>${bookedSlots[slotKey2].room}`)
+                    cell2.addClass('py-3 booked-slot').css({
+                        'border': '2px solid #fff',
+                        'color': '#000',
+                        'background': '#f2b2b2'
+                    }).html(`${bookedSlots[slotKey2].name}<br>${bookedSlots[slotKey2].room}`)
                         .click(() => openCancelModal(slotKey2));
                 } else {
-                    cell2.addClass('bg-success text-white py-3').text('Available');
+                    cell2.addClass(' py-3').css({
+                        'border': '2px solid #fff',
+                        'color': '#000',
+                        'background': '#c1d7b5'
+                    }).text('Available');
                 }
 
                 row.append(cell1).append(cell2);
@@ -230,11 +300,12 @@ include "components/navBar.php";
         const startTime = parseInt($('#start-time-select').val());
         endTimeSelect.empty().append('<option value>Select End Time</option>');
 
-        for (let hour = startTime + 1; hour <= startTime + 3 && hour <= 19; hour++) {
+
+        for (let hour = startTime + 1; hour <= startTime + 5 && hour <= 19; hour++) {
             endTimeSelect.append(`<option value="${hour}">${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}</option>`);
         }
 
-        endTimeSelect.prop('disabled', endTimeSelect.children().length === 1); // Disable if no options are available
+        endTimeSelect.prop('disabled', endTimeSelect.children().length === 1);
     }
 
     function updateSlotOptions() {
@@ -261,6 +332,7 @@ include "components/navBar.php";
 
         const isSlot1Booked = bookedSlots[slotKey1];
         const isSlot2Booked = bookedSlots[slotKey2];
+
 
         checkSlotAvailability();
     }
@@ -315,6 +387,7 @@ include "components/navBar.php";
         const course = $('#course').val();
         const name = $('#name').val();
         const room = $('#room').val();
+        const fromFacultyID = $('#fromFacultyID').val();
         const selectedDate = new Date($('#date-select').val());
         const startTime = parseInt($('#start-time-select').val());
         const endTime = parseInt($('#end-time-select').val());
@@ -344,7 +417,6 @@ include "components/navBar.php";
             return;
         }
 
-
         for (let hour = startTime; hour < endTime; hour++) {
             const slotKey = `${hour}-${selectedDate.getTime()}-${selectedSlot}`;
             bookedSlots[slotKey] = {
@@ -352,13 +424,13 @@ include "components/navBar.php";
                 course,
                 room,
                 selectedDate,
+                fromFacultyID,
                 startTime,
                 endTime,
                 evaluationStatus,
                 isEvaluated: false
             };
         }
-
 
         saveBookings();
 
@@ -368,115 +440,38 @@ include "components/navBar.php";
         });
 
         $('#reservationModal').modal('hide');
-    }
 
-    $(document).ready(function () {
-        const today = new Date();
-        const todayString = today.toISOString().split("T")[0];
-        $('#date-select-auto').attr('min', todayString).val(todayString);
-
-
-        const selectedDate = new Date($('#date-select-auto').val());
-        if (selectedDate.toDateString() === today.toDateString()) {
-            if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                autoBookThreeHours(selectedDate);
-            }
-        }
+        const bookingData = {
+            course: course,
+            name: name,
+            room: room,
+            selected_date: selectedDate.toISOString().split('T')[0],
+            start_time: startTime,
+            end_time: endTime,
+            selected_slot: selectedSlot,
+            evaluation_status: evaluationStatus
+        };
 
 
-        $('#date-select-auto').on('change', function () {
-            const selectedDate = new Date($(this).val());
-            if (selectedDate.toDateString() === today.toDateString()) {
-                if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                    autoBookThreeHours(selectedDate);
-                }
+        $.ajax({
+            type: 'POST',
+            url: '../../controller/classroomObservation.php',
+            data: bookingData,
+            success: function (response) {
+                Swal.fire("Success!", "Booking has been successfully made!", "success").then(() => {
+                    location.reload();
+                    createReservationTable();
+                });
+            },
+            error: function (xhr, status, error) {
+                Swal.fire("Error!", "There was an error processing your request: " + error, "error");
             }
         });
-    });
 
-    function hasExistingBookingBeforeDate(date) {
-
-        const userName = "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>";
-
-
-        for (let key in bookedSlots) {
-            const bookingDate = new Date(parseInt(key.split('-')[1]));
-
-            if (bookingDate < date && bookedSlots[key].name === userName) {
-                return true;
-            }
-        }
-        return false;
+        $('#reservationModal').modal('hide');
     }
 
-    function hasBookingForSelectedDate(selectedDate) {
-        const userName = "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>";
 
-
-        for (let key in bookedSlots) {
-            const bookingDate = new Date(parseInt(key.split('-')[1]));
-            if (bookingDate.toDateString() === selectedDate.toDateString() && bookedSlots[key].name === userName) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function autoBookThreeHours(selectedDate) {
-        let slotFound = false;
-
-
-        for (let hour = 7; hour <= 16; hour++) {
-            const slotKey1 = `${hour}-${selectedDate.getTime()}-1`;
-            const slotKey2 = `${hour}-${selectedDate.getTime()}-2`;
-
-
-            if (!bookedSlots[slotKey1] && !bookedSlots[`${hour + 1}-${selectedDate.getTime()}-1`] && !bookedSlots[`${hour + 2}-${selectedDate.getTime()}-1`]) {
-                bookThreeHourSlot(hour, 1, selectedDate);
-                slotFound = true;
-                break;
-            }
-
-
-            if (!bookedSlots[slotKey2] && !bookedSlots[`${hour + 1}-${selectedDate.getTime()}-2`] && !bookedSlots[`${hour + 2}-${selectedDate.getTime()}-2`]) {
-                bookThreeHourSlot(hour, 2, selectedDate);
-                slotFound = true;
-                break;
-            }
-        }
-
-        if (!slotFound) {
-            Swal.fire("Error", "No available 3-hour slot found.", "error");
-        }
-    }
-
-    function bookThreeHourSlot(startHour, slotNumber, selectedDate) {
-        const name = $('#name').val();
-        const course = $('#course').val();
-        const room = $('#room').val();
-        const evaluationStatus = $('#evaluationStatus').val();
-
-
-        for (let hour = startHour; hour < startHour + 3; hour++) {
-            const slotKey = `${hour}-${selectedDate.getTime()}-${slotNumber}`;
-            bookedSlots[slotKey] = {
-                name,
-                course,
-                room,
-                selectedDate,
-                startTime: startHour,
-                endTime: startHour + 3,
-                evaluationStatus,
-                isEvaluated: false
-            };
-        }
-
-
-        saveBookings();
-        createReservationTable();
-
-        Swal.fire("Success!", "3-hour slot successfully booked!", "success");
-    }
 
 
 
@@ -513,9 +508,7 @@ include "components/navBar.php";
             if (bookedSlots[slotKey]) {
                 const booking = bookedSlots[slotKey];
 
-
                 const bookedName = "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>";
-
 
 
                 if (booking.name === bookedName) {
@@ -533,9 +526,9 @@ include "components/navBar.php";
     }
 
 
-    $(document).ready(function () {
-        $('#clear-btn').on('click', clearBookings);
-    });
+    // $(document).ready(function () {
+    //     $('#clear-btn').on('click', clearBookings);
+    // });
     function clearBookings() {
         Swal.fire({
             title: "Are you sure?",
@@ -555,8 +548,4 @@ include "components/navBar.php";
             }
         });
     }
-
-
-
-
 </script>

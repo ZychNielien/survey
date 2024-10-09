@@ -587,30 +587,62 @@ if (isset($_POST['classroomObservationSubmit'])) {
         $_SESSION['status-code'] = "warning";
     }
 
-    // Optional: Handle the additional `$sqlrandom` logic if needed
-    /*
-    $random_Id = isset($_POST['random_Id']) ? trim($_POST['random_Id']) : '';
-    $faculty_Id = isset($_POST['faculty_Id']) ? trim($_POST['faculty_Id']) : '';
-    $status = isset($_POST['doneStatus']) ? trim($_POST['doneStatus']) : '';
+}
 
-    if (!empty($random_Id) && !empty($faculty_Id)) {
-        $sqlrandom = "UPDATE randomfaculty SET doneStatus = ? WHERE faculty_Id = ? AND random_Id = ?";
-        
-        if ($stmt = mysqli_prepare($con, $sqlrandom)) {
-            mysqli_stmt_bind_param($stmt, 'sss', $status, $faculty_Id, $random_Id);
-            if (mysqli_stmt_execute($stmt)) {
-                $_SESSION['status'] = "Evaluation Completed Successfully";
-                $_SESSION['status-code'] = "success";
-                header('location:../view/facultyModule/evaluate.php');
-                exit;
-            } else {
-                $_SESSION['status'] = "Error updating randomfaculty: " . mysqli_error($con);
-                $_SESSION['status-code'] = "error";
+if (isset($_POST['studentSubmit'])) {
+
+    $columns = [];
+    $values = [];
+
+    $toFaculty = isset($_POST['toFaculty']) ? trim($_POST['toFaculty']) : '';
+    $toFacultyID = isset($_POST['toFacultyID']) ? trim($_POST['toFacultyID']) : '';
+    $fromStudents = isset($_POST['fromStudents']) ? trim($_POST['fromStudents']) : '';
+    $fromStudentID = isset($_POST['fromStudentID']) ? trim($_POST['fromStudentID']) : '';
+    $semester = isset($_POST['semester']) ? trim($_POST['semester']) : '';
+    $academic_year = isset($_POST['academic_year']) ? trim($_POST['academic_year']) : '';
+    $date = isset($_POST['date']) ? trim($_POST['date']) : '';
+    $comment = isset($_POST['comment']) ? trim($_POST['comment']) : '';
+
+    foreach ($_POST as $key => $value) {
+        // Filter out unnecessary keys
+        if ($key !== 'studentSubmit' && $key !== 'toFaculty' && $key !== 'toFacultyID' && $key !== 'fromStudents' && $key !== 'fromStudentID' && $key !== 'semester' && $key !== 'academic_year' && $key !== 'date' && $key !== 'comment') { // Exclude these keys
+            // Remove underscores and trim whitespace from key and value
+            $cleanKey = str_replace('_', '', trim($key));
+            $cleanValue = trim($value);
+
+            // Check if cleanKey is not empty
+            if (!empty($cleanKey)) {
+                $columns[] = mysqli_real_escape_string($con, $cleanKey);
+                $values[] = mysqli_real_escape_string($con, $cleanValue);
             }
-            mysqli_stmt_close($stmt);
         }
     }
-    */
+
+
+    // Create a dynamic query if we have valid columns
+    if (!empty($columns) && !empty($values)) {
+        // Construct the SQL query, adding doneStatus directly
+        $sql = "INSERT INTO `studentsform` (" . implode(", ", $columns) . ", toFaculty, toFacultyID, fromStudents, fromStudentID, semester, academic_year, date,comment) VALUES ('" . implode("', '", $values) . "', '$toFaculty', '$toFacultyID', '$fromStudents', '$fromStudentID', '$semester', '$academic_year', '$date','$comment')";
+
+        // Execute the query
+        if (mysqli_query($con, $sql)) {
+
+            $_SESSION['status'] = "Evaluation Completed Successfully";
+            $_SESSION['status-code'] = "success";
+            header('location:../view/facultyModule/evaluate.php');
+            exit;
+
+
+        } else {
+            $_SESSION['status'] = "Error evaluation: " . mysqli_error($con);
+            $_SESSION['status-code'] = "error";
+
+        }
+    } else {
+        $_SESSION['status'] = "No Data Inserted.";
+        $_SESSION['status-code'] = "warning";
+    }
 }
+
 
 ?>

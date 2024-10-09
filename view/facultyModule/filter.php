@@ -291,7 +291,7 @@ include '../../model/dbconnection.php';
                                 ?>
                                 <div class="mb-3 comment">
                                     <label for="">Comment:</label>
-                                    <textarea class="form-control" id="criteriaText" name="commentText" rows="3"
+                                    <textarea class="form-control" id="criteriaText" name="comment" rows="3"
                                         required></textarea>
                                 </div>
                                 <div class="navigation-buttons p-1">
@@ -300,7 +300,7 @@ include '../../model/dbconnection.php';
                                     <button type="button" class="btn btn-secondary prev-step mx-2"
                                         style="display: none;">Previous</button>
                                     <button type="button" class="btn btn-primary next-step mx-2">Next</button>
-                                    <button type="submit" name="submitData" class="btn btn-success mx-2"
+                                    <button type="submit" name="studentSubmit" class="btn btn-success mx-2"
                                         style="display: none;">Submit</button>
                                 </div>
                             </form>
