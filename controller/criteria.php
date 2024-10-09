@@ -602,10 +602,12 @@ if (isset($_POST['studentSubmit'])) {
     $academic_year = isset($_POST['academic_year']) ? trim($_POST['academic_year']) : '';
     $date = isset($_POST['date']) ? trim($_POST['date']) : '';
     $comment = isset($_POST['comment']) ? trim($_POST['comment']) : '';
+    $enrolled = isset($_POST['enrolled']) ? trim($_POST['enrolled']) : '';
+    $subject = isset($_POST['subject']) ? trim($_POST['subject']) : '';
 
     foreach ($_POST as $key => $value) {
         // Filter out unnecessary keys
-        if ($key !== 'studentSubmit' && $key !== 'toFaculty' && $key !== 'toFacultyID' && $key !== 'fromStudents' && $key !== 'fromStudentID' && $key !== 'semester' && $key !== 'academic_year' && $key !== 'date' && $key !== 'comment') { // Exclude these keys
+        if ($key !== 'studentSubmit' && $key !== 'toFaculty' && $key !== 'toFacultyID' && $key !== 'fromStudents' && $key !== 'fromStudentID' && $key !== 'semester' && $key !== 'academic_year' && $key !== 'date' && $key !== 'comment' && $key !== 'enrolled' && $key !== 'subject') { // Exclude these keys
             // Remove underscores and trim whitespace from key and value
             $cleanKey = str_replace('_', '', trim($key));
             $cleanValue = trim($value);
@@ -622,15 +624,21 @@ if (isset($_POST['studentSubmit'])) {
     // Create a dynamic query if we have valid columns
     if (!empty($columns) && !empty($values)) {
         // Construct the SQL query, adding doneStatus directly
-        $sql = "INSERT INTO `studentsform` (" . implode(", ", $columns) . ", toFaculty, toFacultyID, fromStudents, fromStudentID, semester, academic_year, date,comment) VALUES ('" . implode("', '", $values) . "', '$toFaculty', '$toFacultyID', '$fromStudents', '$fromStudentID', '$semester', '$academic_year', '$date','$comment')";
+        $sql = "INSERT INTO `studentsform` (" . implode(", ", $columns) . ", toFaculty, toFacultyID, fromStudents, fromStudentID, semester, academic_year, date,comment, subject) VALUES ('" . implode("', '", $values) . "', '$toFaculty', '$toFacultyID', '$fromStudents', '$fromStudentID', '$semester', '$academic_year', '$date','$comment','$subject')";
 
         // Execute the query
         if (mysqli_query($con, $sql)) {
+            $SQLUpdate = "UPDATE `enrolled_subject` SET eval_status = '1' WHERE id ='$enrolled'";
+            $SQLUpdate_query = mysqli_query($con, $SQLUpdate);
 
-            $_SESSION['status'] = "Evaluation Completed Successfully";
-            $_SESSION['status-code'] = "success";
-            header('location:../view/facultyModule/evaluate.php');
-            exit;
+            if ($SQLUpdate_query) {
+                $_SESSION['status'] = "Evaluation Completed Successfully";
+                $_SESSION['status-code'] = "success";
+                header('location:../view/student_view.php');
+                exit;
+            }
+
+
 
 
         } else {
