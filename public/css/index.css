@@ -16,16 +16,6 @@ input {
   font-family: "Poppins", sans-serif;
 }
 
-main {
-  width: 100%;  
-  min-height: 100vh;
-  overflow: hidden;
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 a {
   text-decoration: none;
 }
@@ -38,13 +28,18 @@ li {
 .wrapper {
   display: flex;
 }
+.main {
+  width: 100%;
+  padding: 20px 30px;
+}
 #sidebar {
   width: 260px;
   min-width: 260px;
-  height: 89vh;
+  height: 100vh;
   z-index: 1000;
   transition: all 0.25s ease-in-out;
-  background-color: #0e2238;
+  background-color: #c30011;
+
   display: flex;
   flex-direction: column;
 }
@@ -55,13 +50,13 @@ li {
 
 a.sidebar-link {
   padding: 0.8rem 1.625rem;
-  color: #000;
+  color: #ffffff;
   display: block;
   white-space: wrap;
 }
 a.sidebar-link:hover {
-  background-color: red;
-  color: white;
+  background-color: #ffffff;
+  color: #c30011;
   font-weight: bold;
 }
 
@@ -81,7 +76,8 @@ a.sidebar-link:hover {
   padding: 0;
   min-width: 15rem;
   display: none;
-  background-color: #f8f9fa;
+  background-color: #c30011;
+  border: 1px solid #c30011;
 }
 
 #sidebar:not(.expand) .sidebar-item:hover .has-dropdown + .sidebar-dropdown {

@@ -1,11 +1,11 @@
 <?php
 
 include "../model/dbconnection.php";
-if(isset($_GET['year_level'])){
-        $yearlvl = $_GET['year_level'];
-        $srcode = $_GET['srcode'];
+if (isset($_GET['year_level'])) {
+    $yearlvl = $_GET['year_level'];
+    $srcode = $_GET['srcode'];
 
-        $query = "WITH sec_count AS (
+    $query = "WITH sec_count AS (
                     SELECT 
                         COUNT(section_id) AS SLOT, 
                         subject_id 
@@ -55,14 +55,14 @@ if(isset($_GET['year_level'])){
                                                 FROM `enrolled_student` 
                                                     WHERE sr_code = '$srcode')";
 
-        $query_run = mysqli_query($con, $query);
+    $query_run = mysqli_query($con, $query);
 
-        $data = array();
+    $data = array();
 
-        if(mysqli_num_rows($query_run) > 0){
-            while($row = mysqli_fetch_assoc($query_run)){
-                $data[] = $row;
-            }
+    if (mysqli_num_rows($query_run) > 0) {
+        while ($row = mysqli_fetch_assoc($query_run)) {
+            $data[] = $row;
         }
-        echo json_encode($data);
+    }
+    echo json_encode($data);
 }

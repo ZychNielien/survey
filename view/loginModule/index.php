@@ -17,7 +17,8 @@ session_start();
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- JQUERY CDN -->
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+    crossorigin="anonymous"></script>
   <!--  -->
 
   <!-- LOCALSTORAGE JS -->
@@ -45,7 +46,8 @@ session_start();
 
             <div class="actual-form">
               <div class="input-wrap">
-                <input type="text" name="studentSRCode" id="studentSRCode" minlength="4" class="input-field" autocomplete="off" required />
+                <input type="text" name="studentSRCode" id="studentSRCode" minlength="4" class="input-field"
+                  autocomplete="off" required />
                 <label>SR-Code</label>
               </div>
 
@@ -124,16 +126,16 @@ session_start();
   <script src="../../public/js/jquery-3.7.1.min.js"></script>
 
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
 
       // Show password for Student 
-      $('#passStudent').click(function() {
+      $('#passStudent').click(function () {
         $(this).toggleClass("fa-eye fa-eye-slash");
         $("#passStudentInput").attr('type', $("#passStudentInput").attr('type') === 'password' ? 'text' : 'password');
       })
 
       // Show password for Faculty
-      $('#passFaculty').click(function() {
+      $('#passFaculty').click(function () {
         $(this).toggleClass("fa-eye fa-eye-slash");
         $("#passFacultyInput").attr('type', $("#passFacultyInput").attr('type') === 'password' ? 'text' : 'password');
       })
@@ -145,7 +147,7 @@ session_start();
 
   <?php
   if (isset($_SESSION['status']) && $_SESSION['status'] != '') {
-  ?>
+    ?>
     <script>
       swal({
         title: "<?php echo $_SESSION['status']; ?>",
@@ -154,7 +156,7 @@ session_start();
         button: "Ok",
       });
     </script>
-  <?php
+    <?php
     unset($_SESSION['status']);
   }
   ?>

@@ -1,0 +1,75 @@
+.header-content {
+  background-color: #d0112b;
+  border-radius: 10px;
+  color: #fff;
+  letter-spacing: 2px;
+}
+
+/* ALL CONTENT CONTAINER */
+.contentContainer {
+  position: relative;
+  height: 100px;
+  margin: 0 20px;
+  margin-left: 310px;
+  height: calc(100% / 3 - 2px);
+  transition: all 0.5s ease;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.sidebar.close ~ .contentContainer {
+  left: 105px;
+  width: 93%;
+  transition: all 0.5s ease-out;
+  margin-left: 10px;
+}
+
+table thead tr th {
+  background: #d0112b;
+  color: #fff;
+}
+
+/* ADMIN */
+/* FACULTY PAGE */
+#imagePreview {
+  max-width: 300px;
+  max-height: 300px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+/* CLASSROOM OBSERVATION */
+#multi-step-form {
+  overflow-x: hidden;
+}
+.booked {
+  padding: 10px;
+  background-color: #d0112b;
+  color: white;
+  cursor: not-allowed;
+}
+
+/* STAR RATING ON EVERY FORM */
+.rating {
+  direction: rtl;
+  unicode-bidi: bidi-override;
+  color: #ddd;
+  /* Personal choice */
+}
+
+.rating input {
+  display: none;
+}
+
+.rating label,
+.rating input {
+  margin: 0 10px;
+}
+
+.rating .ratingLabel:hover,
+.rating .ratingLabel:hover ~ .ratingLabel,
+.rating input:checked + .ratingLabel,
+.rating input:checked + .ratingLabel ~ .ratingLabel {
+  color: gold;
+  cursor: pointer;
+}
