@@ -104,19 +104,247 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Fetch all data from the database for the user and display it
-$userId = $userRow['faculty_Id']; // Get the user ID from the session
-$result = $con->query("SELECT * FROM vcaaexcel WHERE faculty_Id = '$userId' LIMIT 1"); // Limit to 1 record for user
-
-// Retrieve the average value from the database
-// Retrieve the average value from the database
+$userId = $userRow['faculty_Id'];
+$result = $con->query("SELECT * FROM vcaaexcel WHERE faculty_Id = '$userId' LIMIT 1");
 if ($row = $result->fetch_assoc()) {
-    $average = (float) $row['cell_value']; // Cast to float to ensure it's a number
+    $average = (float) $row['cell_value'];
 } else {
-    $average = 0; // Set a default value if no record is found
+    $average = 0;
 }
 
+function sanitizeColumnName($name)
+{
+    return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
+}
+// FACULTY ID NG NAKALOGIN SA WEBSITE
+$facultyID = $userRow['faculty_Id'];
+
+// Initialize these variables outside the block to accumulate totals.
+$totalAverage = 0;
+$categoryCount = 0;
+
+// Loop through each category.
+$sql = "SELECT * FROM studentscategories";
+$sql_query = mysqli_query($con, $sql);
+
+if (mysqli_num_rows($sql_query) > 0) {
+
+    while ($categoriesRow = mysqli_fetch_assoc($sql_query)) {
+        $categories = $categoriesRow['categories'];
+
+        // Initialize these variables for each category.
+        $totalRatings = [0, 0, 0, 0, 0]; // Array to count ratings 1 to 5.
+        $ratingCount = 0;
+
+        // Get all criteria for the current category.
+        $sqlcriteria = "SELECT * FROM studentscriteria WHERE studentsCategories = '$categories'";
+        $resultCriteria = mysqli_query($con, $sqlcriteria);
+
+        if (mysqli_num_rows($resultCriteria) > 0) {
+
+            // Fetch all forms submitted for the current faculty.
+            $SQLFaculty = "SELECT * FROM studentsform WHERE toFacultyID = '$facultyID'";
+            $SQLFaculty_query = mysqli_query($con, $SQLFaculty);
+
+            // Loop through each form submission.
+            while ($ratingRow = mysqli_fetch_assoc($SQLFaculty_query)) {
+
+                // Loop through each criterion for the current category.
+                while ($criteriaRow = mysqli_fetch_assoc($resultCriteria)) {
+                    $columnName = sanitizeColumnName($criteriaRow['studentsCategories']);
+                    $finalColumnName = $columnName . $criteriaRow['id'];
+
+                    // Get the rating for this criterion in the current form.
+                    $criteriaRating = $ratingRow[$finalColumnName] ?? null;
+
+                    if ($criteriaRating !== null && $criteriaRating >= 1 && $criteriaRating <= 5) {
+                        // Increment the count for the specific rating (1 to 5).
+                        $totalRatings[$criteriaRating - 1]++;
+                        $ratingCount++; // Total number of ratings.
+                    }
+                }
+
+                // Reset the criteria result pointer for the next form.
+                mysqli_data_seek($resultCriteria, 0);
+            }
+
+            // Now calculate the average rating for this category.
+            if ($ratingCount > 0) {
+                // Calculate the weighted sum for the average rating.
+                $categoryTotal = 0;
+                for ($i = 0; $i < 5; $i++) {
+                    $categoryTotal += ($i + 1) * $totalRatings[$i];
+                }
+                $averageRating = $categoryTotal / $ratingCount; // Average based on the total number of ratings.
+
+                $totalAverage += $averageRating; // Accumulate total average for overall calculation.
+                $categoryCount++; // Increment the category count.
+            }
+        }
+    }
+
+    // Final overall average across all categories.
+    $finalAverageRating = 0;
+    if ($categoryCount > 0) {
+        $finalAverageRating = round($totalAverage / $categoryCount, 2); // Average of all category averages.
+    } else {
+        $finalAverageRating = 'No ratings available';
+    }
+
+} else {
+    $finalAverageRating = 'No Categories Found';
+}
+
+// Output the final average rating
+$combinedAverage = ($finalAverageRating + $average) / 2;
+$semester = $_POST['semester'] ?? 'Fall'; // Default value if not provided
+$academic_year = $_POST['academic_year'] ?? '2025-2026';
+// Check if a record already exists for the current semester, academic year, and faculty ID
+$sql = "SELECT * FROM faculty_averages WHERE semester = ? AND academic_year = ? AND faculty_Id = ? LIMIT 1";
+$stmt = $con->prepare($sql);
+$stmt->bind_param("ssi", $semester, $academic_year, $facultyID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($row = $result->fetch_assoc()) {
+    // Record exists, update it
+    $existingId = $row['id']; // Get the existing record ID
+    $updateSql = "UPDATE faculty_averages SET combined_average = ? WHERE id = ?";
+    $updateStmt = $con->prepare($updateSql);
+    $updateStmt->bind_param("di", $combinedAverage, $existingId); // Update with the new average
+    $updateStmt->execute();
+    $updateStmt->close();
+} else {
+    // Record doesn't exist, insert new record
+    $insertSql = "INSERT INTO faculty_averages (faculty_Id, semester, academic_year, combined_average) VALUES (?, ?, ?, ?)";
+    $insertStmt = $con->prepare($insertSql);
+    $insertStmt->bind_param("issi", $facultyID, $semester, $academic_year, $combinedAverage);
+    $insertStmt->execute();
+    $insertStmt->close();
+}
+
+// Fetching and displaying averages
+$filteredSemesters = [];
+$averages = [];
+$message = ""; // Initialize message variable
+
+// Fetch combined averages based on the selected semesters
+if (isset($_POST['fromSemester']) || isset($_POST['toSemester'])) {
+    $selectedFrom = $_POST['fromSemester'] ?? '';
+    $selectedTo = $_POST['toSemester'] ?? '';
+
+    // Initialize arrays to store results
+    $filteredSemesters = [];
+    $averages = [];
+    $message = '';
+
+    // If both selections are empty, fetch all records
+    if (empty($selectedFrom) && empty($selectedTo)) {
+        $sql = "SELECT semester, academic_year, combined_average 
+                FROM faculty_averages 
+                WHERE faculty_Id = ? AND subject = ?
+                ORDER BY academic_year, semester";
+
+        $stmt = $con->prepare($sql);
+        $stmt->bind_param("i", $facultyID);
+    } else {
+        // Split the semester and academic year if selections are made
+        if (!empty($selectedFrom)) {
+            list($fromSemester, $fromYear) = explode(' ', $selectedFrom);
+        }
+
+        if (!empty($selectedTo)) {
+            list($toSemester, $toYear) = explode(' ', $selectedTo);
+        }
+
+        // Build the SQL query for the selected range
+        $sql = "SELECT semester, academic_year, combined_average 
+                FROM faculty_averages 
+                WHERE faculty_Id = ? 
+                AND (academic_year > ? OR (academic_year = ? AND semester >= ?)) 
+                AND (academic_year < ? OR (academic_year = ? AND semester <= ?))
+                ORDER BY academic_year, semester";
+
+        // Prepare the statement
+        $stmt = $con->prepare($sql);
+
+        // Check if from and to years are set, and bind the parameters accordingly
+        if (!empty($selectedFrom) && !empty($selectedTo)) {
+            // Now we have 7 placeholders, so we need to bind 7 parameters
+            $stmt->bind_param(
+                "issssss",
+                $facultyID,
+                $fromYear,
+                $fromYear,
+                $fromSemester,
+                $toYear,
+                $toYear, // Ensure this matches the expected parameter
+                $toSemester
+            );
+        } elseif (!empty($selectedFrom)) {
+            $stmt->bind_param("iss", $facultyID, $fromYear, $fromSemester);
+        } elseif (!empty($selectedTo)) {
+            $stmt->bind_param("iss", $facultyID, $toYear, $toSemester);
+        }
+    }
+
+    // Execute the prepared statement
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+
+        // Check if there are results
+        if ($result->num_rows > 0) {
+            // Fetch the data
+            while ($row = $result->fetch_assoc()) {
+                $filteredSemesters[] = $row['semester'] . ' ' . $row['academic_year'];
+                $averages[] = $row['combined_average'];
+            }
+        } else {
+            $message = "No data available for the selected semester range.";
+        }
+    } else {
+        // Handle execution error
+        $message = "Error executing query: " . $stmt->error;
+    }
+
+    $stmt->close();
+} else {
+    // Default case: Fetch all records if no filters are applied
+    $sql = "SELECT semester, academic_year, combined_average 
+            FROM faculty_averages 
+            WHERE faculty_Id = ? 
+            ORDER BY academic_year, semester";
+
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param("i", $facultyID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Initialize arrays to store results
+    $filteredSemesters = [];
+    $averages = [];
+    $message = '';
+
+    // Check if there are results
+    if ($result->num_rows > 0) {
+        // Fetch the data
+        while ($row = $result->fetch_assoc()) {
+            $filteredSemesters[] = $row['semester'] . ' ' . $row['academic_year'];
+            $averages[] = $row['combined_average'];
+        }
+    } else {
+        $message = "No data available.";
+    }
+
+    $stmt->close();
+}
+
+// Handle message display (if needed in HTML)
+if (!empty($message)) {
+    echo "<div class='alert alert-warning'>$message</div>";
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -127,21 +355,34 @@ if ($row = $result->fetch_assoc()) {
     <title>Dashboard</title>
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../../public/css/style.css">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
+    <link rel="stylesheet" href="../../public/sweetalert.min.css.css">
     <style>
-        h2 {
-            margin: 50px 0;
+        .graphContainer {
+            width: 100%;
+            /* 100% na lapad ng container */
+            display: flex;
+            /* Gawing flex container */
+            align-items: stretch;
+        }
+
+        .currentRating {
+            max-width: 400px;
+            /* Maximum width para sa div 1 */
+            flex-shrink: 0;
+        }
+
+        .allRating {
+            flex-grow: 1;
+            padding: 0 50px;
         }
 
         .file-drop-area {
             position: relative;
             display: flex;
             align-items: center;
-            width: 450px;
+            width: 300px;
             max-width: 100%;
-            padding: 25px;
+            padding: 10px;
             border: 1px dashed black;
             border-radius: 3px;
             transition: 0.2s;
@@ -152,7 +393,7 @@ if ($row = $result->fetch_assoc()) {
             background-color: rgba(255, 255, 255, 0.04);
             border: 1px solid black;
             border-radius: 3px;
-            padding: 8px 15px;
+            padding: 8px 5px;
             margin-right: 10px;
             font-size: 12px;
             text-transform: uppercase;
@@ -176,37 +417,87 @@ if ($row = $result->fetch_assoc()) {
             cursor: pointer;
             opacity: 0;
         }
-
-        canvas {
-            max-width: 350px;
-            max-height: 350px;
-            width: 350px;
-        }
     </style>
+
 </head>
 
 <body>
     <section class="contentContainer">
-        <div class="container mt-5">
-            <h2 class="text-center">Upload Excel File</h2>
-            <form action="" method="POST" enctype="multipart/form-data" class="mt-4">
-                <div class="file-drop-area">
-                    <label class="choose-file-button" for="excel_file">Choose Excel File</label>
-                    <span class="file-message">or drag and drop files here</span>
-                    <input type="file" name="excel_file" accept=".xlsx, .xls" required class="form-control file-input"
-                        id="excel_file">
-                </div>
-                <button type="submit" class="btn btn-primary my-2">Upload</button>
-            </form>
 
-            <div class="chart-container">
-                <canvas id="averageChart" style="max-width: 350px;"></canvas>
+        <div class="graphContainer d-flex justify-content-between align-items-center">
+            <div class="currentRating d-flex flex-column justify-content-center  align-items-center w-100">
+                <form action="" method="POST" enctype="multipart/form-data" class="mt-4">
+                    <div class="file-drop-area">
+                        <label class="choose-file-button" for="excel_file">Choose Excel File</label>
+                        <span class="file-message">or drag and drop files here</span>
+                        <input type="file" name="excel_file" accept=".xlsx, .xls" required
+                            class="form-control file-input" id="excel_file">
+                    </div>
+                    <button type="submit" class="btn btn-primary my-2">Upload</button>
+                </form>
+
+                <div class="chart-container  justify-content-center">
+                    <h3 class="text-center">Your VCAA Rating</h3>
+
+                    <canvas id="averageChart" style="max-width: 250px;"></canvas>
+                </div>
             </div>
+
+            <div class="allRating d-flex flex-column justify-content-center align-items-center">
+                <h3 class="text-center my-2">VCAA Ratings per Semester and Academic Year</h3>
+                <form method="POST" action="" class="d-flex">
+                    <div class="d-flex flex-row justify-content-between align-items-center px-5">
+                        <div class="form-group me-2"> <!-- Use Bootstrap margin class for spacing -->
+                            <label for="fromSemester">From Semester:</label>
+                            <select name="fromSemester" id="fromSemester" class="form-control" required>
+                                <option value="">Select a Semester</option>
+                                <?php
+                                // Fetch available semesters and academic years for the dropdown
+                                $semestersResult = $con->query("SELECT DISTINCT semester, academic_year FROM faculty_averages WHERE faculty_Id = '$facultyID' ORDER BY academic_year, semester");
+                                while ($semesterRow = $semestersResult->fetch_assoc()) {
+                                    $semester = $semesterRow['semester'];
+                                    $academicYear = $semesterRow['academic_year'];
+                                    echo "<option value=\"$semester $academicYear\">$semester $academicYear</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group me-2">
+                            <label for="toSemester">To Semester:</label>
+                            <select name="toSemester" id="toSemester" class="form-control" required>
+                                <option value="">Select a Semester</option>
+                                <?php
+                                // Fetch available semesters and academic years for the dropdown
+                                $semestersResult = $con->query("SELECT DISTINCT semester, academic_year FROM faculty_averages WHERE faculty_Id = '$facultyID' ORDER BY academic_year, semester");
+                                while ($semesterRow = $semestersResult->fetch_assoc()) {
+                                    $semester = $semesterRow['semester'];
+                                    $academicYear = $semesterRow['academic_year'];
+                                    echo "<option value=\"$semester $academicYear\">$semester $academicYear</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </form>
+
+
+
+
+                <canvas id="lineChart"></canvas>
+
+
+            </div>
+
         </div>
+
+
     </section>
 
     <!-- Include Chart.js and Chart.js Datalabels Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../public/js/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
 
@@ -244,13 +535,7 @@ if ($row = $result->fetch_assoc()) {
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        }
+                        display: false // Completely hide the default legend
                     },
                     tooltip: {
                         callbacks: {
@@ -265,6 +550,8 @@ if ($row = $result->fetch_assoc()) {
                     }
                 }
             },
+
+
             plugins: [{
                 afterDraw: function (chart) {
                     var ctx = chart.ctx;
@@ -291,11 +578,73 @@ if ($row = $result->fetch_assoc()) {
         });
     </script>
 
+    <script>
+        // Data fetched from PHP
+        const semesters = <?php echo json_encode($filteredSemesters); ?>;
+        const averages = <?php echo json_encode($averages); ?>;
+
+        // Create the line chart if there is data
+        if (semesters.length > 0) {
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            const lineChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: semesters, // X-axis labels
+                    datasets: [{
+                        label: 'Combined Average',
+                        data: averages, // Y-axis data
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.1 // Curve the line
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false // Remove legends
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true, // Start y-axis from 0
+                            title: {
+                                display: true,
+                                text: 'Combined Average'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Semester'
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            document.getElementById('lineChart').style.display = 'none'; // Hide chart if no data
+            alert('No data available for the selected semester range.');
+        }
+
+    </script>
+
     <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../public/js/sweetalert2@11.js"></script>
     <script>
         $(document).ready(function () {
-            // Show SweetAlert if there is a message
+
+            <?php if (isset($_SESSION['status'])): ?>
+                Swal.fire({
+                    title: '<?php echo $_SESSION['status']; ?>',
+                    icon: '<?php echo ($_SESSION['status-code'] == 'success' ? 'success' : 'error'); ?>',
+                    confirmButtonText: 'OK'
+                });
+                <?php unset($_SESSION['status']); ?>
+            <?php endif; ?>
+
+
             <?php if (!empty($message)): ?>
                 Swal.fire({
                     icon: <?php echo strpos($message, 'Error') === 0 || strpos($message, 'Invalid') === 0 ? "'error'" : "'success'"; ?>,
@@ -319,8 +668,7 @@ if ($row = $result->fetch_assoc()) {
             });
         });
     </script>
-    <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="../../public/js/script.js"></script>
+
 </body>
 
 </html>

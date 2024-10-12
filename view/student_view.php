@@ -11,9 +11,7 @@ include "../model/dbconnection.php";
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="../fontawesome/css/all.min.css">
 
   <link rel="shortcut icon" href="../public/picture/cics.png" type="image/x-icon" />
 
@@ -47,13 +45,14 @@ include "../model/dbconnection.php";
   </style>
 
   <!-- SWEETALERT2 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="../public/css/sweetalert.min.css">
+
+  <!-- SCRIPT -->
+  <script src="../public/js/sweetalert2@11.js"></script>
   <!--  -->
 
   <!-- JQUERY CDN -->
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-    crossorigin="anonymous"></script>
+  <script src="../public/js/jquery-3.7.1.min.js"></script>
   <script src="../bootstrap/js/bootstrap.min.js"></script>
 
   <!--  -->
@@ -174,12 +173,35 @@ include "../model/dbconnection.php";
     <!-- START SECOND NAVBAR -->
     <div class="container-fluid bg-light p-4 d-flex justify-content-around shadow">
       <div>
-        <button type="button" id="enroll-btn" class="btn btn-success d-flex align-items-center"
-          data-bs-target="#enroll_modal" data-bs-toggle="modal">
-          <h2><i class="fa-solid fa-desktop"></i></h2>
-          <h6 style="font-family: monospace;" class="px-2">Online
-            Registration<br>for First Semester</h6 style="font-family: monospace;">
-        </button>
+        <?php
+        $SQLEnrollment = "SELECT * FROM `academic_year_semester` WHERE id = 1";
+        $SQLEnrollment_query = mysqli_query($con, $SQLEnrollment);
+        $enrollment = mysqli_fetch_assoc($SQLEnrollment_query);
+
+        if ($enrollment['isOpen'] == 0) {
+          ?>
+          <button type="button" id="enroll-btn" class="btn btn-secondary d-flex align-items-center"
+            data-bs-target="#enroll_modal" data-bs-toggle="modal" disabled>
+            <h2><i class="fa-solid fa-desktop"></i></h2>
+            <h6 style="font-family: monospace;" class="px-2">Online
+              Registration<br>for First Semester</h6 style="font-family: monospace;">
+          </button>
+          <?php
+        } else {
+          ?>
+          <button type="button" id="enroll-btn" class="btn btn-success d-flex align-items-center"
+            data-bs-target="#enroll_modal" data-bs-toggle="modal">
+            <h2><i class="fa-solid fa-desktop"></i></h2>
+            <h6 style="font-family: monospace;" class="px-2">Online
+              Registration<br>for First Semester</h6 style="font-family: monospace;">
+          </button>
+          <?php
+        }
+        ?>
+
+
+
+
       </div>
       <h1 style="display: none;"><?php echo $_SESSION['studentSRCode'] ?></h1>
       <div>
@@ -344,6 +366,13 @@ include "../model/dbconnection.php";
                       lowest score.</span>
                   </div>
 
+
+                  <?php
+                  $enrollAYS = "SELECT * FROM `academic_year_semester` WHERE id =1";
+                  $enrollAYS_query = mysqli_query($con, $enrollAYS);
+                  $AYS = mysqli_fetch_assoc($enrollAYS_query);
+
+                  ?>
                   <table class="table table-striped table-bordered text-center align-middle">
                     <thead class="">
                       <tr>
@@ -359,7 +388,7 @@ include "../model/dbconnection.php";
                           <div class="d-flex align-items-center">
                             <label for="semesterInput" class="mr-2 mb-0">Semester:</label>
                             <input type="text" id="semester" name="semester" class="form-control no-border" readonly
-                              style="flex: 1;">
+                              value="<?php echo $AYS['semester'] ?>" style="flex: 1;">
                           </div>
                         </th>
                         <th style="color: #000 !important;">
@@ -367,7 +396,7 @@ include "../model/dbconnection.php";
                             <label for="academic" class="mr-2 mb-0">Academic
                               Year:</label>
                             <input type="text" id="academic" name="academic_year" class="form-control no-border"
-                              style="flex: 1;">
+                              readonly value="<?php echo $AYS['academic_year'] ?>" style="flex: 1;">
                           </div>
                         </th>
                       </tr>
@@ -441,7 +470,7 @@ include "../model/dbconnection.php";
                 </div>
 
                 <!-- HIDDEN INPUTS -->
-                <div style="display: nne;">
+                <div style="display: none;">
                   <input type="text" name="fromStudents" value="">
                   <input type="text" id="facultyID" name="toFacultyID">
                   <input type="date" id="dateInput" name="date" required>

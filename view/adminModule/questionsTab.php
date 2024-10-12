@@ -64,9 +64,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit;
     }
+
+    if (isset($_POST['studentaction'])) {
+        $action = $_POST['studentaction'];
+
+        if ($action === 'assign') {
+            $semester = $_POST['semester'] ?? null; // Changed to match request
+            $academicYear = $_POST['academicYear'] ?? null; // Changed to match request
+
+            // Ensure semester and academic year are provided
+            if (is_null($semester) || is_null($academicYear)) {
+                echo json_encode(["status" => "error", "message" => "Semester and Academic Year are required."]);
+                exit;
+            }
+
+            // Use prepared statements for better security
+            $updateSQL = "UPDATE `academic_year_semester` SET semester=?, academic_year=?, isOpen='1' WHERE id=1";
+            $stmt = $con->prepare($updateSQL);
+            if ($stmt) {
+                $stmt->bind_param("ss", $semester, $academicYear);
+                $success = $stmt->execute();
+                $stmt->close();
+
+                if ($success) {
+                    $_SESSION['toggle_studentstate'] = 'assign';
+                    echo json_encode(["status" => "success", "message" => "Evaluation opened."]);
+                } else {
+                    echo json_encode(["status" => "error", "message" => "Failed to update semester and academic year."]);
+                }
+            } else {
+                echo json_encode(["status" => "error", "message" => "Failed to prepare the SQL statement."]);
+            }
+
+        } elseif ($action === 'clear') {
+            $clearSql = "UPDATE `academic_year_semester` SET semester = '', academic_year = '', isOpen = '0' WHERE id=1";
+            if ($con->query($clearSql) === TRUE) {
+                $_SESSION['toggle_studentstate'] = 'clear';
+                echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
+            }
+        }
+        exit;
+    }
 }
 
+$initialAction = isset($_SESSION['toggle_studentState']) ? $_SESSION['toggle_studentState'] : 'assign';
+
 $initialAction = isset($_SESSION['toggle_state']) ? $_SESSION['toggle_state'] : 'assign';
+
+
+
 
 ?>
 
@@ -81,7 +129,8 @@ $initialAction = isset($_SESSION['toggle_state']) ? $_SESSION['toggle_state'] : 
     <link rel="stylesheet" href="../../public/css/sweetalert.min.css">
 
     <style>
-        .btn-toggle {
+        .btn-toggle,
+        .btn-studenttoggle {
             border: none;
             height: 2.5rem;
             width: 5rem;
@@ -462,18 +511,18 @@ $initialAction = isset($_SESSION['toggle_state']) ? $_SESSION['toggle_state'] : 
                 <form action="">
                     <div class="d-flex px-3">
                         <div class="d-flex flex-column align-items-center px-2">
-                            <select id="semesterSelect" class="form-control">
+                            <select id="semesterSelect" name="semesterSelect" class="form-control">
                                 <option value="">--Select Semester--</option>
-                                <option value="1st">1st Semester</option>
-                                <option value="2nd">2nd Semester</option>
+                                <option value="FIRST">1st Semester</option>
+                                <option value="SECOND">2nd Semester</option>
                             </select>
                         </div>
                         <div class="d-flex flex-column align-items-center px-2">
-                            <select id="academicYearSelect" class="form-control">
+                            <select id="academicYearSelect" name="academicYearSelect" class="form-control">
                                 <option value="" disabled>Select Academic Year</option>
                                 <?php
                                 $currentYear = date("Y");
-                                $nextYear = $currentYear + 5; // Extend five years into the future
+                                $nextYear = $currentYear + 3; // Extend five years into the future
                                 
                                 // Generate future academic year options
                                 for ($year = $currentYear; $year <= $nextYear; $year++) {
@@ -669,14 +718,53 @@ $initialAction = isset($_SESSION['toggle_state']) ? $_SESSION['toggle_state'] : 
 
         <!-- STUDENTS EVALUATION PANEL -->
         <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-            <h3 class="text-danger fw-bold text-center">Faculty Evaluation Criteria for Students</h3>
-            <div class="d-flex justify-content-end mb-3">
-                <button class="btn btn-success float-right mx-3" data-bs-toggle="modal"
-                    data-bs-target="#studentCategoriesModal">+ Categories</button>
-                <button class="btn btn-success float-right" data-bs-toggle="modal"
-                    data-bs-target="#studentEvaluationModal">+ Criteria</button>
+            <div class="d-flex justify-content-between mb-3 ">
+                <form id="evaluationForm">
+                    <div class="d-flex px-3">
+                        <div class="d-flex flex-column align-items-center px-2">
+                            <select id="termSelect" class="form-control">
+                                <option value="">--Select Semester--</option>
+                                <option value="FIRST">1st Semester</option>
+                                <option value="SECOND">2nd Semester</option>
+                            </select>
+                        </div>
+                        <div class="d-flex flex-column align-items-center px-2">
+                            <select id="yearSelect" class="form-control">
+                                <option value="" disabled>Select Academic Year</option>
+                                <?php
+                                $currentAcademicYear = date("Y");
+                                $futureYear = $currentAcademicYear + 3; // Extend five years into the future
+                                
+                                // Generate future academic year options
+                                for ($year = $currentAcademicYear; $year <= $futureYear; $year++) {
+                                    echo "<option value='$year-" . ($year + 1) . "'>$year - " . ($year + 1) . "</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="d-flex flex-column align-items-center px-2">
+                            <button type="button" class="btn btn-studenttoggle" data-toggle="button"
+                                aria-pressed="false">
+                                <div class="handle"></div>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+
+
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-success float-right mx-3" data-bs-toggle="modal"
+                        data-bs-target="#studentCategoriesModal">+ Categories</button>
+                    <button class="btn btn-success float-right" data-bs-toggle="modal"
+                        data-bs-target="#studentEvaluationModal">+ Criteria</button>
+                </div>
             </div>
 
+            <div>
+                <h3 id="actionLabel" class="fw-bold text-center">Assigning Random IDs</h3>
+            </div>
             <!-- Student Evaluation Panel -->
             <div class="overflow-auto" style="max-height: 580px">
                 <?php
@@ -866,6 +954,7 @@ if (isset($_SESSION['success'])) {
 
     unset($_SESSION['success']);
 }
+
 ?>
 
 
@@ -1248,6 +1337,7 @@ if (isset($_SESSION['success'])) {
                 });
             });
         }
+
         function updateActionLabel(action) {
             const label = action === 'assign' ? 'The peer-to-peer evaluation is OPEN.' : 'The peer-to-peer evaluation is CLOSED.';
             $('#actionLabel').text(label);
@@ -1267,6 +1357,144 @@ if (isset($_SESSION['success'])) {
                 $('#actionLabel').css('color', 'red');
             }
         }
+
+        // LOCALSTORAGE FOR TERM AND ACADEMIC YEAR
+        const termDropdown = $('#termSelect');
+        const yearDropdown = $('#yearSelect');
+        let currentStatus = 'clear';
+
+        // Load stored values from localStorage
+        const savedTerm = localStorage.getItem('term');
+        const savedYear = localStorage.getItem('academicYear');
+        if (savedTerm) termDropdown.val(savedTerm);
+        if (savedYear) yearDropdown.val(savedYear);
+
+        // Initialize status state
+        if (localStorage.getItem('status') === 'assign') {
+            termDropdown.val(savedTerm);
+            yearDropdown.val(savedYear);
+            currentStatus = 'assign';
+        }
+
+        // Update button state and status label
+        updateToggleButtonState();
+        updateStatusLabel(currentStatus);
+
+        // Event listeners
+        termDropdown.on('change', () => localStorage.setItem('term', termDropdown.val()));
+        yearDropdown.on('change', () => localStorage.setItem('academicYear', yearDropdown.val()));
+
+        $('.btn-studenttoggle').on('click', handleToggleClick);
+
+        // Functions
+        function handleToggleClick() {
+            currentStatus = (currentStatus === 'assign') ? 'clear' : 'assign';
+            updateToggleButtonState();
+            updateStatusLabel(currentStatus);
+
+            if (currentStatus === 'assign') {
+                handleAssignProcess();
+            } else {
+                handleClearProcess();
+            }
+        }
+
+        function handleAssignProcess() {
+            const selectedTerm = termDropdown.val();
+            const selectedYear = yearDropdown.val();
+
+            if (!selectedTerm || !selectedYear) {
+                displayAlert('Missing Selections', 'Please select both a term and an academic year before proceeding.', 'warning');
+                currentStatus = 'clear';
+                updateToggleButtonState();
+                return;
+            }
+
+            localStorage.setItem('term', selectedTerm);
+            localStorage.setItem('academicYear', selectedYear);
+            localStorage.setItem('status', 'assign');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `You have selected ${selectedTerm} Term, Academic Year: ${selectedYear}. Proceed with assigning?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, assign it!',
+                cancelButtonText: 'No, cancel!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executeProcess(currentStatus, selectedTerm, selectedYear);
+                } else {
+                    resetStatusState();
+                }
+            });
+        }
+
+        function handleClearProcess() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This will clear all selections. Do you want to proceed?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, clear it!',
+                cancelButtonText: 'No, cancel!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    termDropdown.val('');
+                    yearDropdown.val('');
+                    currentStatus = 'clear';
+                    localStorage.removeItem('term');
+                    localStorage.removeItem('academicYear');
+                    localStorage.removeItem('status');
+                    executeProcess(currentStatus);
+                } else {
+                    currentStatus = 'assign';
+                    updateToggleButtonState();
+                }
+            });
+        }
+
+        function executeProcess(status, term, year) {
+            const requestData = { studentaction: status, semester: term, academicYear: year };
+
+            $.post("", requestData, function (response) {
+                const result = JSON.parse(response);
+                displayAlert('Success', result.message, 'success');
+
+                if (status === 'assign') {
+                    displayAlert('Random IDs Assigned', 'Random IDs have been successfully assigned.', 'success');
+                }
+
+                // Load users or perform any additional operations
+                // loadUsers(); // Uncomment if you have a loadUsers function defined
+            }).fail(function (xhr) {
+                const errorMessage = xhr.responseJSON?.message || "An error occurred on the server.";
+                displayAlert('Error', errorMessage, 'error');
+            });
+        }
+
+        function displayAlert(title, message, icon) {
+            Swal.fire({ title, text: message, icon, confirmButtonText: 'Okay' });
+        }
+
+        function updateToggleButtonState() {
+            $('.btn-studenttoggle').toggleClass('assigned', currentStatus === 'assign');
+        }
+
+        function updateStatusLabel(status) {
+            const labelText = status === 'assign' ? 'The peer-to-peer evaluation is OPEN.' : 'The peer-to-peer evaluation is CLOSED.';
+            $('#actionLabel').text(labelText).css('color', status === 'assign' ? 'green' : 'red');
+        }
+
+        function resetStatusState() {
+            currentStatus = 'clear';
+            $('.btn-studenttoggle').removeClass('assigned');
+            updateStatusLabel(currentStatus);
+        }
+
+
 
     });
+
+
 </script>

@@ -31,194 +31,191 @@ include "../../model/dbconnection.php";
 
 
                 <div class="overflow-auto" style="max-height: 580px">
-                    <table class="table  table-striped table-bordered text-center align-middle w-100">
-                        <thead>
-                            <tr style="background: #d0112b; color: #fff;">
-                                <th>Area</th>
-                                <th>APS</th>
-                                <th>Description</th>
-                                <th>Recommendation</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- PHP CODE FOR FIRST TAB FETCHING THE AVERAGE -->
-                            <?php
-
-                            // FUNCTION SA PAGTANGGAL NG MGA SPECIAL CHARACTERS SA COLUMN
-                            function sanitizeColumnName($name)
-                            {
-                                return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
-                            }
-
-                            // FACULTY ID NG NAKALOGIN SA WEBSITE, NAKAFETCH SIYA SA NAV NA PHP FILE
-                            $facultyID = $userRow['faculty_Id'];
 
 
-                            // KAILANGAN GUMAWA NG VARIABLE OUTSIDE THE BLOCK PARA MA CALL MO OUTSIDE NG PHP TAG
-                            $averageRatings = [];
-                            $totalAverage = 0;
-                            $categoryCount = 0;
+                    <?php
 
-                            // SQL QUERY PARA MAFETCH LAHAT NG CATEGORIES NG FACULTY PEER TO PEER
-                            $sql = "SELECT * FROM `studentscategories`";
-                            $sql_query = mysqli_query($con, $sql);
 
-                            // CONDITION KUNG SAAN BINIBILANG ANG LAMAN NG QUERY IF MORE THAN 0, ITO YUNG LALABAS
-                            if (mysqli_num_rows($sql_query) > 0) {
+                    function sanitizeColumnName($name)
+                    {
+                        return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
+                    }
 
-                                // PAGKUHA NG MGA DATA SA ROW GAMIT ANG MYSQLI_FETCH_ASSOC NA FUNCTION
-                                while ($categoriesRow = mysqli_fetch_assoc($sql_query)) {
+                    function getVerbalInterpretationAndLinks($averageRating)
+                    {
+                        $result = ['interpretation' => '', 'links' => ''];
 
-                                    // ITO YUNG LAHAT NG CATEGORIES NG FACULTY
-                                    $categories = $categoriesRow['categories'];
 
-                                    // ITO YUNG RATING 1 - 5 DITO MALALAGAY
-                                    $totalRatings = [0, 0, 0, 0, 0];
 
-                                    // ITO YUNG PAGBILANG NG RATINGS SA CATEGORY
-                                    $ratingCount = 0;
+                        if ($averageRating >= 0 && $averageRating < 1) {
+                            $result['interpretation'] = 'None';
+                            $result['links'] = '<ul><li><a href="#">Link for None 1</a></li><li><a href="#">Link for None 2</a></li></ul>';
+                        } elseif ($averageRating >= 1 && $averageRating < 2) {
+                            $result['interpretation'] = 'Poor';
+                            $result['links'] = '<ul><li><a href="#">Link for Poor 1</a></li><li><a href="#">Link for Poor 2</a></li></ul>';
+                        } elseif ($averageRating >= 2 && $averageRating < 3) {
+                            $result['interpretation'] = 'Fair';
+                            $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                        } elseif ($averageRating >= 3 && $averageRating < 4) {
+                            $result['interpretation'] = 'Satisfactory';
+                            $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                        } elseif ($averageRating >= 4 && $averageRating < 5) {
+                            $result['interpretation'] = 'Very Satisfactory';
+                            $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                        } elseif ($averageRating == 5) {
+                            $result['interpretation'] = 'Outstanding';
+                            $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                        } else {
+                            $result['interpretation'] = 'No description';
+                            $result['links'] = 'No links available';
+                        }
 
-                                    // SQL QUERY PARA MAKUHA LAHAT NG CRITERIA NG FACULTY
-                                    $sqlcriteria = "SELECT * FROM `studentscriteria` WHERE studentsCategories = '$categories'";
-                                    $resultCriteria = mysqli_query($con, $sqlcriteria);
+                        return $result;
+                    }
+                    $sqlSubject = "SELECT i.faculty_Id, s.subject 
+                                    FROM instructor i
+                                    JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
+                                    JOIN subject s ON a.subject_id = s.subject_id
+                                    WHERE i.faculty_Id = " . $userRow['faculty_Id'];
 
-                                    // CONDITION KUNG SAAN BINIBILANG ANG LAMAN NG QUERY IF MORE THAN 0, ITO YUNG LALABAS
-                                    if (mysqli_num_rows($resultCriteria) > 0) {
+                    $sqlSubject_query = mysqli_query($con, $sqlSubject);
 
-                                        // FETCH ALL THE FORMS NA NAGSAGOT SA FAULTY NA NAKALOGIN
-                                        $SQLFaculty = "SELECT * FROM `studentsform` WHERE toFacultyID = '$facultyID' ";
-                                        $SQLFaculty_query = mysqli_query($con, $SQLFaculty);
+                    if (mysqli_num_rows($sqlSubject_query) > 0) {
 
-                                        // PAGKUHA NG MGA DATA SA ROW GAMIT ANG MYSQLI_FETCH_ASSOC NA FUNCTION
-                                        while ($ratingRow = mysqli_fetch_assoc($SQLFaculty_query)) {
+                        while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
+                            ?>
+                            <h2><?php echo $subject['subject'] ?></h2>
 
-                                            // PAGKUHA NG MGA DATA SA ROW GAMIT ANG MYSQLI_FETCH_ASSOC NA FUNCTION
-                                            while ($criteriaRow = mysqli_fetch_array($resultCriteria)) {
-                                                // CALL NG SANITIZE FUNCTION PARA MAWALA YUNG MGA SPECIAL CHARACTERS SA COLUMN NAME
-                                                $columnName = sanitizeColumnName($criteriaRow['studentsCategories']);
 
-                                                // PINAGSAMA YUNG COLUMN NAME NG CATEGORIES AT LAST ID SA CRITERIA PARA SA BAGONG COLUMN SA PEER TO PEER
-                                                $finalColumnName = $columnName . $criteriaRow['id'];
 
-                                                // PAGKUHA NG RATING SA BAWAT CRITERIA
-                                                $criteriaRating = $ratingRow[$finalColumnName] ?? null;
 
-                                                if ($criteriaRating !== null) {
-                                                    // INCREMENT THE RATING NUMBER PARA MAKUHA LAHAT NG RATING
-                                                    $totalRatings[$criteriaRating - 1]++;
-                                                    $ratingCount++;
+
+                            <table class="table  table-striped table-bordered text-center align-middle w-100">
+                                <thead>
+                                    <tr style="background: #d0112b; color: #fff;">
+                                        <th>Area</th>
+                                        <th>APS</th>
+                                        <th>Description</th>
+                                        <th>Recommendation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $facultyID = $userRow['faculty_Id'];
+
+                                    $totalAverage = 0;
+                                    $categoryCount = 0;
+                                    $totalCriteriaCount = 0;
+
+                                    // Loop through each category.
+                                    $sql = "SELECT * FROM `studentscategories`";
+                                    $sql_query = mysqli_query($con, $sql);
+
+                                    if (mysqli_num_rows($sql_query) > 0) {
+
+                                        while ($categoriesRow = mysqli_fetch_assoc($sql_query)) {
+                                            $categories = $categoriesRow['categories'];
+
+                                            // Initialize these variables for each category.
+                                            $totalRatings = [0, 0, 0, 0, 0]; // Array to count ratings 1 to 5.
+                                            $ratingCount = 0;
+                                            $criteriaCount = 0; // Initialize criteria count for each category.
+                            
+                                            // Get all criteria for the current category.
+                                            $sqlcriteria = "SELECT * FROM `studentscriteria` WHERE studentsCategories = '$categories'";
+                                            $resultCriteria = mysqli_query($con, $sqlcriteria);
+
+                                            if (mysqli_num_rows($resultCriteria) > 0) {
+                                                $selectedSubject = $subject['subject'];
+                                                // Fetch all forms submitted for the current faculty.
+                                                $SQLFaculty = "SELECT * FROM `studentsform` WHERE toFacultyID = '$facultyID' AND subject = '$selectedSubject'";
+                                                $SQLFaculty_query = mysqli_query($con, $SQLFaculty);
+
+                                                // Loop through each form submission.
+                                                while ($ratingRow = mysqli_fetch_assoc($SQLFaculty_query)) {
+
+                                                    // Loop through each criterion for the current category.
+                                                    while ($criteriaRow = mysqli_fetch_assoc($resultCriteria)) {
+                                                        $columnName = sanitizeColumnName($criteriaRow['studentsCategories']);
+                                                        $finalColumnName = $columnName . $criteriaRow['id'];
+
+                                                        // Get the rating for this criterion in the current form.
+                                                        $criteriaRating = $ratingRow[$finalColumnName] ?? null;
+
+                                                        if ($criteriaRating !== null && $criteriaRating >= 1 && $criteriaRating <= 5) {
+                                                            // Increment the count for the specific rating (1 to 5).
+                                                            $totalRatings[$criteriaRating - 1]++;
+                                                            $ratingCount++; // Total number of ratings.
+                                                        }
+                                                        $criteriaCount++; // Count the number of criteria for this category.
+                                                    }
+
+                                                    // Reset the criteria result pointer for the next form.
+                                                    mysqli_data_seek($resultCriteria, 0);
                                                 }
+
+                                                // Now calculate the average rating for this category.
+                                                $averageRating = 0;
+                                                if ($ratingCount > 0) {
+                                                    for ($i = 0; $i < 5; $i++) {
+                                                        $averageRating += ($i + 1) * $totalRatings[$i];
+                                                    }
+                                                    $averageRating /= $ratingCount; // Average based on the total number of ratings.
+                            
+                                                    $averageRatings[$categories] = round($averageRating, 2);
+                                                    $totalAverage += $averageRating;
+                                                    $categoryCount++; // Increment the category count.
+                                                    $totalCriteriaCount += $criteriaCount; // Total criteria count across all categories.
+                                                } else {
+                                                    $averageRatings[$categories] = 'No ratings';
+                                                }
+
+                                                $interpretationData = getVerbalInterpretationAndLinks($averageRating);
+
+
+                                                // Output the average rating for this category.
+                                                echo '
+                <tr>
+                    <td>' . $categoriesRow['categories'] . '</td>
+                    <td>' . round($averageRating, 2) . '</td>
+                    <td>' . $interpretationData['interpretation'] . '</td> 
+                    <td>' . $interpretationData['links'] . '</td>
+                </tr>
+            ';
+                                            } else {
+                                                echo '<tr><td colspan="2" class="text-center">No Criteria Found for ' . $categories . '</td></tr>';
                                             }
-                                            // RESET NG CRITERIA PARA MAGPROCEED SA SUNOD NA FORM
-                                            mysqli_data_seek($resultCriteria, 0);
                                         }
 
-                                        // CALCULATE THE AVERAGE RATING PARA SA CATEGORY
-                                        $averageRating = 0;
-                                        if ($ratingCount > 0) {
-                                            for ($i = 0; $i < 5; $i++) {
-                                                $averageRating += ($i + 1) * $totalRatings[$i];
-                                            }
-                                            $averageRating /= $ratingCount;
-                                            $averageRatings[$categories] = round($averageRating, 2);
-                                            $totalAverage += $averageRating;
-                                            $categoryCount++;
-                                        } else {
-                                            $averageRatings[$categories] = 'No ratings';
-                                        }
-
-                                        // FINAL OVERALL AVERAGE
+                                        // Final overall average across all categories.
                                         $finalAverageRating = 0;
                                         if ($categoryCount > 0) {
-                                            // AVARAGE NG LAHAT NG CATEGORY
-                                            $finalAverageRating = round($totalAverage / $categoryCount, 2);
+                                            $finalAverageRating = round($totalAverage / $categoryCount, 2); // Average of all categories.
                                         } else {
                                             $finalAverageRating = 'No ratings available';
                                         }
 
-                                        // VERBAL INTERPRETATION NG STAR RATING
-                                        $verbalInterpretation = '';
-                                        switch (true) {
-                                            case ($finalAverageRating >= 0 && $finalAverageRating < 1):
-                                                $verbalInterpretation = 'None';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 1 && $finalAverageRating < 2):
-                                                $verbalInterpretation = 'Poor';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 2 && $finalAverageRating < 3):
-                                                $verbalInterpretation = 'Fair';
-                                                $linksHere =
-                                                    '<ul>
-                                            <li><a href="#">Link here 1</a></li>
-                                            <li><a href="#">Link here 2</a></li>
-                                            <li><a href="#">Link here 3</a></li>
-                                            </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 3 && $finalAverageRating < 4):
-                                                $verbalInterpretation = 'Satisfactory';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 4 && $finalAverageRating < 5):
-                                                $verbalInterpretation = 'Very Satisfactory';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating == 5):
-                                                $verbalInterpretation = 'Outstanding';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            default:
-                                                $verbalInterpretation = 'No description';
-                                                $linksHere = 'No links';
-                                                break;
-                                        }
 
-                                        // RESULTS
-                                        echo '
-                                            <tr>
-                                                <td>' . $categoriesRow['categories'] . '</td>
-                                                <td>' . $finalAverageRating . '</td>
-                                                <td>' . $verbalInterpretation . '</td>
-                                                <td>' . $linksHere . '</td>
-                                            </tr>
-                                        ';
+                                        echo '<tr><td colspan="2">Overall Average: ' . $finalAverageRating . '</td></tr>';
+
                                     } else {
-                                        echo '<tr><td colspan="2" class="text-center">No Categories Found</td></tr>';
+                                        echo '<tr><td colspan="2">No Categories Found</td></tr>';
                                     }
-                                }
-                            } else {
-                                echo 'No Categories';
-                            }
 
-                            ?>
-                        </tbody>
-                    </table>
+                                    ?>
+                                </tbody>
+                            </table>
+
+                            <?php
+                        }
+                    } else {
+                        echo 'NO SUBJECT FOR THIS FACULTY';
+                    }
+
+
+                    ?>
+
+
                 </div>
             </div>
 

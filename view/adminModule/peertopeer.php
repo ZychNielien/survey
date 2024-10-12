@@ -75,7 +75,37 @@ include "components/navBar.php"
                                 return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
                             }
 
-                            // FACULTY ID NG NAKALOGIN SA WEBSITE, NAKAFETCH SIYA SA NAV NA PHP FILE
+                            function getVerbalInterpretationAndLinks($averageRating)
+                            {
+                                $result = ['interpretation' => '', 'links' => ''];
+
+
+
+                                if ($averageRating >= 0 && $averageRating < 1) {
+                                    $result['interpretation'] = 'None';
+                                    $result['links'] = '<ul><li><a href="#">Link for None 1</a></li><li><a href="#">Link for None 2</a></li></ul>';
+                                } elseif ($averageRating >= 1 && $averageRating < 2) {
+                                    $result['interpretation'] = 'Poor';
+                                    $result['links'] = '<ul><li><a href="#">Link for Poor 1</a></li><li><a href="#">Link for Poor 2</a></li></ul>';
+                                } elseif ($averageRating >= 2 && $averageRating < 3) {
+                                    $result['interpretation'] = 'Fair';
+                                    $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                                } elseif ($averageRating >= 3 && $averageRating < 4) {
+                                    $result['interpretation'] = 'Satisfactory';
+                                    $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                                } elseif ($averageRating >= 4 && $averageRating < 5) {
+                                    $result['interpretation'] = 'Very Satisfactory';
+                                    $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                                } elseif ($averageRating == 5) {
+                                    $result['interpretation'] = 'Outstanding';
+                                    $result['links'] = 'No recommendation needed'; // No links for ratings >= 2.
+                                } else {
+                                    $result['interpretation'] = 'No description';
+                                    $result['links'] = 'No links available';
+                                }
+
+                                return $result;
+                            }
                             $facultyID = $userRow['faculty_Id'];
 
 
@@ -161,76 +191,15 @@ include "components/navBar.php"
                                             $finalAverageRating = 'No ratings available';
                                         }
 
-                                        // VERBAL INTERPRETATION NG STAR RATING
-                                        $verbalInterpretation = '';
-                                        switch (true) {
-                                            case ($finalAverageRating >= 0 && $finalAverageRating < 1):
-                                                $verbalInterpretation = 'None';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 1 && $finalAverageRating < 2):
-                                                $verbalInterpretation = 'Poor';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 2 && $finalAverageRating < 3):
-                                                $verbalInterpretation = 'Fair';
-                                                $linksHere =
-                                                    '<ul>
-                                            <li><a href="#">Link here 1</a></li>
-                                            <li><a href="#">Link here 2</a></li>
-                                            <li><a href="#">Link here 3</a></li>
-                                            </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 3 && $finalAverageRating < 4):
-                                                $verbalInterpretation = 'Satisfactory';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 4 && $finalAverageRating < 5):
-                                                $verbalInterpretation = 'Very Satisfactory';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating == 5):
-                                                $verbalInterpretation = 'Outstanding';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            default:
-                                                $verbalInterpretation = 'No description';
-                                                $linksHere = 'No links';
-                                                break;
-                                        }
+                                        $interpretationData = getVerbalInterpretationAndLinks($averageRating);
 
                                         // RESULTS
                                         echo '
                                             <tr>
                                                 <td>' . $categoriesRow['categories'] . '</td>
                                                 <td>' . $finalAverageRating . '</td>
-                                                <td>' . $verbalInterpretation . '</td>
-                                                <td>' . $linksHere . '</td>
+                                                            <td>' . $interpretationData['interpretation'] . '</td> 
+                    <td>' . $interpretationData['links'] . '</td>
                                             </tr>
                                         ';
                                     } else {

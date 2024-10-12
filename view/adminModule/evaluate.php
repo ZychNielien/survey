@@ -401,8 +401,8 @@ include "../../model/dbconnection.php";
                 <div class="col-auto mx-3">
                     <select id="semesterSelect" class="form-control">
                         <option value="">Select Semester</option>
-                        <option value="1st">1st Semester</option>
-                        <option value="2nd">2nd Semester</option>
+                        <option value="FIRST">1st Semester</option>
+                        <option value="SECOND">2nd Semester</option>
                     </select>
                 </div>
                 <div class="col-auto mx-3">
