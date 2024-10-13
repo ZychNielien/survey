@@ -420,10 +420,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (mysqli_stmt_execute($stmt)) {
             $_SESSION['success'] = 'Additonal Questions Updated Successfully!';
         } else {
-            echo "Error updating criteria: " . mysqli_error($con);
+            echo "Error updating Additonal Questions: " . mysqli_error($con);
         }
         mysqli_stmt_close($stmt);
     }
+
+    if (isset($_POST['linkId']) && isset($_POST['linkOne']) && isset($_POST['linkTwo']) && isset($_POST['linkThree'])) {
+        $linkId = $_POST['linkId'];
+        $linkOne = $_POST['linkOne'];  // Correct variable
+        $linkTwo = $_POST['linkTwo'];  // Correct variable
+        $linkThree = $_POST['linkThree'];  // Use linkThree for the third link
+
+        $sqlUpdate = "UPDATE `subject` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE subject_id = ?";
+        $stmt = mysqli_prepare($con, $sqlUpdate);
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+
+        if (mysqli_stmt_execute($stmt)) {
+            $_SESSION['success'] = 'Link Updated Successfully!';
+        } else {
+            echo "Error updating Link: " . mysqli_error($con);
+        }
+        mysqli_stmt_close($stmt);
+    }
+
+
+
+
 }
 
 
