@@ -47,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                 }
-                $_SESSION['toggle_state'] = 'assign';
                 echo json_encode(["status" => "success", "message" => "Tatlong random IDs na-assign sa bawat user!"]);
             } else {
                 echo json_encode(["status" => "error", "message" => "Walang users na natagpuan."]);
@@ -55,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($_POST['action'] === 'clear') {
             $clearSql = "DELETE FROM randomfaculty";
             if ($con->query($clearSql) === TRUE) {
-                $_SESSION['toggle_state'] = 'clear';
 
                 echo json_encode(["status" => "success", "message" => "Nabura ang lahat ng random IDs at ang mga napiling Academic Year at Semester."]);
             } else {
@@ -69,16 +67,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['studentaction'];
 
         if ($action === 'assign') {
-            $semester = $_POST['semester'] ?? null; // Changed to match request
-            $academicYear = $_POST['academicYear'] ?? null; // Changed to match request
+            $semester = $_POST['semester'] ?? null;
+            $academicYear = $_POST['academicYear'] ?? null;
 
-            // Ensure semester and academic year are provided
             if (is_null($semester) || is_null($academicYear)) {
                 echo json_encode(["status" => "error", "message" => "Semester and Academic Year are required."]);
                 exit;
             }
 
-            // Use prepared statements for better security
             $updateSQL = "UPDATE `academic_year_semester` SET semester=?, academic_year=?, isOpen='1' WHERE id=1";
             $stmt = $con->prepare($updateSQL);
             if ($stmt) {
@@ -87,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->close();
 
                 if ($success) {
-                    $_SESSION['toggle_studentstate'] = 'assign';
+
                     echo json_encode(["status" => "success", "message" => "Evaluation opened."]);
                 } else {
                     echo json_encode(["status" => "error", "message" => "Failed to update semester and academic year."]);
@@ -99,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'clear') {
             $clearSql = "UPDATE `academic_year_semester` SET semester = '', academic_year = '', isOpen = '0' WHERE id=1";
             if ($con->query($clearSql) === TRUE) {
-                $_SESSION['toggle_studentstate'] = 'clear';
+
                 echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
             } else {
                 echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
@@ -108,13 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
-
-$initialAction = isset($_SESSION['toggle_studentState']) ? $_SESSION['toggle_studentState'] : 'assign';
-
-$initialAction = isset($_SESSION['toggle_state']) ? $_SESSION['toggle_state'] : 'assign';
-
-
-
 
 ?>
 
@@ -1358,35 +1347,29 @@ if (isset($_SESSION['success'])) {
             }
         }
 
-        // LOCALSTORAGE FOR TERM AND ACADEMIC YEAR
         const termDropdown = $('#termSelect');
         const yearDropdown = $('#yearSelect');
         let currentStatus = 'clear';
 
-        // Load stored values from localStorage
         const savedTerm = localStorage.getItem('term');
         const savedYear = localStorage.getItem('academicYear');
         if (savedTerm) termDropdown.val(savedTerm);
         if (savedYear) yearDropdown.val(savedYear);
 
-        // Initialize status state
         if (localStorage.getItem('status') === 'assign') {
             termDropdown.val(savedTerm);
             yearDropdown.val(savedYear);
             currentStatus = 'assign';
         }
 
-        // Update button state and status label
         updateToggleButtonState();
         updateStatusLabel(currentStatus);
 
-        // Event listeners
         termDropdown.on('change', () => localStorage.setItem('term', termDropdown.val()));
         yearDropdown.on('change', () => localStorage.setItem('academicYear', yearDropdown.val()));
 
         $('.btn-studenttoggle').on('click', handleToggleClick);
 
-        // Functions
         function handleToggleClick() {
             currentStatus = (currentStatus === 'assign') ? 'clear' : 'assign';
             updateToggleButtonState();
@@ -1465,8 +1448,6 @@ if (isset($_SESSION['success'])) {
                     displayAlert('Random IDs Assigned', 'Random IDs have been successfully assigned.', 'success');
                 }
 
-                // Load users or perform any additional operations
-                // loadUsers(); // Uncomment if you have a loadUsers function defined
             }).fail(function (xhr) {
                 const errorMessage = xhr.responseJSON?.message || "An error occurred on the server.";
                 displayAlert('Error', errorMessage, 'error');
@@ -1492,9 +1473,6 @@ if (isset($_SESSION['success'])) {
             updateStatusLabel(currentStatus);
         }
 
-
-
     });
-
 
 </script>

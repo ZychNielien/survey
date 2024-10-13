@@ -165,9 +165,9 @@ if (isset($_POST['checking_viewbtn'])) {
                 $criteriaCount = 1;
                 $averageRatings = [];
                 $totalAverage = 0;
-                $categoryCount = 0; // Track the number of categories
-                $firstCategory = true; // Flag to check if it's the first category
-    
+                $categoryCount = 0;
+                $firstCategory = true;
+
                 if (mysqli_num_rows($sql_query)) {
                     while ($categoryRow = mysqli_fetch_assoc($sql_query)) {
                         $categories = $categoryRow['categories'];
@@ -179,12 +179,11 @@ if (isset($_POST['checking_viewbtn'])) {
                         <th colspan="5" class="text-center" style="padding: 0 10px;"></th>
         ';
 
-                        // Only show APS header for the first category
                         if ($firstCategory) {
                             echo '<th class="text-center" style="padding: 0 10px;">AVERAGE POINT SCORE (APS)</th>';
-                            $firstCategory = false; // Set flag to false after the first category
+                            $firstCategory = false;
                         } else {
-                            echo '<th class="text-center" style="padding: 0 50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>'; // Empty header for subsequent categories
+                            echo '<th class="text-center" style="padding: 0 50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>';
                         }
 
                         echo '
@@ -206,9 +205,8 @@ if (isset($_POST['checking_viewbtn'])) {
 
                                 $criteriaRating = $ratingRow[$finalColumnName] ?? null;
 
-                                // Handle ratings and output for the table
-                                $output = ''; // Initialize an empty variable to store the output
-    
+                                $output = '';
+
                                 switch ($criteriaRating) {
                                     case '':
                                     case 1:
@@ -227,7 +225,7 @@ if (isset($_POST['checking_viewbtn'])) {
                                         $output = '5';
                                         break;
                                     default:
-                                        $output = ''; // If there's no match, output an empty string
+                                        $output = '';
                                         break;
                                 }
 
@@ -250,43 +248,41 @@ if (isset($_POST['checking_viewbtn'])) {
                                 }
                             }
 
-                            // Calculate the average rating for this category
                             $averageRating = 0;
                             if ($ratingCount > 0) {
                                 for ($i = 0; $i < 5; $i++) {
                                     $averageRating += ($i + 1) * $totalRatings[$i];
                                 }
                                 $averageRating /= $ratingCount;
-                                $totalAverage += $averageRating; // Add to total average
-                                $categoryCount++; // Increment the category count for overall average
+                                $totalAverage += $averageRating;
+                                $categoryCount++;
                             }
                         } else {
                             echo '<tr><td colspan="8" class="text-center">NO CRITERIA</td></tr>';
                         }
 
-                        echo '</tbody></table>'; // Close the table for this category
+                        echo '</tbody></table>';
                     }
 
-                    // Calculate final average rating for all categories
                     $finalAverageRating = $categoryCount > 0 ? round($totalAverage / $categoryCount, 2) : 'No ratings available';
 
-                    // Display the total average rating in a separate table
+
                     echo '
-    <table class="table">
-        <thead>
-            <tr>
-                <th style="text-align: right; min-width: 165px">AVERAGE</th>
-                <th style="font-weight: bold; ">' . $finalAverageRating . '</th>
-            </tr>
-        </thead>
-        <tbody>
-        <tr>
-        <td colspan="2"><span style="font-weight: bold; ">Comment : </span> </br><span style="margin: 0 20px; text-align:justify;">' . $ratingRow['commentText'] . '</span></td>
-        </tr>
-                <tr>
-        <td colspan="2"><span>Note:  </span> </br><span style="font-size: 15px; margin: 0 20px; text-align:justify;">Adopted from: Lerchenfeldt, S., & Ah, T. (2020). Best Practices in Peer Assessment: Training Tomorrow’s Physicians to Obtain and Provide Quality Feedback. <text>https://doi.org/10.2147/AMEP.S25076</text></span></td>
-        </tr></tbody>
-    </table>';
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: right; min-width: 165px">AVERAGE</th>
+                                    <th style="font-weight: bold; ">' . $finalAverageRating . '</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                            <td colspan="2"><span style="font-weight: bold; ">Comment : </span> </br><span style="margin: 0 20px; text-align:justify;">' . $ratingRow['commentText'] . '</span></td>
+                            </tr>
+                                    <tr>
+                            <td colspan="2"><span>Note:  </span> </br><span style="font-size: 15px; margin: 0 20px; text-align:justify;">Adopted from: Lerchenfeldt, S., & Ah, T. (2020). Best Practices in Peer Assessment: Training Tomorrow’s Physicians to Obtain and Provide Quality Feedback. <text>https://doi.org/10.2147/AMEP.S25076</text></span></td>
+                            </tr></tbody>
+                        </table>';
                 } else {
                     echo '<tr><td colspan="2" class="text-center">No Categories Found</td></tr>';
                 }

@@ -11,15 +11,17 @@ include "../model/dbconnection.php";
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer" />
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <link rel="shortcut icon" href="../public/picture/cics.png" type="image/x-icon" />
+  <link rel="shortcut icon" href="../public/picture/cics.png"
+    type="image/x-icon" />
 
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.css" />
 
@@ -29,8 +31,7 @@ include "../model/dbconnection.php";
   <!--  -->
 
   <!-- JQUERY CDN -->
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
   <!--  -->
 
   <!-- LOCALSTORAGE JS -->
@@ -69,21 +70,31 @@ include "../model/dbconnection.php";
     <!-- START NAVBAR -->
     <nav class="navbar bg-danger d-flex align-items-center p-3 shadow">
       <div>
-        <img src="../public/picture/bsu.png" alt style="width: 70px; height: 70px" />
+        <img
+          src="../public/picture/bsu.png"
+          alt
+          style="width: 70px; height: 70px" />
       </div>
       <div>
         <h4 style="color: white">FACULTY EVALUATION PORTAL</h4>
       </div>
       <div>
-        <img src="../public/picture/cics.png" alt style="width: 65px; height: 65px" />
+        <img
+          src="../public/picture/cics.png"
+          alt
+          style="width: 65px; height: 65px" />
       </div>
     </nav>
     <!-- END NAVBAR -->
     <!-- START PROFILE -->
-    <div class="container-fluid p-3 d-flex align-items-center justify-content-between bg-light shadow">
+    <div
+      class="container-fluid p-3 d-flex align-items-center justify-content-between bg-light shadow">
       <div class="d-flex align-items-center">
         <div class="border p-2 bg-light">
-          <img src="../public/picture/user.jpg" alt style="width: 150px; height: 150px" />
+          <img
+            src="../public/picture/user.jpg"
+            alt
+            style="width: 150px; height: 150px" />
         </div>
         <div class="px-3">
           <h2 id="lastname"></h2>
@@ -114,7 +125,8 @@ include "../model/dbconnection.php";
     </div>
     <!-- END PROFILE -->
     <!-- START LOGOUT CHANGE PASS -->
-    <div class="container-fluid bg-danger p-2 d-flex justify-content-between shadow">
+    <div
+      class="container-fluid bg-danger p-2 d-flex justify-content-between shadow">
       <div>
 
         <button class="t_btn text-danger btn btn-light rounded-pill border-0" data-bs-toggle="modal"
@@ -123,36 +135,43 @@ include "../model/dbconnection.php";
         </button>
 
         <!-- START CHANGE PASSWORD MODAL -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="exampleModal" tabindex="-1"
+          aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header bg-danger">
                 <h5 class="modal-title text-light" id="exampleModalLabel">Change
                   Password</h5>
-                <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close bg-light"
+                  data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
                 <form action="../controller/changepass.php" method="POST">
                   <div class="mb-3">
-                    <label for="oldpass" class="form-label" style="font-family: monospace">Current Password:</label>
-                    <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
+                    <label for="oldpass"
+                      class="form-label" style="font-family: monospace">Current Password:</label>
+                    <input type="password" class="form-control" name="oldpass"
+                      id="exampleInputPassword1">
                   </div>
                   <div class="mb-3">
-                    <label for="newpass" class="form-label" style="font-family: monospace">New Password:</label>
-                    <input type="password" class="form-control" name="newpass" id="exampleInputPassword1">
+                    <label for="newpass"
+                      class="form-label" style="font-family: monospace">New Password:</label>
+                    <input type="password" class="form-control" name="newpass"
+                      id="exampleInputPassword1">
                   </div>
                   <div class="mb-3">
-                    <label for="conpass" class="form-label" style="font-family: monospace">Re-enter New
-                      Password:</label>
-                    <input type="password" class="form-control" name="conpass" id="exampleInputPassword1">
+                    <label for="conpass"
+                      class="form-label" style="font-family: monospace">Re-enter New Password:</label>
+                    <input type="password" class="form-control" name="conpass"
+                      id="exampleInputPassword1">
                   </div>
 
               </div>
               <div class="modal-footer d-flex justify-content-between bg-light">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
-                    class="fa-regular fa-circle-xmark"></i> Close</button>
-                <button type="submit" name="changePass" class="btn btn-primary"><i
-                    class="fa-regular fa-circle-check"></i> Confirm</button>
+                <button type="button" class="btn btn-danger"
+                  data-bs-dismiss="modal"><i class="fa-regular fa-circle-xmark"></i> Close</button>
+                <button type="submit" name="changePass"
+                  class="btn btn-primary"><i class="fa-regular fa-circle-check"></i> Confirm</button>
               </div>
               </form>
             </div>
@@ -170,50 +189,67 @@ include "../model/dbconnection.php";
     </div>
     <!-- END LOGOUT CHANGE PASS -->
     <!-- START SECOND NAVBAR -->
-    <div class="container-fluid bg-light p-4 d-flex justify-content-around shadow">
+    <div
+      class="container-fluid bg-light p-4 d-flex justify-content-around shadow">
       <div>
-        <button type="button" id="enroll-btn" class="btn btn-success d-flex align-items-center"
-          data-bs-target="#enroll_modal" data-bs-toggle="modal">
+        <button type="button" id="enroll-btn" class="btn btn-success d-flex align-items-center" data-bs-target="#enroll_modal" data-bs-toggle="modal">
           <h2><i class="fa-solid fa-desktop"></i></h2>
-          <h6 style="font-family: monospace;" class="px-2">Online
-            Registration<br>for First Semester</h6 style="font-family: monospace;">
+          <h6
+            style="font-family: monospace;" class="px-2">Online
+            Registration<br>for First Semester</h6
+            style="font-family: monospace;">
         </button>
       </div>
       <div>
         <button class="btn btn-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#add_subject">
           <h2><i class="fa-solid fa-plus"></i></h2>
-          <h6 style="font-family: monospace;" class="px-2">Add subject</h6 style="font-family: monospace;">
+          <h6
+            style="font-family: monospace;" class="px-2">Add subject</h6 style="font-family: monospace;">
         </button>
       </div>
       <div>
         <button class="btn btn-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addSec">
           <h2><i class="fa-solid fa-plus"></i></h2>
-          <h6 style="font-family: monospace;" class="px-2">Add Section</h6 style="font-family: monospace;">
+          <h6
+            style="font-family: monospace;" class="px-2">Add Section</h6 style="font-family: monospace;">
         </button>
       </div>
       <div>
         <button class="btn btn-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#assigned">
           <h2><i class="fa-solid fa-plus"></i></h2>
-          <h6 style="font-family: monospace;" class="px-2">Assigned Instructor</h6 style="font-family: monospace;">
+          <h6
+            style="font-family: monospace;" class="px-2">Assigned Instructor</h6 style="font-family: monospace;">
         </button>
       </div>
       <div>
         <button class="btn btn-success d-flex align-items-center">
           <h2><i class="fa-solid fa-clipboard-list"></i></h2>
-          <h6 style="font-family: monospace;" class="px-2">Evaluate My
+          <h6
+            style="font-family: monospace;" class="px-2">Evaluate My
             Instructors</h6 style="font-family: monospace;">
         </button>
       </div>
     </div>
+    <div>
+      <button class="btn btn-success d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addSec">
+        <h2><i class="fa-solid fa-plus"></i></h2>
+        <h6
+          style="font-family: monospace;" class="px-2">Add Instructor</h6 style="font-family: monospace;">
+      </button>
+    </div>
     <!-- END SECOND NAVBAR -->
     <!-- START ENROLLED TABLE -->
-    <div class="container bg-light d-flex align-items-center justify-content-center shadow" style="height: 60vh auto">
+    <div
+      class="container bg-light d-flex align-items-center justify-content-center shadow"
+      style="height: 60vh auto">
       <div class="p-3">
         <h1 class="text-center" style="font-family: monospace">
           ENROLLED SUBJECTS
         </h1>
         <div>
-          <table class="table table-striped table-bordered text-center" style="font-family: monospace">
+          <table
+            class="table table-striped table-bordered text-center"
+            style="font-family: monospace">
             <thead>
               <th>Code</th>
               <th>Description</th>
@@ -231,8 +267,7 @@ include "../model/dbconnection.php";
                 <td>IT-SM-4101 / MALVAR</td>
                 <td>GUILLO, JOSEPH RIZALDE</td>
                 <td>MON - 05:00 PM-08:00 PM / CICS 202</td>
-                <td><button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#eval_ins">Evaluate</button>
-                </td>
+                <td><button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#eval_ins">Evaluate</button></td>
               </tr>
               <tr>
                 <td>CS 423</td>
@@ -241,8 +276,7 @@ include "../model/dbconnection.php";
                 <td>IT-SM-4101 / MALVAR</td>
                 <td>ROSAL, MIGUEL EDWARD A.</td>
                 <td>SAT - 10:00 AM-01:00 PM / CIT 404</td>
-                <td><button class="btn btn-success" data-bs-toggle="modal"
-                    data-bs-target="#evaluation">Evaluate</button></td>
+                <td><button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#evaluation">Evaluate</button></td>
               </tr>
               <tr>
                 <td>SMT 405</td>
@@ -314,14 +348,17 @@ include "../model/dbconnection.php";
     <!-- END MAIN CONTENT -->
     <!-- START FOOTER -->
     <footer class="container bg-danger shadow">
-      <div class="text-center d-flex align-items-center justify-content-center">
-        <p class="pt-3" style="color: white;">Copyritght <i class="fa-regular fa-copyright"></i> Batangas State
-          University
+      <div
+        class="text-center d-flex align-items-center justify-content-center">
+        <p class="pt-3" style="color: white;">Copyritght <i
+            class="fa-regular fa-copyright"></i> Batangas State University
           | College of Informatics and Computing Sciences</p>
       </div>
-      <div class="bg-light d-flex justify-content-center align-items-center shadow-lg">
+      <div
+        class="bg-light d-flex justify-content-center align-items-center shadow-lg">
         <p class="pt-2 fw-bold">Stay Updated by following us on:</p>
-        <h3 class="px-3 py-2"><i class="fa-brands fa-facebook"></i> <i class="fa-brands fa-instagram"></i> <i
+        <h3 class="px-3 py-2"><i class="fa-brands fa-facebook"></i> <i
+            class="fa-brands fa-instagram"></i> <i
             class="fa-brands fa-youtube"></i></h6>
       </div>
     </footer>
@@ -333,7 +370,7 @@ include "../model/dbconnection.php";
 
   <?php
   if (isset($_SESSION['status']) && $_SESSION['status'] != '') {
-    ?>
+  ?>
     <script>
       swal({
         title: "<?php echo $_SESSION['status']; ?>",
@@ -342,7 +379,7 @@ include "../model/dbconnection.php";
         button: "Ok",
       });
     </script>
-    <?php
+  <?php
     unset($_SESSION['status']);
   }
   ?>
@@ -379,8 +416,7 @@ include "../model/dbconnection.php";
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
-              class="fa-regular fa-circle-xmark"></i> Close</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-circle-xmark"></i> Close</button>
         </div>
       </div>
     </div>
@@ -426,10 +462,9 @@ include "../model/dbconnection.php";
 
                     if ($check_sem) {
                       while ($row_sem = mysqli_fetch_array($query_sem_run)) {
-                        ?>
-                        <option value="<?php echo $row_sem['sem_id'] ?>"><?php echo $row_sem['semester'] ?> SEMESTER
-                        </option>
-                        <?php
+                    ?>
+                        <option value="<?php echo $row_sem['sem_id'] ?>"><?php echo $row_sem['semester'] ?> SEMESTER</option>
+                    <?php
                       }
                     }
                     ?>
@@ -448,10 +483,9 @@ include "../model/dbconnection.php";
 
                     if ($check_year) {
                       while ($row_year = mysqli_fetch_array($query_year_run)) {
-                        ?>
-                        <option value="<?php echo $row_year['year_id'] ?>"><?php echo $row_year['year_level'] ?> YEAR
-                        </option>
-                        <?php
+                    ?>
+                        <option value="<?php echo $row_year['year_id'] ?>"><?php echo $row_year['year_level'] ?> YEAR</option>
+                    <?php
                       }
                     }
                     ?>
@@ -461,8 +495,7 @@ include "../model/dbconnection.php";
           </div>
         </div>
         <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
-              class="fa-regular fa-circle-xmark"></i> Close</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-circle-xmark"></i> Close</button>
           <input type="submit" name="submit_sub" id="submit_sub" class="btn btn-success" value="Save">
           </form>
         </div>
@@ -488,21 +521,155 @@ include "../model/dbconnection.php";
                     <label for="sub_id" class="form-label fw-bold">Subject:</label>
                     <Select name="sub_id" id="sub_id" class="form-select">
                       <option value="selected" selected disabled>---Select Subject---</option>
-                      <?php
-                      $query_sub = "SELECT subject_id, subject FROM subject ORDER BY year ASC";
+                      <!-- FIRST YEAR -->
+                      <optgroup label="FIRST YEAR">
+                      <optgroup label="First Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '1' AND semester = '1' ORDER BY year ASC";
 
-                      $query_sub_run = mysqli_query($con, $query_sub);
+                        $query_sub_run = mysqli_query($con, $query_sub);
 
-                      $check_sub = mysqli_num_rows($query_sub_run) > 0;
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
 
-                      if ($check_sub) {
-                        while ($row_sub = mysqli_fetch_array($query_sub_run)) {
-                          ?>
-                          <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
-                          <?php
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
                         }
-                      }
-                      ?>
+                        ?>
+                      </optgroup>
+                      <optgroup label="Second Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '1' AND semester = '2' ORDER BY year ASC";
+
+                        $query_sub_run = mysqli_query($con, $query_sub);
+
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
+
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
+                        }
+                        ?>
+                      </optgroup>
+                      </optgroup>
+                      <!-- SECOND YEAR -->
+                      <optgroup label="SECOND YEAR">
+                      <optgroup label="First Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '2' AND semester = '1' ORDER BY year ASC";
+
+                        $query_sub_run = mysqli_query($con, $query_sub);
+
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
+
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
+                        }
+                        ?>
+                      </optgroup>
+                      <optgroup label="Second Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '2' AND semester = '2' ORDER BY year ASC";
+
+                        $query_sub_run = mysqli_query($con, $query_sub);
+
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
+
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
+                        }
+                        ?>
+                      </optgroup>
+                      </optgroup>
+                      w
+                      <!-- THIRD YEAR -->
+                      <optgroup label="THIRD YEAR">
+                      <optgroup label="First Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '3' AND semester = '1' ORDER BY year ASC";
+
+                        $query_sub_run = mysqli_query($con, $query_sub);
+
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
+
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
+                        }
+                        ?>
+                      </optgroup>
+                      <optgroup label="Second Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '3' AND semester = '2' ORDER BY year ASC";
+
+                        $query_sub_run = mysqli_query($con, $query_sub);
+
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
+
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
+                        }
+                        ?>
+                      </optgroup>
+                      </optgroup>
+                      <!-- FOURTH YEAR -->
+                      <optgroup label="FOURTH YEAR">
+                      <optgroup label="First Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '4' AND semester = '1' ORDER BY year ASC";
+
+                        $query_sub_run = mysqli_query($con, $query_sub);
+
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
+
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
+                        }
+                        ?>
+                      </optgroup>
+                      <optgroup label="Second Semester">
+                        <?php
+                        $query_sub = "SELECT subject_id, subject FROM subject WHERE year = '4' AND semester = '2' ORDER BY year ASC";
+
+                        $query_sub_run = mysqli_query($con, $query_sub);
+
+                        $check_sub = mysqli_num_rows($query_sub_run) > 0;
+
+                        if ($check_sub) {
+                          while ($row_sub = mysqli_fetch_array($query_sub_run)) {
+                        ?>
+                            <option value="<?php echo $row_sub['subject_id'] ?>"><?php echo $row_sub['subject'] ?></option>
+                        <?php
+                          }
+                        }
+                        ?>
+                      </optgroup>
+                      </optgroup>
                     </Select>
                   </div>
                   <div class="col">
@@ -529,8 +696,7 @@ include "../model/dbconnection.php";
                 <div class="row mb-3" id="sched_part" style="display: none;">
                   <div class="mb-3 d-flex justify-content-between align-items-center">
                     <h5>Schedule of the subject:</h5>
-                    <div class="btn btn-secondary" id="sched2" disabled><i class="fa-solid fa-plus"></i> Another
-                      Schedule</div>
+                    <div class="btn btn-secondary" id="sched2" disabled><i class="fa-solid fa-plus"></i> Another Schedule</div>
                   </div>
                   <div class="col">
                     <label for="day" class="form-label fw-bold">Day:</label>
@@ -545,9 +711,9 @@ include "../model/dbconnection.php";
 
                       if ($check_day) {
                         while ($row_day = mysqli_fetch_array($query_day_run)) {
-                          ?>
+                      ?>
                           <option value="<?php echo $row_day['day_id'] ?>"><?php echo $row_day['days'] ?></option>
-                          <?php
+                      <?php
                         }
                       }
                       ?>
@@ -585,9 +751,9 @@ include "../model/dbconnection.php";
 
                       if ($check_day) {
                         while ($row_day = mysqli_fetch_array($query_day_run)) {
-                          ?>
+                      ?>
                           <option value="<?php echo $row_day['day_id'] ?>"><?php echo $row_day['days'] ?></option>
-                          <?php
+                      <?php
                         }
                       }
                       ?>
@@ -612,8 +778,7 @@ include "../model/dbconnection.php";
           </div>
         </div>
         <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
-              class="fa-regular fa-circle-xmark"></i> Close</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-circle-xmark"></i> Close</button>
           <input type="submit" name="submit_assigned" id="submit_assigned" class="btn btn-success" value="Assigned">
           </form>
         </div>
@@ -653,10 +818,9 @@ include "../model/dbconnection.php";
 
                     if ($check_year) {
                       while ($row_year = mysqli_fetch_array($query_year_run)) {
-                        ?>
-                        <option value="<?php echo $row_year['year_id'] ?>"><?php echo $row_year['year_level'] ?> YEAR
-                        </option>
-                        <?php
+                    ?>
+                        <option value="<?php echo $row_year['year_id'] ?>"><?php echo $row_year['year_level'] ?> YEAR</option>
+                    <?php
                       }
                     }
                     ?>
@@ -675,10 +839,9 @@ include "../model/dbconnection.php";
 
                     if ($check_sem) {
                       while ($row_sem = mysqli_fetch_array($query_sem_run)) {
-                        ?>
-                        <option value="<?php echo $row_sem['sem_id'] ?>"><?php echo $row_sem['semester'] ?> SEMESTER
-                        </option>
-                        <?php
+                    ?>
+                        <option value="<?php echo $row_sem['sem_id'] ?>"><?php echo $row_sem['semester'] ?> SEMESTER</option>
+                    <?php
                       }
                     }
                     ?>
@@ -688,8 +851,7 @@ include "../model/dbconnection.php";
           </div>
         </div>
         <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
-              class="fa-regular fa-circle-xmark"></i> Close</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-circle-xmark"></i> Close</button>
           <input type="submit" name="submit_section" id="submit_section" class="btn btn-success" value="Save">
           </form>
         </div>
@@ -703,8 +865,7 @@ include "../model/dbconnection.php";
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header bg-danger">
-          <h5 class="modal-title text-light" id="enroll_modalLabel">PERFORMANCE EVALUATION INSTRUMENT FOR FACULTY
-            DEVELOPMENT</h5>
+          <h5 class="modal-title text-light" id="enroll_modalLabel">PERFORMANCE EVALUATION INSTRUMENT FOR FACULTY DEVELOPMENT</h5>
           <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -724,10 +885,8 @@ include "../model/dbconnection.php";
               </div>
             </div>
             <div class="border border-dark row">
-              <h6><span class="fw-bold">Instruction:</span> Please Evaluate the faculty member involved by selecting the
-                star that corresponds to
-                the given parameter/dimensions at the scale of 5, where five star is the perfect score and one star is
-                the lowest
+              <h6><span class="fw-bold">Instruction:</span> Please Evaluate the faculty member involved by selecting the star that corresponds to
+                the given parameter/dimensions at the scale of 5, where five star is the perfect score and one star is the lowest
                 score.</h6>
             </div>
             <div class="row text-center">
@@ -749,8 +908,7 @@ include "../model/dbconnection.php";
                 <p class="text-center">Outstanding</p>
               </div>
               <div class="col-lg-7 border border-dark">
-                <p>Exhibits the behavior described <span class="fw-bold"><u>at all times</u></span> when the occasion
-                  occurs.</p>
+                <p>Exhibits the behavior described <span class="fw-bold"><u>at all times</u></span> when the occasion occurs.</p>
               </div>
             </div>
             <div class="row" style="font-family: monospace;">
@@ -761,8 +919,7 @@ include "../model/dbconnection.php";
                 <p class="text-center">Very Satisfactory</p>
               </div>
               <div class="col-lg-7 border border-dark">
-                <p>Exhibits the behavior described <span class="fw-bold"><u>most of the time</u></span> when the
-                  occasion occurs.</p>
+                <p>Exhibits the behavior described <span class="fw-bold"><u>most of the time</u></span> when the occasion occurs.</p>
               </div>
             </div>
             <div class="row" style="font-family: monospace;">
@@ -773,8 +930,7 @@ include "../model/dbconnection.php";
                 <p class="text-center">Satisfactory</p>
               </div>
               <div class="col-lg-7 border border-dark">
-                <p>Exhibits the behavior described <span class="fw-bold"><u>sometimes</u></span> when the occasion
-                  occurs.</p>
+                <p>Exhibits the behavior described <span class="fw-bold"><u>sometimes</u></span> when the occasion occurs.</p>
               </div>
             </div>
             <div class="row" style="font-family: monospace;">
@@ -785,8 +941,7 @@ include "../model/dbconnection.php";
                 <p class="text-center">Fair</p>
               </div>
               <div class="col-lg-7 border border-dark">
-                <p>Exhibits the behavior described <span class="fw-bold"><u>rarely</u></span> when the occasion occurs.
-                </p>
+                <p>Exhibits the behavior described <span class="fw-bold"><u>rarely</u></span> when the occasion occurs.</p>
               </div>
             </div>
             <div class="row" style="font-family: monospace;">
@@ -797,17 +952,14 @@ include "../model/dbconnection.php";
                 <p class="text-center">Poor</p>
               </div>
               <div class="col-lg-7 border border-dark">
-                <p>Exhibits the behavior described <span class="fw-bold"><u>has not been exhibited at all
-                      times</u></span> when the occasion occurs.</p>
+                <p>Exhibits the behavior described <span class="fw-bold"><u>has not been exhibited at all times</u></span> when the occasion occurs.</p>
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
-              class="fa-regular fa-circle-xmark"></i> Close</button>
-          <button type="button" class="btn btn-success" data-bs-target="#evaluation" data-bs-toggle="modal"
-            data-bs-dismiss="modal"><i class="fa-regular fa-circle-right"></i> Proceed</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-circle-xmark"></i> Close</button>
+          <button type="button" class="btn btn-success" data-bs-target="#evaluation" data-bs-toggle="modal" data-bs-dismiss="modal"><i class="fa-regular fa-circle-right"></i> Proceed</button>
         </div>
       </div>
     </div>
@@ -819,8 +971,7 @@ include "../model/dbconnection.php";
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header bg-danger">
-          <h5 class="modal-title text-light" id="enroll_modalLabel">PERFORMANCE EVALUATION INSTRUMENT FOR FACULTY
-            DEVELOPMENT</h5>
+          <h5 class="modal-title text-light" id="enroll_modalLabel">PERFORMANCE EVALUATION INSTRUMENT FOR FACULTY DEVELOPMENT</h5>
           <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -839,7 +990,7 @@ include "../model/dbconnection.php";
 
                 if ($check_TE) {
                   while ($row_TE = mysqli_fetch_array($query_TE_run)) {
-                    ?>
+                ?>
                     <h6 class="fw-bold"><i class="fa-solid fa-play"></i> <?php echo $row_TE['description'] ?></h6>
                     <input type="hidden" name="qu_id[]" value="<?php echo $row_TE['q_id'] ?>">
                     <input type="hidden" name="sr-code[]" value="19-61072">
@@ -854,12 +1005,12 @@ include "../model/dbconnection.php";
                     <label for="4" class="form-label fw-bold">4</label>
                     <input type="radio" name="<?php echo $row_TE['q_id'] ?>TE" id="5" value="5">
                     <label for="5" class="form-label fw-bold">5</label>
-                    <?php
+                  <?php
                   }
                 } else {
                   ?>
                   <h6 class="fw-bold">NO QUESTIONS</h6>
-                  <?php
+                <?php
                 }
                 ?>
               </div>
@@ -878,7 +1029,7 @@ include "../model/dbconnection.php";
 
                 if ($check_TE) {
                   while ($row_TE = mysqli_fetch_array($query_TE_run)) {
-                    ?>
+                ?>
                     <h6 class="fw-bold"><i class="fa-solid fa-play"></i> <?php echo $row_TE['description'] ?></h6>
                     <input type="hidden" name="qu_id[]" value="<?php echo $row_TE['q_id'] ?>">
                     <input type="hidden" name="sr-code[]" value="19-61072">
@@ -893,12 +1044,12 @@ include "../model/dbconnection.php";
                     <label for="4" class="form-label fw-bold">4</label>
                     <input type="radio" name="<?php echo $row_TE['q_id'] ?>CM" id="5" value="5">
                     <label for="5" class="form-label fw-bold">5</label>
-                    <?php
+                  <?php
                   }
                 } else {
                   ?>
                   <h6 class="fw-bold">NO QUESTIONS</h6>
-                  <?php
+                <?php
                 }
                 ?>
               </div>
@@ -916,7 +1067,7 @@ include "../model/dbconnection.php";
 
                 if ($check_TE) {
                   while ($row_TE = mysqli_fetch_array($query_TE_run)) {
-                    ?>
+                ?>
                     <h6 class="fw-bold"><i class="fa-solid fa-play"></i> <?php echo $row_TE['description'] ?></h6>
                     <input type="hidden" name="qu_id[]" value="<?php echo $row_TE['q_id'] ?>">
                     <input type="hidden" name="sr-code[]" value="19-61072">
@@ -931,12 +1082,12 @@ include "../model/dbconnection.php";
                     <label for="4" class="form-label fw-bold">4</label>
                     <input type="radio" name="<?php echo $row_TE['q_id'] ?>SE" id="5" value="5">
                     <label for="5" class="form-label fw-bold">5</label>
-                    <?php
+                  <?php
                   }
                 } else {
                   ?>
                   <h6 class="fw-bold">NO QUESTIONS</h6>
-                  <?php
+                <?php
                 }
                 ?>
               </div>
@@ -954,7 +1105,7 @@ include "../model/dbconnection.php";
 
                 if ($check_TE) {
                   while ($row_TE = mysqli_fetch_array($query_TE_run)) {
-                    ?>
+                ?>
                     <h6 class="fw-bold"><i class="fa-solid fa-play"></i> <?php echo $row_TE['description'] ?></h6>
                     <input type="hidden" name="qu_id[]" value="<?php echo $row_TE['q_id'] ?>">
                     <input type="hidden" name="sr-code[]" value="19-61072">
@@ -969,12 +1120,12 @@ include "../model/dbconnection.php";
                     <label for="4" class="form-label fw-bold">4</label>
                     <input type="radio" name="<?php echo $row_TE['q_id'] ?>C" id="5" value="5">
                     <label for="5" class="form-label fw-bold">5</label>
-                    <?php
+                  <?php
                   }
                 } else {
                   ?>
                   <h6 class="fw-bold">NO QUESTIONS</h6>
-                  <?php
+                <?php
                 }
                 ?>
               </div>
@@ -992,7 +1143,7 @@ include "../model/dbconnection.php";
 
                 if ($check_TE) {
                   while ($row_TE = mysqli_fetch_array($query_TE_run)) {
-                    ?>
+                ?>
                     <h6 class="fw-bold"><i class="fa-solid fa-play"></i> <?php echo $row_TE['description'] ?></h6>
                     <input type="hidden" name="qu_id[]" value="<?php echo $row_TE['q_id'] ?>">
                     <input type="hidden" name="sr-code[]" value="19-61072">
@@ -1007,12 +1158,12 @@ include "../model/dbconnection.php";
                     <label for="4" class="form-label fw-bold">4</label>
                     <input type="radio" name="<?php echo $row_TE['q_id'] ?>EC" id="5" value="5">
                     <label for="5" class="form-label fw-bold">5</label>
-                    <?php
+                  <?php
                   }
                 } else {
                   ?>
                   <h6 class="fw-bold">NO QUESTIONS</h6>
-                  <?php
+                <?php
                 }
                 ?>
               </div>
@@ -1023,10 +1174,8 @@ include "../model/dbconnection.php";
           </div>
         </div>
         <div class="modal-footer d-flex justify-content-between">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
-              class="fa-regular fa-circle-xmark"></i> Close</button>
-          <button type="submit" name="submit_evaluation" id="submit_evaluation" class="btn btn-success"
-            data-bs-target="#evaluation" data-bs-toggle="modal"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-regular fa-circle-xmark"></i> Close</button>
+          <button type="submit" name="submit_evaluation" id="submit_evaluation" class="btn btn-success" data-bs-target="#evaluation" data-bs-toggle="modal"><i class="fa-solid fa-paper-plane"></i> Submit</button>
           </form>
         </div>
       </div>

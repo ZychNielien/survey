@@ -236,29 +236,31 @@ if (isset($_POST['checking_viewbtn'])) {
                         $averageRatings[$categories] = round($averageRating, 2);
 
                         echo '
-                        <tr>
-                            <td  colspan="7" style="text-align: right;padding: 0 10px; font-weight: bold;">Average</td>
-                            <td  colspan="1" style="padding: 0 10px; font-weight: bold;">' . round($averageRating, 2) . '</td>
-                        </tr>
-                        <tr>
-                            <td class="text-left " colspan="8" >
-                                <div style="min-height: 45px; ">
-                                    <span style="font-weight: bold;">Comments: </span>
-                                    <span style="text-indent: 50px; "> ' . $ratingRow[$finalColumnComment] . '</span>                  
-                                </div>
-                           </td>
-                        </tr>
-                   </tbody>
-            </table>
-              
-                    
-                    ';
+                                <tr>
+                                    <td  colspan="7" style="text-align: right;padding: 0 10px; font-weight: bold;">Average</td>
+                                    <td  colspan="1" style="padding: 0 10px; font-weight: bold;">' . round($averageRating, 2) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-left " colspan="8" >
+                                        <div style="min-height: 45px; ">
+                                            <span style="font-weight: bold;">Comments: </span>
+                                            <span style="text-indent: 50px; "> ' . $ratingRow[$finalColumnComment] . '</span>                  
+                                        </div>
+                                </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        ';
+
                     }
                 }
+
                 echo '<script>';
                 echo 'const averageRatings = ' . json_encode($averageRatings) . ';';
                 echo '</script>';
+
                 ?>
+
                 <table class="table table-striped table-bordered text-center align-middle">
                     <tbody>
 
@@ -359,11 +361,11 @@ if (isset($_POST['checking_viewbtn'])) {
                                     }
 
                                     echo '
-                <tr>
-                    <td style="text-transform: capitalize; padding: 0 10px; " >' . $categoryRow['categories'] . '</td>
-                    <td class="text-center" style="padding: 0 10px; text-align: center">' . (isset($averageRatings[$categories]) ? $averageRatings[$categories] : 'N/A') . '</td>
-                </tr>
-            ';
+                                        <tr>
+                                            <td style="text-transform: capitalize; padding: 0 10px; " >' . $categoryRow['categories'] . '</td>
+                                            <td class="text-center" style="padding: 0 10px; text-align: center">' . (isset($averageRatings[$categories]) ? $averageRatings[$categories] : 'N/A') . '</td>
+                                        </tr>
+                                    ';
                                 }
 
                                 $finalAverageRating = 0;

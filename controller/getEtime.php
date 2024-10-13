@@ -9,7 +9,8 @@ if (isset($_POST['stime'])) {
     $s = $stime + 1;
     $e = $stime + 5;
 
-    $query_Etime = "SELECT time_id, time FROM time WHERE time_id BETWEEN '$s' AND '$e'";
+    $query_Etime = "SELECT time_id, time FROM time WHERE time_id BETWEEN '$s' AND '$e' AND time_id NOT IN (SELECT T.time_id FROM time T INNER JOIN assigned_subject A 
+                    WHERE A.section_id = '$section' AND A.day_id = '$day' AND T.time_id BETWEEN A.S_time_id AND A.E_time_id)";
 
     $query_Etime_run = mysqli_query($con, $query_Etime);
 
@@ -19,7 +20,7 @@ if (isset($_POST['stime'])) {
         echo '<option value="selected" selected disabled>---Select end time---</option>';
         while ($row_Etime = mysqli_fetch_array($query_Etime_run)) {
 
-          echo  '<option value="' .$row_Etime['time_id']. '">' .$row_Etime['time']. '</option>';
+            echo '<option value="' . $row_Etime['time_id'] . '">' . $row_Etime['time'] . '</option>';
 
         }
     } else {

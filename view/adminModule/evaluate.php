@@ -57,12 +57,9 @@ include "../../model/dbconnection.php";
                 <table class="table table-striped table-bordered text-center align-middle w-100">
                     <thead>
                         <tr>
-                            <th style=" background: #d0112b;
-            color: #fff; letter-spacing: 2px;">Image</th>
-                            <th style=" background: #d0112b;
-            color: #fff; letter-spacing: 2px;">Faculty Member</th>
-                            <th style=" background: #d0112b;
-            color: #fff; letter-spacing: 2px;">Action</th>
+                            <th style=" background: #d0112b; color: #fff; letter-spacing: 2px;">Image</th>
+                            <th style=" background: #d0112b; color: #fff; letter-spacing: 2px;">Faculty Member</th>
+                            <th style=" background: #d0112b; color: #fff; letter-spacing: 2px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -384,14 +381,14 @@ include "../../model/dbconnection.php";
                     <select id="nameSelect" class="form-control">
                         <option value="">Select Faculty</option>
                         <?php
-                        // Fetch faculty names from the database
-                        $facultySQL = "SELECT * FROM instructor"; // Update the table name as necessary
+
+                        $facultySQL = "SELECT * FROM instructor";
                         $facultyQuery = mysqli_query($con, $facultySQL);
                         while ($facultyRow = mysqli_fetch_assoc($facultyQuery)) {
                             $firstName = htmlspecialchars($facultyRow['first_name'], ENT_QUOTES, 'UTF-8');
                             $lastName = htmlspecialchars($facultyRow['last_name'], ENT_QUOTES, 'UTF-8');
-                            $facultyId = htmlspecialchars($facultyRow['faculty_Id'], ENT_QUOTES, 'UTF-8'); // Adjust based on your table structure
-                            $facultyName = "$firstName $lastName"; // Concatenate first and last names
+                            $facultyId = htmlspecialchars($facultyRow['faculty_Id'], ENT_QUOTES, 'UTF-8');
+                            $facultyName = "$firstName $lastName";
                             echo "<option value='$facultyId'>$facultyName</option>";
                         }
                         ?>
@@ -446,12 +443,12 @@ include "../../model/dbconnection.php";
                                 $officialId = htmlspecialchars($archivedRow['id'], ENT_QUOTES, 'UTF-8');
                                 echo '
                         <tr>
-                             <td class="official_id" hidden>' . $officialId . '</td>
-            <td data-toFaculty="' . $archivedRow['toFacultyID'] . '" hidden>' . $archivedRow['toFacultyID'] . '</td>
-            <td>' . $archivedRow['toFaculty'] . '</td>
-            <td>' . $archivedRow['semester'] . '</td>
-            <td>' . $archivedRow['academic_year'] . '</td>
-            <td><a href="#" class="view-btn btn btn-success">Print</a></td>
+                            <td class="official_id" hidden>' . $officialId . '</td>
+                            <td data-toFaculty="' . $archivedRow['toFacultyID'] . '" hidden>' . $archivedRow['toFacultyID'] . '</td>
+                            <td>' . $archivedRow['toFaculty'] . '</td>
+                            <td>' . $archivedRow['semester'] . '</td>
+                            <td>' . $archivedRow['academic_year'] . '</td>
+                            <td><a href="#" class="view-btn btn btn-success">Print</a></td>
                         </tr>
                         ';
                             }
@@ -490,15 +487,12 @@ include "../../model/dbconnection.php";
 
 <script>
 
-    // Attach click event to the dynamically generated Print buttons
     $('.view-btn').click(function (e) {
         e.preventDefault();
 
-        // Get the official_id and faculty name from the table row
         var official_id = $(this).closest('tr').find('.official_id').text();
         const facultyName = $(this).closest('tr').find('td[data-toFaculty]').data('toFaculty');
 
-        // Perform the AJAX request
         $.ajax({
             type: "POST",
             url: "printevaluation.php",
@@ -507,15 +501,12 @@ include "../../model/dbconnection.php";
                 'official_id': official_id,
             },
             success: function (response) {
-                // Update modal content and show the modal
                 $('.officialviewmodal').html(response);
                 $('#officialviewmodal').modal('show');
 
-                // Call SweetAlert after showing the modal
-                showSweetAlert(facultyName); // Pass the faculty name to the SweetAlert function
+                showSweetAlert(facultyName);
             },
             error: function (xhr, status, error) {
-                // Handle errors
                 console.error("AJAX Error: " + status + ": " + error);
                 alert("An error occurred while processing your request. Please try again.");
             }
@@ -534,14 +525,13 @@ include "../../model/dbconnection.php";
             cancelButtonText: 'Close',
         }).then((result) => {
             if (result.isConfirmed) {
-                printPartOfPage(143); // Call your print function
+                printPartOfPage(143);
             } else {
-                $('#officialviewmodal').modal('hide'); // Hide modal if closed
+                $('#officialviewmodal').modal('hide');
             }
         });
     }
 
-    // Print function
     function printPartOfPage(elementId) {
         var printContent = document.getElementById(elementId).innerHTML;
         var windowUrl = 'about:blank';
@@ -549,21 +539,16 @@ include "../../model/dbconnection.php";
         var windowName = 'Print' + uniqueName.getTime();
         var printWindow = window.open(windowUrl, windowName, 'width=1000,height=1000');
 
-        // Write content to the new window and print it
         printWindow.document.write(printContent);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
         printWindow.close();
 
-        // Hide the modal after printing
         $('#officialviewmodal').modal('hide');
     }
 
-
-
     $(document).ready(function () {
-
 
         $('input[type="radio"]').click(function () {
             const groupName = $(this).attr('name');
@@ -591,13 +576,8 @@ include "../../model/dbconnection.php";
             }
         });
 
-
-
-
-
         var currentStep = 1;
         var totalSteps = <?php echo $totalCategories + 1; ?>;
-
 
         $('#multi-step-form .step').slice(1).hide();
 
@@ -635,7 +615,6 @@ include "../../model/dbconnection.php";
             }
         }
 
-
         $(".next-step").click(function () {
             if (currentStep < totalSteps) {
                 currentStep++;
@@ -649,7 +628,6 @@ include "../../model/dbconnection.php";
                 displayStep(currentStep);
             }
         });
-
 
         displayStep(currentStep);
 
@@ -673,16 +651,12 @@ include "../../model/dbconnection.php";
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
 
-
     const formattedDate = `${year}-${month}-${day}`;
-
 
     document.getElementById('dateInput').value = formattedDate;
 
-
-
     $("#filterButton").on("click", function () {
-        var facultyId = $("#nameSelect").val(); // Get the selected faculty ID
+        var facultyId = $("#nameSelect").val();
         var semester = $("#semesterSelect").val();
         var year = $("#yearSelect").val();
 
@@ -690,9 +664,9 @@ include "../../model/dbconnection.php";
         $("#noResults").hide();
 
         var filteredRows = $("#tableBody tr").filter(function () {
-            var facultyMatch = facultyId === "" || $(this).find("td:eq(1)").text() === facultyId; // Update index if necessary
-            var semesterMatch = semester === "" || $(this).find("td:eq(3)").text().includes(semester); // Semester
-            var yearMatch = year === "" || $(this).find("td:eq(4)").text() === year; // Academic Year
+            var facultyMatch = facultyId === "" || $(this).find("td:eq(1)").text() === facultyId;
+            var semesterMatch = semester === "" || $(this).find("td:eq(3)").text().includes(semester);
+            var yearMatch = year === "" || $(this).find("td:eq(4)").text() === year;
             return !(facultyMatch && semesterMatch && yearMatch);
         });
 
@@ -702,6 +676,5 @@ include "../../model/dbconnection.php";
             $("#noResults").show();
         }
     });
-
 
 </script>

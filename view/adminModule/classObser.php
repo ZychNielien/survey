@@ -314,19 +314,19 @@ include "components/navBar.php";
                                             $categories = $row['categories'];
 
                                             echo '
-            <div class="step step-' . $stepIndex . '">
-                <h3>' . htmlspecialchars($categories) . '</h3>
-                <table class="table table-striped table-bordered text-center align-middle">
-                    <thead>
-                        <tr class="bg-danger text-uppercase">
-                            <th class="text-justify">No.</th>
-                            <th style="text-align: center; margin: 0;">Criteria</th>
-                            <th class="text-center">Star Rating</th>
-                            <th class="text-justify">Interpretation</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        ';
+                                                <div class="step step-' . $stepIndex . '">
+                                                    <h3>' . htmlspecialchars($categories) . '</h3>
+                                                    <table class="table table-striped table-bordered text-center align-middle">
+                                                        <thead>
+                                                            <tr class="bg-danger text-uppercase">
+                                                                <th class="text-justify">No.</th>
+                                                                <th style="text-align: center; margin: 0;">Criteria</th>
+                                                                <th class="text-center">Star Rating</th>
+                                                                <th class="text-justify">Interpretation</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                            ';
 
                                             $sqlcriteria = "SELECT * FROM `classroomcriteria` WHERE classroomCategories = '$categories'";
                                             $resultCriteria = mysqli_query($con, $sqlcriteria);
@@ -337,70 +337,68 @@ include "components/navBar.php";
                                                     $columnName = sanitizeColumnName($criteriaRow['classroomCategories']) . $criteriaRow['id'];
 
                                                     echo '
-                        <tr>
-                            <td>' . $criteriaCount++ . '</td>
-                            <td>
-                                <p style="text-align: justify; margin: 0;">
-                                    ' . htmlspecialchars($criteriaRow['classroomCriteria']) . '
-                                </p>
-                            </td>
-                            <td>
-                                <div class="rating d-flex justify-content-center mt-1">
-                                    <input id="rating-5-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="5" />
-                                    <label for="rating-5-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
-                                    
-                                    <input id="rating-4-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="4" />
-                                    <label for="rating-4-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
-                                    
-                                    <input id="rating-3-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="3" />
-                                    <label for="rating-3-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
-                                    
-                                    <input id="rating-2-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="2" />
-                                    <label for="rating-2-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
-                                    
-                                    <input id="rating-1-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="1" />
-                                    <label for="rating-1-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
-                                </div>
-                            </td>
-                            <td>
-                                <div id="ratingDisplay-' . $columnName . '" class="text-center">
-                                    <span id="ratingValue-' . $columnName . '">Rate First</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-  
-                        </tr>
-                                                        
-                        
-                    ';
+                                                        <tr>
+                                                            <td>' . $criteriaCount++ . '</td>
+                                                            <td>
+                                                                <p style="text-align: justify; margin: 0;">
+                                                                    ' . htmlspecialchars($criteriaRow['classroomCriteria']) . '
+                                                                </p>
+                                                            </td>
+                                                            <td>
+                                                                <div class="rating d-flex justify-content-center mt-1">
+                                                                    <input id="rating-5-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="5" />
+                                                                    <label for="rating-5-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
+                                                                    
+                                                                    <input id="rating-4-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="4" />
+                                                                    <label for="rating-4-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
+                                                                    
+                                                                    <input id="rating-3-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="3" />
+                                                                    <label for="rating-3-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
+                                                                    
+                                                                    <input id="rating-2-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="2" />
+                                                                    <label for="rating-2-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
+                                                                    
+                                                                    <input id="rating-1-' . $columnName . '" type="radio" name="' . htmlspecialchars($columnName) . '" value="1" />
+                                                                    <label for="rating-1-' . $columnName . '" class="ratingLabel"><i class="fas fa-3x fa-star fa-2xl my-3"></i></label>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div id="ratingDisplay-' . $columnName . '" class="text-center">
+                                                                    <span id="ratingValue-' . $columnName . '">Rate First</span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ';
                                                 }
                                             } else {
                                                 die("Error fetching criteria: " . mysqli_error($con));
                                             }
-
                                             echo '
-                    </tbody>
-                </table>
-                <div class="mb-3 comment">
-                    <label for="">Comment:</label>
-                    <textarea class="form-control" id="comment' . $columnComment . '" name="comment' . htmlspecialchars($columnComment) . '" rows="3"></textarea>
-                </div>
+                                                        </tbody>
+                                                    </table>
+                                                    <div class="mb-3 comment">
+                                                        <label for="">Comment:</label>
+                                                        <textarea class="form-control" id="comment' . $columnComment . '" name="comment' . htmlspecialchars($columnComment) . '" rows="3"></textarea>
+                                                    </div>
 
-            </div>
-        ';
+                                                </div>
+                                            ';
 
                                             $stepIndex++;
                                         }
                                     }
+
                                     ?>
 
                                     <div class="step step-<?php echo $stepIndex; ?>">
-                                        <h4>Additional Step Title</h4>
-                                        <table class="table table-striped table-bordered text-center align-middle">
-                                            <tbody>
 
+                                        <h4>Additional Step Title</h4>
+
+                                        <table class="table table-striped table-bordered text-center align-middle">
+
+                                            <tbody>
                                                 <?php
+
                                                 $classroomQuestion = "SELECT * FROM `classroomquestions`";
                                                 $classroomQuestion_query = mysqli_query($con, $classroomQuestion);
 
@@ -409,22 +407,25 @@ include "components/navBar.php";
                                                     while ($questionsRow = mysqli_fetch_assoc($classroomQuestion_query)) {
                                                         $questionName = sanitizeColumnName('QUESTIONNO') . $questionsRow['id'];
                                                         echo '
-                                                    <tr style="text-align: justify;">
-                                                        <td style="text-align: justify;">
-                                                            <div class="mb-3 text-justify" style="text-align: justify;">
-                                                                <label for="" class="text-justify" style="text-align: justify;">' . $questionCount++ . '. ' . $questionsRow['questions'] . '</label>
-                                                                <textarea class="form-control" id="QUESTIONNO-' . $questionsRow['id'] . '" name="' . htmlspecialchars($questionName) . '" rows="3"
-                                                                    required></textarea>
-                                                            </div>
-                                                         </td>
-                                                    </tr>
-                                                ';
+                                                            <tr style="text-align: justify;">
+                                                                <td style="text-align: justify;">
+                                                                    <div class="mb-3 text-justify" style="text-align: justify;">
+                                                                        <label for="" class="text-justify" style="text-align: justify;">' . $questionCount++ . '. ' . $questionsRow['questions'] . '</label>
+                                                                        <textarea class="form-control" id="QUESTIONNO-' . $questionsRow['id'] . '" name="' . htmlspecialchars($questionName) . '" rows="3"
+                                                                            required></textarea>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ';
                                                     }
                                                 }
+
                                                 ?>
 
                                             </tbody>
+
                                         </table>
+
                                     </div>
 
                                     <div class="navigation-buttons p-1">
@@ -437,19 +438,27 @@ include "components/navBar.php";
                                             class="btn btn-success mx-2" style="display: none;"
                                             onclick="  );">Submit</button>
                                     </div>
+
                                 </form>
+
                             </div>
+
                         </div>
 
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
         <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
 
             <form id="searchForm" class="d-flex flex-wrap justify-content-center align-items-center">
+
                 <div class="form-group me-3 mb-3">
+
                     <label for="facultySelect">Select Instructor:</label>
                     <select name="facultySelect" id="facultySelect" class="form-select">
                         <option value="">Select Instructor</option>
@@ -462,9 +471,11 @@ include "components/navBar.php";
                         }
                         ?>
                     </select>
+
                 </div>
 
                 <div class="form-group me-3 mb-3">
+
                     <label for="adminSelect">Select Observer:</label>
                     <select name="adminSelect" id="adminSelect" class="form-select">
                         <option value="">Select Observer</option>
@@ -476,48 +487,55 @@ include "components/navBar.php";
                         }
                         ?>
                     </select>
+
                 </div>
 
                 <button type="button" id="searchButton" class="btn btn-primary mb-3">Search</button>
+
             </form>
 
-
-
-
             <div class="overflow-auto" style="max-height: 520px">
+
                 <table class="table table-striped table-bordered text-center align-middle w-100">
+
                     <thead>
+
                         <tr class="bg-danger text-white">
                             <th>Observed Faculty Member</th>
                             <th>Date</th>
                             <th>Observation Conducted By</th>
                             <th>Action</th>
                         </tr>
+
                     </thead>
+
                     <tbody id="tableBody">
-                        <?php
-
-
-                        ?>
 
                         <h1 id="noResults" class="text-center text-danger" style="display: none;">No results found</h1>
+
+                    </tbody>
             </div>
 
-
         </div>
+
     </div>
 
     <div class="modal fade bg-transparent opacity-1" id="officialviewmodal" style="opacity: transparent" tabindex="-1"
         role="dialog" aria-labelledby="officialviewmodalLabel" aria-hidden="true">
+
         <div class="modal-dialog" role="document">
+
             <div class="modal-content">
 
                 <div class="modal-body officialviewmodal">
                 </div>
 
             </div>
+
         </div>
+
     </div>
+
 </section>
 
 
@@ -563,11 +581,6 @@ include "components/navBar.php";
                 }
             });
         }
-
-
-
-
-
 
         $('input[type="radio"]').click(function () {
             const groupName = $(this).attr('name');
@@ -615,10 +628,8 @@ include "components/navBar.php";
 
                 saveBookings();
 
-
             }
         });
-
 
         var currentStep = 1;
         var totalSteps = <?php echo $totalCategories + 2; ?>;
@@ -656,7 +667,6 @@ include "components/navBar.php";
             }
         }
 
-
         $(".next-step").click(function () {
             if (currentStep < totalSteps) {
                 currentStep++;
@@ -671,14 +681,12 @@ include "components/navBar.php";
             }
         });
 
-
         displayStep(currentStep);
 
         const today = new Date().toISOString().split('T')[0];
         $('#view-date-select').val(today);
         loadBookings();
         createViewReservationTable();
-
 
         $('#view-date-select').change(createViewReservationTable);
 
@@ -720,7 +728,6 @@ include "components/navBar.php";
                     });
                 headerRow.append(dateCell);
             }
-
 
             const slotHeaderRow = $('<tr>').css({
                 'background-color': '#b71c1c',
@@ -809,7 +816,6 @@ include "components/navBar.php";
             }
         }
 
-
         $(document).on('click', '.booked-slot', function () {
             const slotKey = $(this).data('slotKey');
             const booking = bookedSlots[slotKey];
@@ -860,7 +866,6 @@ include "components/navBar.php";
             }
         });
 
-
     });
 
     $('input[type="radio"]').click(function () {
@@ -874,6 +879,5 @@ include "components/navBar.php";
             displayText.text('');
         }
     });
-
 
 </script>

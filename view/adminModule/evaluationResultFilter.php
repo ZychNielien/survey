@@ -1,53 +1,34 @@
 <?php
 
-// NAV BAR
-include "components/navBar.php"
+include "components/navBar.php";
+include "../../model/dbconnection.php";
 
-    ?>
+
+?>
 
 <head>
-    <!-- TITLE WEB PAGE -->
-    <title>Peer to Peer Faculty Evaluation</title>
-
-    <!-- ALL STYLES, CSS AND SCRIPTS -->
+    <title>Evaluation Result</title>
     <link rel="stylesheet" href="../../public/css/style.css">
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
     <script src="../../public/js/jquery-3.7.1.min.js"></script>
-    <style>
-        ul li {
-            list-style: none;
-        }
 
-        .star {
-            color: gold;
-            font-size: 30px;
-        }
-    </style>
 </head>
 
-<!-- CONTENT CONTAINER -->
 <section class="contentContainer">
-
-    <!-- CONTENT SHADOW CONTAINER -->
     <div class="card p-3 shadow " style="min-height: 720px;">
-
-        <!-- NAVIGATION FOR TAB LIST -->
         <nav>
             <div class="nav nav-tabs mb-3" id="nav-tab" role="tablist">
                 <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home"
-                    type="button" role="tab" aria-controls="nav-home" aria-selected="true">Peer to Peer
-                    Evaluation Result</button>
+                    type="button" role="tab" aria-controls="nav-home" aria-selected="true">Results of Student
+                    Evaluations</button>
                 <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile"
-                    type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Peer to Peer
-                    Evaluation Feedbacks</button>
+                    type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Feedbacks</button>
             </div>
         </nav>
-
-        <!-- CONTENT OF A TAB LIST -->
-        <div class="tab-content p-3 border overflow-auto" id="nav-tabContent">
-
-            <!-- TAB LIST FIRST TAB -->
+        <div class="tab-content p-3 border bg-light overflow-auto" id="nav-tabContent">
             <div class="tab-pane fade active show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+
+
 
                 <?php
 
@@ -56,28 +37,24 @@ include "components/navBar.php"
                     return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
                 }
 
-                $FacultyID = $userRow['faculty_Id'];
-                $sqlSAY = "SELECT DISTINCT  sf.semester, sf.academic_year 
-                            FROM peertopeerform sf
-                            JOIN instructor i ON sf.toFacultyID = i.faculty_Id
-                            WHERE i.faculty_Id = '$FacultyID'";
-
+                // Fetch distinct academic years and semesters from studentsform
+                $sqlSAY = "SELECT DISTINCT semester, academic_year FROM studentsform";
                 $sqlSAY_query = mysqli_query($con, $sqlSAY);
 
+                // Store semesters and academic years
                 $semesters = [];
                 $academicYears = [];
-
                 while ($academicYearSemester = mysqli_fetch_assoc($sqlSAY_query)) {
                     $semesters[] = $academicYearSemester['semester'];
                     $academicYears[] = $academicYearSemester['academic_year'];
                 }
 
+                // Handle filter submission
                 $selectedSemester = isset($_POST['semester']) ? $_POST['semester'] : '';
                 $selectedAcademicYear = isset($_POST['academic_year']) ? $_POST['academic_year'] : '';
-
                 ?>
 
-                <!-- FILTER FOR SEMESTER AND ACADEMIC YEAR -->
+                <!-- Filter Form -->
                 <form method="POST" action="" class="mb-4 d-flex justify-content-evenly text-center">
                     <div class="mb-3">
                         <label for="academic_year" class="form-label">Academic Year:</label>
@@ -99,30 +76,31 @@ include "components/navBar.php"
                     </div>
                 </form>
 
-                <div class="overflow-auto" style="max-height: 500px">
-                    <!-- RESULT OF DATA FROM THE STUDENTS EVALUATION -->
-                    <div id="result"></div>
-                </div>
+
+                <div id="result"></div> <!-- This div will hold the filtered results -->
+
 
             </div>
 
-            <!-- TAB LIST SECOND TAB -->
             <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+
                 <?php
                 $o_id = $userRow['faculty_Id'];
-                $query = "SELECT * FROM peertopeerform WHERE toFacultyID='$o_id'";
+                $query = "SELECT * FROM studentsform WHERE toFacultyID='$o_id'";
                 $query_run = mysqli_query($con, $query);
 
+                // Fetch all ratings
                 $ratings = [];
                 while ($ratingRow = mysqli_fetch_assoc($query_run)) {
-                    $ratings[] = $ratingRow;
+                    $ratings[] = $ratingRow; // Store each row of ratings in an array
                 }
 
-                $sql = "SELECT * FROM facultycategories";
+                $sql = "SELECT * FROM studentscategories";
                 $sql_query = mysqli_query($con, $sql);
 
                 if (mysqli_num_rows($sql_query)) {
                     ?>
+                    <!-- Filter Dropdown for Final Average Rating or Stars -->
                     <div class="filter-section d-flex justify-content-evenly">
                         <select id="rating-filter" class="form-select" style="width: 200px;">
                             <option value="all">All Ratings</option>
@@ -136,21 +114,26 @@ include "components/navBar.php"
                     </div>
                     <div id="ratings-container">
                         <?php
+                        $categoriesArray = [];
+                        while ($categoryRow = mysqli_fetch_assoc($sql_query)) {
+                            $categoriesArray[] = $categoryRow;
+                        }
+
                         foreach ($ratings as $ratingRow) {
                             $totalAverage = 0;
                             $categoryCount = 0;
 
-                            while ($categoryRow = mysqli_fetch_assoc($sql_query)) {
+                            foreach ($categoriesArray as $categoryRow) {
                                 $categories = $categoryRow['categories'];
                                 $totalRatings = [0, 0, 0, 0, 0];
                                 $ratingCount = 0;
 
-                                $sqlcriteria = "SELECT * FROM facultycriteria WHERE facultyCategories = '$categories'";
+                                $sqlcriteria = "SELECT * FROM studentscriteria WHERE studentsCategories = '$categories'";
                                 $resultCriteria = mysqli_query($con, $sqlcriteria);
 
                                 if (mysqli_num_rows($resultCriteria) > 0) {
                                     while ($criteriaRow = mysqli_fetch_array($resultCriteria)) {
-                                        $columnName = sanitizeColumnName($criteriaRow['facultyCategories']);
+                                        $columnName = sanitizeColumnName($criteriaRow['studentsCategories']);
                                         $finalColumnName = $columnName . $criteriaRow['id'];
 
                                         $criteriaRating = $ratingRow[$finalColumnName] ?? null;
@@ -173,9 +156,9 @@ include "components/navBar.php"
                                 }
                             }
 
-
                             $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
 
+                            // Determine verbal interpretation
                             $verbalInterpretation = '';
                             switch (true) {
                                 case ($finalAverageRating >= 0 && $finalAverageRating < 1):
@@ -205,24 +188,16 @@ include "components/navBar.php"
                             $date = new DateTime($datetoString);
                             $formattedDate = $date->format('F j, Y');
                             echo '
-                                <div class="rating-row" data-average="' . $finalAverageRating . '" style="display:flex; justify-content: center;">
-                                    <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
-                                        <div class="d-flex justify-content-center align-items-center">
-                                            <span style="font-size: 30px;">Anonymous</span>
-                                        </div>
-                                        <div class="d-flex justify-content-evenly align-items-center m-2">
-                                            <span>Semester: ' . $ratingRow['semester'] . ' </span>
-                                            <span>Academic Year:' . $ratingRow['academic_year'] . '</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
-                                            <span class="text-secondary">' . $formattedDate . '</span>
-                                        </div>
-                                        <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['commentText'] . '</p>
-                                    </div>
-                                </div>
-                            ';
-                            mysqli_data_seek($sql_query, 0);
+       <div class="rating-row" data-average="' . $finalAverageRating . '" style="display:flex; justify-content: center;">
+        <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
+            <div class="d-flex justify-content-between align-items-center">
+                <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
+                <span class="text-secondary">' . $formattedDate . '</span>
+            </div>
+            <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['comment'] . '</p>
+        </div>
+    </div>';
+                            mysqli_data_seek($sql_query, 0); // Reset categories query
                         }
                 }
                 ?>
@@ -230,47 +205,40 @@ include "components/navBar.php"
                         <h1 style="color: red;">No results found for the selected filter.</h1>
                     </div>
                 </div>
+
             </div>
-
-
-
         </div>
-    </div>
     </div>
 
 </section>
 
-
-<script src="../public/js/jquery-3.7.1.min.js"></script>
 <script>
     $(document).ready(function () {
-        fetchFilteredResults();
-
-        $('#academic_year, #semester').change(function () {
-            fetchFilteredResults();
-        });
-
-
-        // STAR RATING FEEDBACK FILTER
+        // Handle filtering on button click
         $('#apply-filter').on('click', function () {
+            // Get the selected rating from the dropdown
             var selectedRating = $('#rating-filter').val();
-            console.log("Selected Rating:", selectedRating);
+            console.log("Selected Rating:", selectedRating); // Debugging
 
+            // Track if any rows are visible after filtering
             let visibleCount = 0;
 
+            // Loop through each rating row
             $('.rating-row').each(function () {
                 var averageRating = parseFloat($(this).data('average'));
-                var flooredRating = Math.floor(averageRating);
-                console.log("Average Rating (floored):", flooredRating);
+                var flooredRating = Math.floor(averageRating); // Apply Math.floor to round down
+                console.log("Average Rating (floored):", flooredRating); // Debugging
 
+                // Show or hide rows based on matching the selected rating
                 if (selectedRating === 'all' || flooredRating == selectedRating) {
-                    $(this).show();
-                    visibleCount++;
+                    $(this).show(); // Show rows that match
+                    visibleCount++; // Increment visible count
                 } else {
-                    $(this).hide();
+                    $(this).hide(); // Hide rows that don't match
                 }
             });
 
+            // Show or hide "No Results" message based on visible rows count
             if (visibleCount === 0) {
                 $('#no-results-message').show();
             } else {
@@ -278,39 +246,60 @@ include "components/navBar.php"
             }
         });
 
+        // Initially hide the "No Results Found" message
         $('#no-results-message').hide();
     });
 
-    // FILTER FOR SEMESTER AND ACADEMIC YEAR
+
+</script>
+<script>
+    $(document).ready(function () {
+        // Fetch all results on page load
+        fetchFilteredResults();
+
+        // Bind change event to the select elements
+        $('#academic_year, #semester').change(function () {
+            fetchFilteredResults();
+        });
+    });
+
     function fetchFilteredResults() {
         var semester = $('#semester').val();
         var academicYear = $('#academic_year').val();
 
+        // Check if both selections are empty
         if (semester === '' && academicYear === '') {
+            // AJAX request to fetch all results
             $.ajax({
                 type: 'POST',
-                url: 'filterpeertopeer.php',
+                url: 'filter.php', // The correct URL
                 data: {
-                    fetchAll: true
+                    fetchAll: true // Indicate that you want all results
                 },
                 success: function (data) {
-                    console.log(data);
-                    $('#result').html(data);
+                    console.log(data); // Log the response
+                    $('#result').html(data); // Update the result div
                 },
-
+                error: function (xhr, status, error) {
+                    console.error('AJAX Error: ' + status + ': ' + error); // Log error
+                }
             });
         } else {
+            // AJAX request to fetch filtered results
             $.ajax({
                 type: 'POST',
-                url: 'filterpeertopeer.php',
+                url: 'filter.php', // The correct URL
                 data: {
                     semester: semester,
                     academic_year: academicYear
                 },
                 success: function (data) {
-                    console.log(data);
-                    $('#result').html(data);
+                    console.log(data); // Log the response
+                    $('#result').html(data); // Update the result div
                 },
+                error: function (xhr, status, error) {
+                    console.error('AJAX Error: ' + status + ': ' + error); // Log error
+                }
             });
         }
     }

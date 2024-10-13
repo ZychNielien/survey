@@ -49,237 +49,80 @@ include "components/navBar.php"
             <!-- TAB LIST FIRST TAB -->
             <div class="tab-pane fade active show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
 
-                <!-- FIRST TAB CONTENT -->
-                <div class="overflow-auto" style="max-height: 580px">
+                <?php
 
-                    <!-- FIRST TAB TABLE -->
-                    <table class="table table-striped table-bordered text-center align-middle w-100">
+                function sanitizeColumnName($name)
+                {
+                    return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
+                }
 
-                        <thead>
-                            <tr style="background: #d0112b; color: #fff;">
-                                <th>Area</th>
-                                <th>APS</th>
-                                <th>Description</th>
-                                <th>Recommendation</th>
-                            </tr>
-                        </thead>
+                $FacultyID = $userRow['faculty_Id'];
+                $sqlSAY = "SELECT DISTINCT  sf.semester, sf.academic_year 
+                            FROM peertopeerform sf
+                            JOIN instructor i ON sf.toFacultyID = i.faculty_Id
+                            WHERE i.faculty_Id = '$FacultyID'";
 
-                        <tbody>
+                $sqlSAY_query = mysqli_query($con, $sqlSAY);
 
-                            <!-- PHP CODE FOR FIRST TAB FETCHING THE AVERAGE -->
-                            <?php
+                $semesters = [];
+                $academicYears = [];
 
-                            // FUNCTION SA PAGTANGGAL NG MGA SPECIAL CHARACTERS SA COLUMN
-                            function sanitizeColumnName($name)
-                            {
-                                return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
-                            }
+                while ($academicYearSemester = mysqli_fetch_assoc($sqlSAY_query)) {
+                    $semesters[] = $academicYearSemester['semester'];
+                    $academicYears[] = $academicYearSemester['academic_year'];
+                }
 
-                            // FACULTY ID NG NAKALOGIN SA WEBSITE, NAKAFETCH SIYA SA NAV NA PHP FILE
-                            $facultyID = $userRow['faculty_Id'];
+                $selectedSemester = isset($_POST['semester']) ? $_POST['semester'] : '';
+                $selectedAcademicYear = isset($_POST['academic_year']) ? $_POST['academic_year'] : '';
 
+                ?>
 
-                            // KAILANGAN GUMAWA NG VARIABLE OUTSIDE THE BLOCK PARA MA CALL MO OUTSIDE NG PHP TAG
-                            $averageRatings = [];
-                            $totalAverage = 0;
-                            $categoryCount = 0;
+                <!-- FILTER FOR SEMESTER AND ACADEMIC YEAR -->
+                <form method="POST" action="" class="mb-4 d-flex justify-content-evenly text-center">
+                    <div class="mb-3">
+                        <label for="academic_year" class="form-label">Academic Year:</label>
+                        <select id="academic_year" name="academic_year" class="form-select">
+                            <option value="">Select Academic Year</option>
+                            <?php foreach (array_unique($academicYears) as $year): ?>
+                                <option value="<?php echo $year; ?>"><?php echo $year; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="semester" class="form-label">Semester:</label>
+                        <select id="semester" name="semester" class="form-select">
+                            <option value="">Select Semester</option>
+                            <?php foreach (array_unique($semesters) as $semester): ?>
+                                <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </form>
 
-                            // SQL QUERY PARA MAFETCH LAHAT NG CATEGORIES NG FACULTY PEER TO PEER
-                            $sql = "SELECT * FROM `facultycategories`";
-                            $sql_query = mysqli_query($con, $sql);
-
-                            // CONDITION KUNG SAAN BINIBILANG ANG LAMAN NG QUERY IF MORE THAN 0, ITO YUNG LALABAS
-                            if (mysqli_num_rows($sql_query) > 0) {
-
-                                // PAGKUHA NG MGA DATA SA ROW GAMIT ANG MYSQLI_FETCH_ASSOC NA FUNCTION
-                                while ($categoriesRow = mysqli_fetch_assoc($sql_query)) {
-
-                                    // ITO YUNG LAHAT NG CATEGORIES NG FACULTY
-                                    $categories = $categoriesRow['categories'];
-
-                                    // ITO YUNG RATING 1 - 5 DITO MALALAGAY
-                                    $totalRatings = [0, 0, 0, 0, 0];
-
-                                    // ITO YUNG PAGBILANG NG RATINGS SA CATEGORY
-                                    $ratingCount = 0;
-
-                                    // SQL QUERY PARA MAKUHA LAHAT NG CRITERIA NG FACULTY
-                                    $sqlcriteria = "SELECT * FROM `facultycriteria` WHERE facultyCategories = '$categories'";
-                                    $resultCriteria = mysqli_query($con, $sqlcriteria);
-
-                                    // CONDITION KUNG SAAN BINIBILANG ANG LAMAN NG QUERY IF MORE THAN 0, ITO YUNG LALABAS
-                                    if (mysqli_num_rows($resultCriteria) > 0) {
-
-                                        // FETCH ALL THE FORMS NA NAGSAGOT SA FAULTY NA NAKALOGIN
-                                        $SQLFaculty = "SELECT * FROM `peertopeerform` WHERE toFacultyID = '$facultyID' ";
-                                        $SQLFaculty_query = mysqli_query($con, $SQLFaculty);
-
-                                        // PAGKUHA NG MGA DATA SA ROW GAMIT ANG MYSQLI_FETCH_ASSOC NA FUNCTION
-                                        while ($ratingRow = mysqli_fetch_assoc($SQLFaculty_query)) {
-
-                                            // PAGKUHA NG MGA DATA SA ROW GAMIT ANG MYSQLI_FETCH_ASSOC NA FUNCTION
-                                            while ($criteriaRow = mysqli_fetch_array($resultCriteria)) {
-                                                // CALL NG SANITIZE FUNCTION PARA MAWALA YUNG MGA SPECIAL CHARACTERS SA COLUMN NAME
-                                                $columnName = sanitizeColumnName($criteriaRow['facultyCategories']);
-
-                                                // PINAGSAMA YUNG COLUMN NAME NG CATEGORIES AT LAST ID SA CRITERIA PARA SA BAGONG COLUMN SA PEER TO PEER
-                                                $finalColumnName = $columnName . $criteriaRow['id'];
-
-                                                // PAGKUHA NG RATING SA BAWAT CRITERIA
-                                                $criteriaRating = $ratingRow[$finalColumnName] ?? null;
-
-                                                if ($criteriaRating !== null) {
-                                                    // INCREMENT THE RATING NUMBER PARA MAKUHA LAHAT NG RATING
-                                                    $totalRatings[$criteriaRating - 1]++;
-                                                    $ratingCount++;
-                                                }
-                                            }
-                                            // RESET NG CRITERIA PARA MAGPROCEED SA SUNOD NA FORM
-                                            mysqli_data_seek($resultCriteria, 0);
-                                        }
-
-                                        // CALCULATE THE AVERAGE RATING PARA SA CATEGORY
-                                        $averageRating = 0;
-                                        if ($ratingCount > 0) {
-                                            for ($i = 0; $i < 5; $i++) {
-                                                $averageRating += ($i + 1) * $totalRatings[$i];
-                                            }
-                                            $averageRating /= $ratingCount;
-                                            $averageRatings[$categories] = round($averageRating, 2);
-                                            $totalAverage += $averageRating;
-                                            $categoryCount++;
-                                        } else {
-                                            $averageRatings[$categories] = 'No ratings';
-                                        }
-
-                                        // FINAL OVERALL AVERAGE
-                                        $finalAverageRating = 0;
-                                        if ($categoryCount > 0) {
-                                            // AVARAGE NG LAHAT NG CATEGORY
-                                            $finalAverageRating = round($totalAverage / $categoryCount, 2);
-                                        } else {
-                                            $finalAverageRating = 'No ratings available';
-                                        }
-
-                                        // VERBAL INTERPRETATION NG STAR RATING
-                                        $verbalInterpretation = '';
-                                        switch (true) {
-                                            case ($finalAverageRating >= 0 && $finalAverageRating < 1):
-                                                $verbalInterpretation = 'None';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 1 && $finalAverageRating < 2):
-                                                $verbalInterpretation = 'Poor';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 2 && $finalAverageRating < 3):
-                                                $verbalInterpretation = 'Fair';
-                                                $linksHere =
-                                                    '<ul>
-                                            <li><a href="#">Link here 1</a></li>
-                                            <li><a href="#">Link here 2</a></li>
-                                            <li><a href="#">Link here 3</a></li>
-                                            </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 3 && $finalAverageRating < 4):
-                                                $verbalInterpretation = 'Satisfactory';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating >= 4 && $finalAverageRating < 5):
-                                                $verbalInterpretation = 'Very Satisfactory';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            case ($finalAverageRating == 5):
-                                                $verbalInterpretation = 'Outstanding';
-                                                $linksHere =
-                                                    '<ul>
-                                                <li><a href="#">Link here 1</a></li>
-                                                <li><a href="#">Link here 2</a></li>
-                                                <li><a href="#">Link here 3</a></li>
-                                                </ul>';
-                                                break;
-                                            default:
-                                                $verbalInterpretation = 'No description';
-                                                $linksHere = 'No links';
-                                                break;
-                                        }
-
-                                        // RESULTS
-                                        echo '
-                                            <tr>
-                                                <td>' . $categoriesRow['categories'] . '</td>
-                                                <td>' . $finalAverageRating . '</td>
-                                                <td>' . $verbalInterpretation . '</td>
-                                                <td>' . $linksHere . '</td>
-                                            </tr>
-                                        ';
-                                    } else {
-                                        echo '<tr><td colspan="2" class="text-center">No Categories Found</td></tr>';
-                                    }
-                                }
-                            } else {
-                                echo 'No Categories';
-                            }
-
-                            ?>
-
-                        </tbody>
-
-                    </table>
-
+                <div class="overflow-auto" style="max-height: 500px">
+                    <!-- RESULT OF DATA FROM THE STUDENTS EVALUATION -->
+                    <div id="result"></div>
                 </div>
 
             </div>
 
             <!-- TAB LIST SECOND TAB -->
             <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-
-                <!-- PHP CODE FOR SECOND TAB FETCHING THE FEEBACKS -->
                 <?php
-
-                // FACULTY ID NG NAKALOGIN SA WEBSITE, NAKAFETCH SIYA SA NAV NA PHP FILE
                 $o_id = $userRow['faculty_Id'];
-
-                // SQL QUERY PARA MAFETCH LAHAT NG FORM SA PEER TO PEER
                 $query = "SELECT * FROM peertopeerform WHERE toFacultyID='$o_id'";
                 $query_run = mysqli_query($con, $query);
 
-                // FETCH ALL RATINGS
                 $ratings = [];
                 while ($ratingRow = mysqli_fetch_assoc($query_run)) {
                     $ratings[] = $ratingRow;
                 }
 
-                // SQL QUERY PARA MAFETCH LAHAT NG CATEGORIES SA FACULTY
                 $sql = "SELECT * FROM facultycategories";
                 $sql_query = mysqli_query($con, $sql);
 
-
-                // CHINECHECK KUNG MAY LAMAN ANG QUERY
                 if (mysqli_num_rows($sql_query)) {
                     ?>
-
-                    <!-- FILTER NG STAR RATINGS -->
                     <div class="filter-section d-flex justify-content-evenly">
                         <select id="rating-filter" class="form-select" style="width: 200px;">
                             <option value="all">All Ratings</option>
@@ -291,47 +134,25 @@ include "components/navBar.php"
                         </select>
                         <button id="apply-filter" class="btn btn-primary">Apply Filter</button>
                     </div>
-
-                    <!-- DITO MAKIKITA YUNG RATINGS AND FEECBACKS -->
                     <div id="ratings-container">
-
-                        <!-- PHP CODE PARA MAKITA YUNG MGA RATINGS -->
                         <?php
-
-
                         foreach ($ratings as $ratingRow) {
-
-                            // SINET SA 0 ANG AVERAGE RATING
                             $totalAverage = 0;
-
-                            // SINET ANG BILANG NG CATEGORY SA 0
                             $categoryCount = 0;
 
-                            // PAULIT ULIT SA LAHAT NG CRITERIA NA MAYROONG SAME NA CATEGORY
                             while ($categoryRow = mysqli_fetch_assoc($sql_query)) {
-
-                                // ITO YUNG MGA CATEGORIES SA FACULTY PEER TO PEER
                                 $categories = $categoryRow['categories'];
-
-                                // PARA BILANGIN YUNG MGA RATINGS MULA 1 HANGGANG 5
                                 $totalRatings = [0, 0, 0, 0, 0];
-
-                                // BILANG NG CRITERIA SA BAWAT CATEGORY
                                 $ratingCount = 0;
 
-                                // SQL QUERY PARA MAFETCH LAHAT NG CRITERIA SA FACULTY CATEGORIES
                                 $sqlcriteria = "SELECT * FROM facultycriteria WHERE facultyCategories = '$categories'";
                                 $resultCriteria = mysqli_query($con, $sqlcriteria);
 
-                                // TINITINGNAN KUNG MAY LAMAN YUNG SQL QUERY
                                 if (mysqli_num_rows($resultCriteria) > 0) {
-
-                                    // PAGULIT ULIT NG MGA CRITERIA SA LOOB NG CATEGORY
                                     while ($criteriaRow = mysqli_fetch_array($resultCriteria)) {
-
                                         $columnName = sanitizeColumnName($criteriaRow['facultyCategories']);
-                                        $finalColumnName = $columnName . $criteriaRow['id']; // Gumawa ng final column name
-                    
+                                        $finalColumnName = $columnName . $criteriaRow['id'];
+
                                         $criteriaRating = $ratingRow[$finalColumnName] ?? null;
 
                                         if ($criteriaRating !== null) {
@@ -339,7 +160,6 @@ include "components/navBar.php"
                                             $ratingCount++;
                                         }
                                     }
-
 
                                     if ($ratingCount > 0) {
                                         $averageRating = 0;
@@ -352,6 +172,7 @@ include "components/navBar.php"
                                     }
                                 }
                             }
+
 
                             $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
 
@@ -384,15 +205,23 @@ include "components/navBar.php"
                             $date = new DateTime($datetoString);
                             $formattedDate = $date->format('F j, Y');
                             echo '
-       <div class="rating-row" data-average="' . $finalAverageRating . '" style="display:flex; justify-content: center;">
-        <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
-            <div class="d-flex justify-content-between align-items-center">
-                <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
-                <span class="text-secondary">' . $formattedDate . '</span>
-            </div>
-            <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['commentText'] . '</p>
-        </div>
-    </div>';
+                                <div class="rating-row" data-average="' . $finalAverageRating . '" style="display:flex; justify-content: center;">
+                                    <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <span style="font-size: 30px;">Anonymous</span>
+                                        </div>
+                                        <div class="d-flex justify-content-evenly align-items-center m-2">
+                                            <span>Semester: ' . $ratingRow['semester'] . ' </span>
+                                            <span>Academic Year:' . $ratingRow['academic_year'] . '</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
+                                            <span class="text-secondary">' . $formattedDate . '</span>
+                                        </div>
+                                        <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['commentText'] . '</p>
+                                    </div>
+                                </div>
+                            ';
                             mysqli_data_seek($sql_query, 0);
                         }
                 }
@@ -415,14 +244,24 @@ include "components/navBar.php"
 <script src="../public/js/jquery-3.7.1.min.js"></script>
 <script>
     $(document).ready(function () {
+        fetchFilteredResults();
+
+        $('#academic_year, #semester').change(function () {
+            fetchFilteredResults();
+        });
+
+
+        // STAR RATING FEEDBACK FILTER
         $('#apply-filter').on('click', function () {
             var selectedRating = $('#rating-filter').val();
+            console.log("Selected Rating:", selectedRating);
 
             let visibleCount = 0;
 
             $('.rating-row').each(function () {
                 var averageRating = parseFloat($(this).data('average'));
                 var flooredRating = Math.floor(averageRating);
+                console.log("Average Rating (floored):", flooredRating);
 
                 if (selectedRating === 'all' || flooredRating == selectedRating) {
                     $(this).show();
@@ -442,5 +281,38 @@ include "components/navBar.php"
         $('#no-results-message').hide();
     });
 
+    // FILTER FOR SEMESTER AND ACADEMIC YEAR
+    function fetchFilteredResults() {
+        var semester = $('#semester').val();
+        var academicYear = $('#academic_year').val();
+
+        if (semester === '' && academicYear === '') {
+            $.ajax({
+                type: 'POST',
+                url: 'filterpeertopeer.php',
+                data: {
+                    fetchAll: true
+                },
+                success: function (data) {
+                    console.log(data);
+                    $('#result').html(data);
+                },
+
+            });
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: 'filterpeertopeer.php',
+                data: {
+                    semester: semester,
+                    academic_year: academicYear
+                },
+                success: function (data) {
+                    console.log(data);
+                    $('#result').html(data);
+                },
+            });
+        }
+    }
 
 </script>

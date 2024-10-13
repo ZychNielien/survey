@@ -9,6 +9,25 @@ function sanitizeColumnName($name)
     return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
 }
 
+$sqlSAY = "SELECT * FROM `academic_year_semester`";
+$sqlSAY_query = mysqli_query($con, $sqlSAY);
+
+// Check if the query was successful
+if (!$sqlSAY_query) {
+    die("Database query failed: " . mysqli_error($con));
+}
+
+// Fetch the data from the result set
+$SAY = mysqli_fetch_assoc($sqlSAY_query);
+
+if (!$SAY) {
+    die("No academic year and semester found.");
+}
+
+// Set the current semester and academic year
+$nowSemester = $SAY['semester'];
+$nowAcademicYear = $SAY['academic_year'];
+
 // Handle file upload
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
     if ($_FILES['excel_file']['error'] == 0) {
@@ -31,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
         } else {
             // Get existing entry for the user
             $userId = $userRow['faculty_Id'];
-            $result = $con->query("SELECT file_name, id FROM vcaaexcel WHERE faculty_Id = '$userId' LIMIT 1");
+            $result = $con->query("SELECT file_name, id FROM vcaaexcel WHERE faculty_Id = '$userId' AND semester = '$nowSemester' AND academic_year = '$nowAcademicYear' LIMIT 1");
 
             // Upload new file and process data
             if ($row = $result->fetch_assoc()) {
@@ -53,11 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
                     if ($cellValue !== null && $cellValue !== '') {
                         // Update or insert data into the database
                         if (isset($recordId)) {
-                            $stmt = $con->prepare("UPDATE vcaaexcel SET file_name = ?, cell_value = ? WHERE id = ?");
-                            $stmt->bind_param("ssi", $uniqueFileName, $cellValue, $recordId);
+                            $stmt = $con->prepare("UPDATE vcaaexcel SET file_name = ?, cell_value = ? WHERE id = ? AND semester = ? AND academic_year = ?");
+                            $stmt->bind_param("ssiis", $uniqueFileName, $cellValue, $recordId, $nowSemester, $nowAcademicYear);
                         } else {
-                            $stmt = $con->prepare("INSERT INTO vcaaexcel (file_name, cell_value, faculty_Id) VALUES (?, ?, ?)");
-                            $stmt->bind_param("ssi", $uniqueFileName, $cellValue, $userId);
+                            $stmt = $con->prepare("INSERT INTO vcaaexcel (file_name, cell_value, faculty_Id, semester, academic_year) VALUES (?, ?, ?, ?, ?)");
+                            $stmt->bind_param("ssiss", $uniqueFileName, $cellValue, $userId, $nowSemester, $nowAcademicYear);
                         }
 
                         if ($stmt->execute()) {
@@ -80,20 +99,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
         $message = "Please upload a valid Excel file.";
     }
 }
-
 // Retrieve the average from the database
 $userId = $userRow['faculty_Id'];
-$result = $con->query("SELECT cell_value FROM vcaaexcel WHERE faculty_Id = '$userId' LIMIT 1");
+$result = $con->query("SELECT cell_value FROM vcaaexcel WHERE faculty_Id = '$userId' AND semester = '$nowSemester' AND academic_year = '$nowAcademicYear' LIMIT 1");
 
 if ($result && mysqli_num_rows($result) > 0) {
     $row = mysqli_fetch_assoc($result);
-    $average = (float) $row['cell_value']; // Now $row is defined
+    $average = (float) $row['cell_value'];
 } else {
-    $average = 0; // Default value if no result
+    $average = 0;
 }
 
-
-function getFinalAverageRating($facultyID, $selectedSubject, $con)
+function getFinalAverageRating($facultyID, $semester, $academic_year, $selectedSubject, $con)
 {
     $totalAverage = 0;
     $categoryCount = 0;
@@ -110,7 +127,7 @@ function getFinalAverageRating($facultyID, $selectedSubject, $con)
         $sqlcriteria = "SELECT * FROM `studentscriteria` WHERE studentsCategories = '$categories'";
         $resultCriteria = mysqli_query($con, $sqlcriteria);
 
-        $SQLFaculty = "SELECT * FROM `studentsform` WHERE toFacultyID = '$facultyID' AND subject = '$selectedSubject'";
+        $SQLFaculty = "SELECT * FROM `studentsform` WHERE toFacultyID = '$facultyID' AND semester = '$semester' AND academic_year = '$academic_year' AND subject = '$selectedSubject' ";
         $SQLFaculty_query = mysqli_query($con, $SQLFaculty);
 
         while ($ratingRow = mysqli_fetch_assoc($SQLFaculty_query)) {
@@ -138,7 +155,8 @@ function getFinalAverageRating($facultyID, $selectedSubject, $con)
         }
     }
 
-    return $categoryCount > 0 ? round($totalAverage / $categoryCount, 2) : null;
+    return $categoryCount > 0 ? round($totalAverage / $categoryCount, 2) : 0;
+
 }
 
 $sqlSubject = "SELECT i.faculty_Id, s.subject 
@@ -153,21 +171,28 @@ $averagesData = [];
 
 while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
     $selectedSubject = $subject['subject'];
-    $finalAverageRating = getFinalAverageRating($userRow['faculty_Id'], $selectedSubject, $con);
 
-    if (is_numeric($finalAverageRating)) {
-        // Combined average calculation
-        $combinedAverage = ($finalAverageRating + $average) / 2; // Ensure $average is defined
 
-        $subjectsData[] = $selectedSubject;
-        $averagesData[] = round($combinedAverage, 2); // Collect average data for the graph
 
-        // Fetch the current semester and academic year
-        $sqlSAY = "SELECT * FROM `academic_year_semester`";
-        $sqlSAY_query = mysqli_query($con, $sqlSAY);
-        if ($SQY = mysqli_fetch_assoc($sqlSAY_query)) {
-            $semester = $SQY['semester'];
-            $academic_year = $SQY['academic_year'];
+    // Fetch the current semester and academic year
+    $sqlSAY = "SELECT * FROM `academic_year_semester`";
+    $sqlSAY_query = mysqli_query($con, $sqlSAY);
+    if ($SQY = mysqli_fetch_assoc($sqlSAY_query)) {
+        $semester = $SQY['semester'];
+        $academic_year = $SQY['academic_year'];
+        $finalAverageRating = getFinalAverageRating($userRow['faculty_Id'], $semester, $academic_year, $selectedSubject, $con);
+
+        if (is_numeric($finalAverageRating)) {
+            // If finalAverageRating is null, set it to 0
+            $finalAverageRating = $finalAverageRating ?? 0;
+            $average = $average ?? 0;
+
+            // Calculate combined average
+            $combinedAverage = ($finalAverageRating + $average) / 2;
+
+            $subjectsData[] = $selectedSubject;
+            $averagesData[] = round($combinedAverage, 2); // Collect average data for the graph
+
 
             // Insert or update the combined average in the database
             $stmt = $con->prepare("SELECT * FROM faculty_averages WHERE semester = ? AND academic_year = ? AND faculty_Id = ? AND subject = ? LIMIT 1");
@@ -196,7 +221,9 @@ while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
             }
             $stmt->close();
         }
+
     }
+
 }
 
 // Prepare data for the chart
@@ -237,7 +264,6 @@ $subjectsJson = json_encode(array_keys($subjectData));
 $subjectDataJson = json_encode($subjectData);
 $semestersJson = json_encode($semesters);
 
-$con->close(); // Close the database connection
 ?>
 
 <!DOCTYPE html>
@@ -321,13 +347,37 @@ $con->close(); // Close the database connection
         <div class="graphContainer d-flex justify-content-between align-items-center">
             <div class="currentRating d-flex flex-column justify-content-center  align-items-center w-100">
                 <form action="" method="POST" enctype="multipart/form-data" class="mt-4">
-                    <div class="file-drop-area">
-                        <label class="choose-file-button" for="excel_file">Choose Excel File</label>
-                        <span class="file-message">or drag and drop files here</span>
-                        <input type="file" name="excel_file" accept=".xlsx, .xls" required
-                            class="form-control file-input" id="excel_file">
-                    </div>
-                    <button type="submit" class="btn btn-primary my-2">Upload</button>
+                    <?php
+                    $evalSQL = "SELECT * FROM `academic_year_semester` WHERE id = 1";
+                    $evalSQL_query = mysqli_query($con, $evalSQL);
+                    $eval = mysqli_fetch_assoc($evalSQL_query);
+
+                    if ($eval['isOpen'] == 0) {
+                        ?>
+                        <div class="file-drop-area">
+                            <label class="choose-file-button" for="excel_file">Choose Excel File</label>
+                            <span class="file-message">or drag and drop files here</span>
+                            <input type="file" name="excel_file" accept=".xlsx, .xls" class="form-control file-input"
+                                id="excel_file">
+                        </div>
+                        <button type="submit" class="btn btn-secondary my-2" disabled>Upload</button>
+
+                        <?php
+
+                    } else {
+                        ?>
+                        <div class="file-drop-area">
+                            <label class="choose-file-button" for="excel_file">Choose Excel File</label>
+                            <span class="file-message">or drag and drop files here</span>
+                            <input type="file" name="excel_file" accept=".xlsx, .xls" required
+                                class="form-control file-input" id="excel_file">
+                        </div>
+                        <button type="submit" class="btn btn-primary my-2">Upload</button>
+
+                        <?php
+                    }
+                    ?>
+
                 </form>
 
                 <div class="chart-container  justify-content-center">
@@ -338,9 +388,38 @@ $con->close(); // Close the database connection
             </div>
 
             <div class="allRating d-flex flex-column justify-content-center align-items-center">
-                <h3 class="text-center my-2">VCAA Ratings per Semester and Academic Year</h3>
+                <h3 class="text-center my-2">Evaluation of VCAA Ratings Across Semesters and Academic Years</h3>
 
-                <canvas id="lineChart" width="400" height="200"></canvas>
+                <div class="container my-3 d-flex justify-content-evenly">
+                    <div class="form-group">
+                        <label for="startSemesterFilter">Select Start Semester:</label>
+                        <select id="startSemesterFilter" class="form-control">
+                            <option value="">Select Start Semester</option>
+                            <?php foreach ($semesters as $semester): ?>
+                                <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endSemesterFilter">Select End Semester:</label>
+                        <select id="endSemesterFilter" class="form-control">
+                            <option value="">Select End Semester</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subjectFilter">Select Subject:</label>
+                        <select id="subjectFilter" class="form-control">
+                            <option value="all">All Subjects</option>
+                            <?php foreach (array_keys($subjectData) as $subject): ?>
+                                <option value="<?php echo $subject; ?>"><?php echo $subject; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <canvas id="lineChart"></canvas>
 
 
             </div>
@@ -433,44 +512,119 @@ $con->close(); // Close the database connection
     </script>
 
     <script>
-        // JSON encoded data from PHP
         const subjects = <?php echo $subjectsJson; ?>;  // List of subjects
         const subjectData = <?php echo $subjectDataJson; ?>;  // Averages data per subject
         const semesters = <?php echo $semestersJson; ?>;  // List of semester-year combinations
 
-        // Define colors for the subjects dynamically
-        const subjectColors = {};
-        subjects.forEach((subject, index) => {
-            subjectColors[subject] = `hsl(${index * 360 / subjects.length}, 100%, 50%)`;  // Generate distinct colors
+        // Predefined color palette for subjects
+        const colorPalette = [
+            'rgba(255, 99, 132, 1)', // Red
+            'rgba(54, 162, 235, 1)', // Blue
+            'rgba(255, 206, 86, 1)', // Yellow
+            'rgba(75, 192, 192, 1)', // Green
+            'rgba(153, 102, 255, 1)', // Purple
+            'rgba(255, 159, 64, 1)', // Orange
+            // Add more colors if you have more subjects
+        ];
+
+        // Function to filter end semester options based on the start semester
+        function filterEndSemesters() {
+            const startSemester = document.getElementById('startSemesterFilter').value;
+            const endSemesterFilter = document.getElementById('endSemesterFilter');
+
+            // Clear existing options
+            endSemesterFilter.innerHTML = '<option value="">Select End Semester</option>';
+
+            // If no start semester is selected, return early
+            if (!startSemester) return;
+
+            const endSemesters = semesters.filter(semester => semesters.indexOf(semester) > semesters.indexOf(startSemester));
+
+            // Add filtered options
+            endSemesters.forEach(semester => {
+                const option = document.createElement('option');
+                option.value = semester;
+                option.text = semester;
+                endSemesterFilter.appendChild(option);
+            });
+        }
+
+        // Create datasets based on filters
+        function createFilteredDatasets(selectedSubject) {
+            const startSemester = document.getElementById('startSemesterFilter').value;
+            const endSemester = document.getElementById('endSemesterFilter').value;
+
+            const startIndex = semesters.indexOf(startSemester);
+            const endIndex = endSemester ? semesters.indexOf(endSemester) : semesters.length - 1;
+
+            return subjects
+                .filter(subject => selectedSubject === 'all' || subject === selectedSubject)
+                .map((subject, index) => {
+                    let data = subjectData[subject];
+
+                    // Initialize data if not an array
+                    if (!Array.isArray(data)) {
+                        data = Array(semesters.length).fill(0);
+                    }
+
+                    // Adjust data slicing based on start and end index
+                    const cleanData = data.slice(startIndex, endIndex + 1).map((value) => {
+                        return value !== null ? value : 0;  // Replace nulls with 0 if desired
+                    });
+
+                    return {
+                        label: subject,
+                        data: cleanData,
+                        borderColor: colorPalette[index % colorPalette.length], // Use unique colors
+                        backgroundColor: colorPalette[index % colorPalette.length],
+                        fill: false,
+                        tension: 0.1
+                    };
+                });
+        }
+
+        // Function to update the chart
+        function updateChart() {
+            const selectedSubject = document.getElementById('subjectFilter').value;
+
+            const startSemester = document.getElementById('startSemesterFilter').value;
+            const endSemester = document.getElementById('endSemesterFilter').value;
+
+            const startIndex = semesters.indexOf(startSemester);
+            const endIndex = endSemester ? semesters.indexOf(endSemester) : semesters.length - 1;
+
+            // Get the correct labels to display based on the selected semesters
+            const filteredLabels = semesters.slice(startIndex, endIndex + 1);
+
+            const datasets = createFilteredDatasets(selectedSubject);
+
+            // Update the chart with new datasets and labels
+            lineChart.data.labels = filteredLabels;  // Update labels based on selected semesters
+            lineChart.data.datasets = datasets;
+            lineChart.update();
+        }
+
+        // Event listeners for filtering
+        document.getElementById('startSemesterFilter').addEventListener('change', () => {
+            filterEndSemesters();
+            updateChart(); // Refresh the chart when the start semester changes
         });
 
-        const datasets = subjects.map(subject => {
-            let data = subjectData[subject];  // Access data for the current subject
-
-            // Ensure data is an array; if not, initialize it as an empty array
-            if (!Array.isArray(data)) {
-                data = Array(semesters.length).fill(0);  // Fallback to an array of zeros for each semester
-            }
-
-            // Replace nulls with 0 or handle them as desired
-            const cleanData = data.map(value => value !== null ? value : 0);
-
-            return {
-                label: subject,  // Use the current subject as the label
-                data: cleanData,  // Use the clean data
-                borderColor: subjectColors[subject] || 'rgba(0, 0, 0, 0.5)',  // Set a color for each subject
-                fill: false,
-                tension: 0.1
-            };
+        // Add event listeners to filter dropdowns
+        document.getElementById('subjectFilter').addEventListener('change', function () {
+            const selectedSubject = this.value;
+            updateChart();
         });
 
-        // Create the line chart
+        document.getElementById('endSemesterFilter').addEventListener('change', updateChart);
+
+        // Initialize the line chart
         const ctxLine = document.getElementById('lineChart').getContext('2d');
         const lineChart = new Chart(ctxLine, {
             type: 'line',
             data: {
-                labels: semesters,  // X-axis labels (semesters with academic year)
-                datasets: datasets  // Dataset for each subject
+                labels: semesters,  // Ensure labels match the semesters initially
+                datasets: createFilteredDatasets('all')  // Initialize with all subjects
             },
             options: {
                 scales: {
@@ -482,7 +636,16 @@ $con->close(); // Close the database connection
             }
         });
 
+        // Set default selections for filters
+        document.getElementById('startSemesterFilter').value = semesters[0]; // Select first semester by default
+        filterEndSemesters(); // Populate end semester options based on the default start semester
+        document.getElementById('endSemesterFilter').value = semesters[semesters.length - 1]; // Select last semester by default
+        updateChart(); // Update chart to reflect the default selections
     </script>
+
+
+
+
 
     <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../../public/js/sweetalert2@11.js"></script>

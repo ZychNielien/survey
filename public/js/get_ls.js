@@ -1,8 +1,4 @@
 $(document).ready(function () {
-  $("#logout").on("click", function () {
-    localStorage.clear();
-  });
-
   var studentData = JSON.parse(localStorage.getItem("studentData"));
   console.log(studentData);
   var lastname = studentData[0].lastname;
@@ -21,7 +17,7 @@ $(document).ready(function () {
   $.ajax({
     url: "../controller/getSubject.php",
     type: "GET",
-    data: { year_level: year, srcode: srcode },
+    data: { year_level: year, srcode: srcode, semester: semester },
     dataType: "json",
     success: function (data) {
       if ($.fn.DataTable.isDataTable("#enroll-table")) {
