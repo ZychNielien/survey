@@ -107,10 +107,10 @@ include "components/navBar.php"
             </div>
 
             <!-- TAB LIST SECOND TAB -->
-            <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                 <?php
                 $o_id = $userRow['faculty_Id'];
-                $query = "SELECT * FROM peertopeerform WHERE toFacultyID='$o_id'";
+                $query = "SELECT * FROM peertopeerform WHERE toFacultyID='$o_id' ORDER BY date DESC";
                 $query_run = mysqli_query($con, $query);
 
                 $ratings = [];
@@ -121,10 +121,17 @@ include "components/navBar.php"
                 $sql = "SELECT * FROM facultycategories";
                 $sql_query = mysqli_query($con, $sql);
 
+                // Fetch distinct semesters and academic years for the filters
+                $semesters_query = "SELECT DISTINCT semester FROM peertopeerform WHERE toFacultyID='$o_id'";
+                $semesters_result = mysqli_query($con, $semesters_query);
+
+                $academic_years_query = "SELECT DISTINCT academic_year FROM peertopeerform WHERE toFacultyID='$o_id'";
+                $academic_years_result = mysqli_query($con, $academic_years_query);
+
                 if (mysqli_num_rows($sql_query)) {
                     ?>
                     <div class="filter-section d-flex justify-content-evenly">
-                        <select id="rating-filter" class="form-select" style="width: 200px;">
+                        <select id="rating-filter" class="form-select" style="width: 150px;">
                             <option value="all">All Ratings</option>
                             <option value="1">1 ⭐</option>
                             <option value="2">2 ⭐</option>
@@ -132,8 +139,23 @@ include "components/navBar.php"
                             <option value="4">4 ⭐</option>
                             <option value="5">5 ⭐</option>
                         </select>
-                        <button id="apply-filter" class="btn btn-primary">Apply Filter</button>
+
+                        <select id="semester-filter" class="form-select" style="width: 150px;">
+                            <option value="all">All Semesters</option>
+                            <?php while ($row = mysqli_fetch_assoc($semesters_result)): ?>
+                                <option value="<?php echo $row['semester']; ?>"><?php echo $row['semester']; ?></option>
+                            <?php endwhile; ?>
+                        </select>
+
+                        <select id="academic-year-filter" class="form-select" style="width: 150px;">
+                            <option value="all">All Academic Years</option>
+                            <?php while ($row = mysqli_fetch_assoc($academic_years_result)): ?>
+                                <option value="<?php echo $row['academic_year']; ?>"><?php echo $row['academic_year']; ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
                     </div>
+
                     <div id="ratings-container">
                         <?php
                         foreach ($ratings as $ratingRow) {
@@ -173,9 +195,13 @@ include "components/navBar.php"
                                 }
                             }
 
-
+                            // Store the final average rating in data attribute
                             $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
 
+                            // Store the final average rating in data attribute
+                            $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
+
+                            // VERBAL INTERPRETATION NG FINAL AVERAGE RATING
                             $verbalInterpretation = '';
                             switch (true) {
                                 case ($finalAverageRating >= 0 && $finalAverageRating < 1):
@@ -204,37 +230,45 @@ include "components/navBar.php"
                             $datetoString = $ratingRow['date'];
                             $date = new DateTime($datetoString);
                             $formattedDate = $date->format('F j, Y');
+
                             echo '
-                                <div class="rating-row" data-average="' . $finalAverageRating . '" style="display:flex; justify-content: center;">
-                                    <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
-                                        <div class="d-flex justify-content-center align-items-center">
-                                            <span style="font-size: 30px;">Anonymous</span>
-                                        </div>
-                                        <div class="d-flex justify-content-evenly align-items-center m-2">
-                                            <span>Semester: ' . $ratingRow['semester'] . ' </span>
-                                            <span>Academic Year:' . $ratingRow['academic_year'] . '</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
-                                            <span class="text-secondary">' . $formattedDate . '</span>
-                                        </div>
-                                        <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['commentText'] . '</p>
-                                    </div>
-                                </div>
-                            ';
-                            mysqli_data_seek($sql_query, 0);
-                        }
-                }
-                ?>
-                    <div id="no-results-message" style="display: none; text-align: center; margin-top: 20px;">
-                        <h1 style="color: red;">No results found for the selected filter.</h1>
+                <div class="rating-row" 
+                     data-average="' . $finalAverageRating . '" 
+                     data-semester="' . $ratingRow['semester'] . '" 
+                     data-academic-year="' . $ratingRow['academic_year'] . '" 
+                     style="display:flex; justify-content: center;">
+                    <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <span style="font-size: 30px;">Anonymous</span>
+                        </div>
+                        <div class="d-flex justify-content-evenly align-items-center m-2">
+                            <span>Semester: ' . $ratingRow['semester'] . ' </span>
+                            <span>Academic Year: ' . $ratingRow['academic_year'] . '</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
+                            <span class="text-secondary">' . $formattedDate . '</span>
+                        </div>
+                        <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['commentText'] . '</p>
                     </div>
                 </div>
+                ';
+                            mysqli_data_seek($sql_query, 0);
+                        }
+                        ?>
+                        <div id="no-results-message" style="display: none; text-align: center; margin-top: 20px;">
+                            <h1 style="color: red;">No results found for the selected filter.</h1>
+                        </div>
+                    </div>
+                <?php } ?>
             </div>
-
-
-
         </div>
+
+    </div>
+
+
+
+    </div>
     </div>
     </div>
 
@@ -250,20 +284,26 @@ include "components/navBar.php"
             fetchFilteredResults();
         });
 
-
         // STAR RATING FEEDBACK FILTER
-        $('#apply-filter').on('click', function () {
+        $('#rating-filter, #semester-filter, #academic-year-filter').on('change', function () {
             var selectedRating = $('#rating-filter').val();
-            console.log("Selected Rating:", selectedRating);
+            var selectedSemester = $('#semester-filter').val();
+            var selectedAcademicYear = $('#academic-year-filter').val();
 
             let visibleCount = 0;
 
             $('.rating-row').each(function () {
                 var averageRating = parseFloat($(this).data('average'));
                 var flooredRating = Math.floor(averageRating);
-                console.log("Average Rating (floored):", flooredRating);
+                var rowSemester = $(this).data('semester');
+                var rowAcademicYear = $(this).data('academic-year');
 
-                if (selectedRating === 'all' || flooredRating == selectedRating) {
+                // Check if the row meets the selected filters
+                var ratingMatch = (selectedRating === 'all' || flooredRating == selectedRating);
+                var semesterMatch = (selectedSemester === 'all' || rowSemester == selectedSemester);
+                var academicYearMatch = (selectedAcademicYear === 'all' || rowAcademicYear == selectedAcademicYear);
+
+                if (ratingMatch && semesterMatch && academicYearMatch) {
                     $(this).show();
                     visibleCount++;
                 } else {
@@ -278,6 +318,7 @@ include "components/navBar.php"
             }
         });
 
+        // Initially hide the no results message
         $('#no-results-message').hide();
     });
 
@@ -294,7 +335,7 @@ include "components/navBar.php"
                     fetchAll: true
                 },
                 success: function (data) {
-                    console.log(data);
+
                     $('#result').html(data);
                 },
 
@@ -308,7 +349,7 @@ include "components/navBar.php"
                     academic_year: academicYear
                 },
                 success: function (data) {
-                    console.log(data);
+
                     $('#result').html(data);
                 },
             });
