@@ -12,7 +12,7 @@ if (!isset($userId)) {
 $usersql = "SELECT * FROM `instructor` WHERE faculty_Id = '$userId'";
 $usersql_query = mysqli_query($con, $usersql);
 if (!$usersql_query) {
-    die("Query Failed: " . mysqli_error($con)); // Debugging line
+    die("Query Failed: " . mysqli_error($con));
 }
 $userRow = mysqli_fetch_assoc($usersql_query);
 if (!$userRow) {
@@ -66,8 +66,6 @@ $sqlSubject = "
     WHERE i.faculty_Id = '$FacultyID'
 ";
 
-
-// Add filtering based on semester and academic year
 if (!empty($selectedAcademicYear)) {
     $sqlSubject .= " AND sf.academic_year = '$selectedAcademicYear'";
 }
@@ -79,7 +77,7 @@ $sqlSubject .= " GROUP BY sf.semester, sf.academic_year ORDER BY sf.semester, sf
 
 $sqlSubject_query = mysqli_query($con, $sqlSubject);
 if (!$sqlSubject_query) {
-    die("Query Failed: " . mysqli_error($con)); // Debugging line
+    die("Query Failed: " . mysqli_error($con));
 }
 
 if (mysqli_num_rows($sqlSubject_query) > 0) {
@@ -112,7 +110,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                 $sql = "SELECT * FROM `facultycategories`";
                 $sql_query = mysqli_query($con, $sql);
                 if (!$sql_query) {
-                    die("Query Failed: " . mysqli_error($con)); // Debugging line
+                    die("Query Failed: " . mysqli_error($con));
                 }
 
                 if (mysqli_num_rows($sql_query) > 0) {
@@ -125,7 +123,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                         $sqlcriteria = "SELECT * FROM `facultycriteria` WHERE facultyCategories = '$categories'";
                         $resultCriteria = mysqli_query($con, $sqlcriteria);
                         if (!$resultCriteria) {
-                            die("Query Failed: " . mysqli_error($con)); // Debugging line
+                            die("Query Failed: " . mysqli_error($con));
                         }
 
                         if (mysqli_num_rows($resultCriteria) > 0) {
@@ -138,7 +136,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
 
                             $SQLFaculty_query = mysqli_query($con, $SQLFaculty);
                             if (!$SQLFaculty_query) {
-                                die("Query Failed: " . mysqli_error($con)); // Debugging line
+                                die("Query Failed: " . mysqli_error($con));
                             }
 
                             while ($ratingRow = mysqli_fetch_assoc($SQLFaculty_query)) {

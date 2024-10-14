@@ -121,7 +121,6 @@ include "components/navBar.php"
                 $sql = "SELECT * FROM facultycategories";
                 $sql_query = mysqli_query($con, $sql);
 
-                // Fetch distinct semesters and academic years for the filters
                 $semesters_query = "SELECT DISTINCT semester FROM peertopeerform WHERE toFacultyID='$o_id'";
                 $semesters_result = mysqli_query($con, $semesters_query);
 
@@ -195,10 +194,6 @@ include "components/navBar.php"
                                 }
                             }
 
-                            // Store the final average rating in data attribute
-                            $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
-
-                            // Store the final average rating in data attribute
                             $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
 
                             // VERBAL INTERPRETATION NG FINAL AVERAGE RATING
@@ -298,7 +293,6 @@ include "components/navBar.php"
                 var rowSemester = $(this).data('semester');
                 var rowAcademicYear = $(this).data('academic-year');
 
-                // Check if the row meets the selected filters
                 var ratingMatch = (selectedRating === 'all' || flooredRating == selectedRating);
                 var semesterMatch = (selectedSemester === 'all' || rowSemester == selectedSemester);
                 var academicYearMatch = (selectedAcademicYear === 'all' || rowAcademicYear == selectedAcademicYear);
@@ -318,7 +312,6 @@ include "components/navBar.php"
             }
         });
 
-        // Initially hide the no results message
         $('#no-results-message').hide();
     });
 

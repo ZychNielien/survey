@@ -19,7 +19,6 @@ function getVerbalInterpretationAndLinks($averageRating, $linkOne, $linkTwo, $li
         'links' => []
     ];
 
-    // Determine interpretation based on average rating
     if ($averageRating >= 0 && $averageRating < 1) {
         $result['interpretation'] = 'None';
 
@@ -37,7 +36,6 @@ function getVerbalInterpretationAndLinks($averageRating, $linkOne, $linkTwo, $li
         $result['interpretation'] = 'No description';
     }
 
-    // Only add links if the average rating is below 2
     if ($averageRating < 2) {
         if (!empty($linkOne)) {
             $result['links'][] = [
@@ -53,7 +51,6 @@ function getVerbalInterpretationAndLinks($averageRating, $linkOne, $linkTwo, $li
         }
     }
 
-    // Check if links array is empty and set a message
     if (empty($result['links'])) {
         $result['links'] = [['text' => 'No links available for this subject', 'url' => '']];
     }
@@ -187,25 +184,21 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                     <td><?php echo htmlspecialchars($interpretationData['interpretation']); ?></td>
                                     <td>
                                         <?php
-                                        // Check if the average rating is below 2
                                         if ($averageRating < 2) {
-                                            // Check if links is an array and display them
                                             if (is_array($interpretationData['links'])) {
                                                 echo "<ul style='list-style: none; padding: 0; margin: 0;'>";
                                                 foreach ($interpretationData['links'] as $link) {
                                                     if (!empty($link['url'])) {
                                                         echo "<li><a href=\"" . htmlspecialchars($link['url']) . "\" target=\"_blank\">" . htmlspecialchars($link['text']) . "</a></li>";
                                                     } else {
-                                                        echo "<li>" . htmlspecialchars($link['text']) . "</li>"; // Display text without a link
+                                                        echo "<li>" . htmlspecialchars($link['text']) . "</li>";
                                                     }
                                                 }
                                                 echo "</ul>";
                                             } else {
-                                                // Display the no links available message
                                                 echo htmlspecialchars($interpretationData['links']);
                                             }
                                         } else {
-                                            // Display a message when the rating is 2 or above
                                             echo "No recommendation needed.";
                                         }
                                         ?>

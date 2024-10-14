@@ -96,11 +96,10 @@ include "../../model/dbconnection.php";
                 $sql = "SELECT * FROM studentscategories";
                 $sql_query = mysqli_query($con, $sql);
 
-                // Fetch distinct semesters and academic years for the filters
-                $semesters_query = "SELECT DISTINCT semester FROM studentsform WHERE toFacultyID='$o_id'";
+                $semesters_query = "SELECT DISTINCT semester FROM studentsform";
                 $semesters_result = mysqli_query($con, $semesters_query);
 
-                $academic_years_query = "SELECT DISTINCT academic_year FROM studentsform WHERE toFacultyID='$o_id'";
+                $academic_years_query = "SELECT DISTINCT academic_year FROM studentsform";
                 $academic_years_result = mysqli_query($con, $academic_years_query);
 
                 if (mysqli_num_rows($sql_query)) {
@@ -170,10 +169,6 @@ include "../../model/dbconnection.php";
                                 }
                             }
 
-                            // Store the final average rating in data attribute
-                            $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
-
-                            // Store the final average rating in data attribute
                             $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
 
                             // VERBAL INTERPRETATION NG FINAL AVERAGE RATING
@@ -214,7 +209,7 @@ include "../../model/dbconnection.php";
                      style="display:flex; justify-content: center;">
                     <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
                         <div class="d-flex justify-content-center align-items-center">
-                            <span style="font-size: 30px;">' . $ratingRow['subject'] . ' </span>
+                            <span style="font-size: 30px;">Anonymous</span>
                         </div>
                         <div class="d-flex justify-content-evenly align-items-center m-2">
                             <span>Semester: ' . $ratingRow['semester'] . ' </span>
@@ -264,7 +259,6 @@ include "../../model/dbconnection.php";
                 var rowSemester = $(this).data('semester');
                 var rowAcademicYear = $(this).data('academic-year');
 
-                // Check if the row meets the selected filters
                 var ratingMatch = (selectedRating === 'all' || flooredRating == selectedRating);
                 var semesterMatch = (selectedSemester === 'all' || rowSemester == selectedSemester);
                 var academicYearMatch = (selectedAcademicYear === 'all' || rowAcademicYear == selectedAcademicYear);
@@ -284,7 +278,6 @@ include "../../model/dbconnection.php";
             }
         });
 
-        // Initially hide the no results message
         $('#no-results-message').hide();
     });
 
