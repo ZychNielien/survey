@@ -1,0 +1,12 @@
+<?php
+
+session_start();
+include "../model/dbconnection.php";
+
+if (isset($_POST['sub_id'])) {
+
+    $sub_id = $_POST['sub_id'];
+
+
+
+}

@@ -215,11 +215,10 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
 
       </div>
       <h1 style="display: none;"><?php echo $_SESSION['studentSRCode'] ?></h1>
-      <div>
+      <div id="major">
         <button class="btn btn-success d-flex align-items-center">
-          <h2><i class="fa-solid fa-clipboard-list"></i></h2>
-          <h6 style="font-family: monospace;" class="px-2">Evaluate My
-            Instructors</h6 style="font-family: monospace;">
+          <h2><i class="fa-solid fa-graduation-cap"></i>
+          <h6 style="font-family: monospace;" class="px-2">Choose A Major</h6>
         </button>
       </div>
     </div>
@@ -788,6 +787,8 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
     document.getElementById('dateInput').value = formattedDate;
 
   </script>
+
+  
 </body>
 
 </html>
