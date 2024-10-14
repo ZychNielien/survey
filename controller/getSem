@@ -3,9 +3,10 @@
 session_start();
 include "../model/dbconnection.php";
 
-if (isset($_POST['sub_id'])) {
+if (isset($_GET['year'])) {
 
-    $sub_id = $_POST['sub_id'];
+    $year = $_GET['year'];
+    $sem = $_GET['sem'];
 
 
 

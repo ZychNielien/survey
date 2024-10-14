@@ -22,7 +22,15 @@ $(document).ready(function () {
 
   if(year == 'THIRD' && semester == 'FIRST'){
     $('#major').css('display', 'flex');
-    
+    Swal.fire({
+      title: "Choose your Major",
+      text: "You need to choose your Major",
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Close",
+      cancelButtonColor: "#d33",
+      showConfirmButton: false,
+    });
   }else{
     $('#major').css('display', 'none');
   }
@@ -103,12 +111,12 @@ $(document).ready(function () {
     var id = $(this).attr("id");
 
     $.ajax({
-      url: "../controller/getUnit.php",
+      url: "../controller/sumUnit.php",
       type: "GET",
-      data: { id: id },
+      data: { srcode: srcode },
       dataType: "json",
       success: function (data) {
-        localStorage.setItem("subjectUnit", JSON.stringify(data));
+        localStorage.setItem("UserTotalUnit", JSON.stringify(data));
       },
     });
 
@@ -122,30 +130,25 @@ $(document).ready(function () {
         var total_student = data[0].total_slot;
         var UserTotalUnit = JSON.parse(localStorage.getItem("UserTotalUnit"));
         var unit = UserTotalUnit[0].TotalUnits;
-        if(year == 'FIRST' || year == 'SECOND'){
-          if (unit >= 2) {
-            Swal.fire({
-              title: "Unit Full",
-              text: "You reach the maximum Unit",
-              icon: "warning",
-              showCancelButton: true,
-              cancelButtonText: "Close",
-              cancelButtonColor: "#d33",
-              showConfirmButton: false,
-            });
-          }
-        } else if(year == 'THIRD' || year == 'FOURTH'){
-          if (unit >= 21) {
-            Swal.fire({
-              title: "Unit Full",
-              text: "You reach the maximum Unit",
-              icon: "warning",
-              showCancelButton: true,
-              cancelButtonText: "Close",
-              cancelButtonColor: "#d33",
-              showConfirmButton: false,
-            });
-          }
+        
+        const maxU = {
+          FIRST: 23,
+          SECOND: 23,
+          THIRD: 21,
+          FOURTH: 21,
+        };
+        
+        if (unit == maxU[year]) {
+          Swal.fire({
+            title: "Unit Full",
+            text: "You have reached the maximum Unit",
+            icon: "warning",
+            showCancelButton: true,
+            cancelButtonText: "Close",
+            cancelButtonColor: "#d33",
+            showConfirmButton: false,
+          });
+          event.preventDefault();
         } else if (total_student == slot) {
           Swal.fire({
             title: "Section Full",
