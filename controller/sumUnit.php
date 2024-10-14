@@ -4,7 +4,7 @@ include "../model/dbconnection.php";
  
 $srcode = $_GET['srcode'];
 
-$query = "SELECT SUM(S.unit) AS TotalUnits FROM `enrolled_student` E INNER JOIN subject S ON E.subject_id = S.subject_id WHERE E.sr_code = '$srcode'";
+$query = "SELECT COALESCE(SUM(S.unit), 0)  AS TotalUnits FROM `enrolled_student` E INNER JOIN subject S ON E.subject_id = S.subject_id WHERE E.sr_code = '$srcode'";
 $query_run = mysqli_query($con, $query);
 
         $data = array();
