@@ -20,6 +20,13 @@ $(document).ready(function () {
     $('#maxunit').text('21');
   }
 
+  if(year == 'THIRD' && semester == 'FIRST'){
+    $('#major').css('display', 'flex');
+    
+  }else{
+    $('#major').css('display', 'none');
+  }
+
   $.ajax({
     url: "../controller/getSubject.php",
     type: "GET",
