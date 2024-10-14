@@ -2,6 +2,12 @@
 
 session_start();
 include "../model/dbconnection.php";
+
+if (!isset($_SESSION['studentSRCode'])) {
+  header('Location: ../view/loginModule/index.php');
+  exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -638,7 +644,7 @@ include "../model/dbconnection.php";
         <div class="modal-body">
           <div class="p-3">
             <div class="pb-3">
-              <h4 class="text-warning">Total Unit: <span id="unit"></span>/23</h4>
+              <h4 class="text-warning">Total Unit: <span id="unit"></span>/<span id="maxunit"></span></h4>
             </div>
             <table id="enroll-table" class="table table-striped text-center">
               <thead>

@@ -15,6 +15,14 @@ session_start();
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- JQUERY CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+  <!--  -->
+
+  <!-- LOCALSTORAGE JS -->
+  <script src="../../public/js/localStorage.js"></script>
+  <!--  -->
 </head>
 
 <body>
@@ -36,7 +44,7 @@ session_start();
 
             <div class="actual-form">
               <div class="input-wrap">
-                <input type="text" name="studentSRCode" minlength="4" class="input-field" autocomplete="off" required />
+                <input type="text" name="studentSRCode" id="studentSRCode" minlength="4" class="input-field" autocomplete="off" required />
                 <label>SR-Code</label>
               </div>
 
@@ -47,7 +55,7 @@ session_start();
                 <span class="password-toggle-icon"><i class="fa-solid fa-eye" id="passStudent"></i></span>
               </div>
 
-              <input type="submit" name="studentLogin" value="Sign In" class="sign-btn" />
+              <input type="submit" name="studentLogin" id="studentLogin" value="Sign In" class="sign-btn" />
 
             </div>
           </form>

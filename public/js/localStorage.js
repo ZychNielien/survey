@@ -10,7 +10,7 @@ $(document).ready(function() {
             data: {studentSRCode: studentSRCode},
             dataType: 'json',
             success: function(data) {
-                localStorage.setItem('studentData', JSON.stringify(data));
+                localStorage.setItem('Student_Data', JSON.stringify(data));
                 console.log(data);
             }
         });
