@@ -10,12 +10,11 @@ include "../../model/dbconnection.php";
     <link rel="stylesheet" href="../../public/css/style.css">
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.min.css">
     <script src="../../public/js/jquery-3.7.1.min.js"></script>
+
 </head>
 
 <section class="contentContainer">
-
     <div class="card p-3 shadow " style="min-height: 720px;">
-
         <!-- NAVIGATION TAB -->
         <nav>
             <div class="nav nav-tabs mb-3" id="nav-tab" role="tablist">
@@ -77,24 +76,19 @@ include "../../model/dbconnection.php";
                     </div>
                 </form>
 
-                <div class="overflow-auto" style="max-height: 500px">
-                    <!-- RESULT OF DATA FROM THE STUDENTS EVALUATION -->
-                    <div id="result"></div>
-                </div>
+                <!-- RESULT OF DATA FROM THE STUDENTS EVALUATION -->
+                <div id="result"></div>
 
             </div>
 
             <!-- FEEDBACK FROM STUDENT'S EVALUATION -->
-            <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-
+            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                 <?php
-
                 $o_id = $userRow['faculty_Id'];
-                $query = "SELECT * FROM studentsform WHERE toFacultyID='$o_id'";
+                $query = "SELECT * FROM studentsform WHERE toFacultyID='$o_id' ORDER BY date DESC";
                 $query_run = mysqli_query($con, $query);
 
                 $ratings = [];
-
                 while ($ratingRow = mysqli_fetch_assoc($query_run)) {
                     $ratings[] = $ratingRow;
                 }
@@ -102,12 +96,16 @@ include "../../model/dbconnection.php";
                 $sql = "SELECT * FROM studentscategories";
                 $sql_query = mysqli_query($con, $sql);
 
+                $semesters_query = "SELECT DISTINCT semester FROM studentsform";
+                $semesters_result = mysqli_query($con, $semesters_query);
+
+                $academic_years_query = "SELECT DISTINCT academic_year FROM studentsform";
+                $academic_years_result = mysqli_query($con, $academic_years_query);
+
                 if (mysqli_num_rows($sql_query)) {
                     ?>
-
-                    <!-- FILTER FOR STAR RATING FEEDBACK -->
                     <div class="filter-section d-flex justify-content-evenly">
-                        <select id="rating-filter" class="form-select" style="width: 200px;">
+                        <select id="rating-filter" class="form-select" style="width: 150px;">
                             <option value="all">All Ratings</option>
                             <option value="1">1 ⭐</option>
                             <option value="2">2 ⭐</option>
@@ -115,22 +113,30 @@ include "../../model/dbconnection.php";
                             <option value="4">4 ⭐</option>
                             <option value="5">5 ⭐</option>
                         </select>
-                        <button id="apply-filter" class="btn btn-primary">Apply Filter</button>
+
+                        <select id="semester-filter" class="form-select" style="width: 150px;">
+                            <option value="all">All Semesters</option>
+                            <?php while ($row = mysqli_fetch_assoc($semesters_result)): ?>
+                                <option value="<?php echo $row['semester']; ?>"><?php echo $row['semester']; ?></option>
+                            <?php endwhile; ?>
+                        </select>
+
+                        <select id="academic-year-filter" class="form-select" style="width: 150px;">
+                            <option value="all">All Academic Years</option>
+                            <?php while ($row = mysqli_fetch_assoc($academic_years_result)): ?>
+                                <option value="<?php echo $row['academic_year']; ?>"><?php echo $row['academic_year']; ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
                     </div>
 
-                    <!-- FEEDBACK RATING -->
                     <div id="ratings-container">
                         <?php
-                        $categoriesArray = [];
-                        while ($categoryRow = mysqli_fetch_assoc($sql_query)) {
-                            $categoriesArray[] = $categoryRow;
-                        }
-
                         foreach ($ratings as $ratingRow) {
                             $totalAverage = 0;
                             $categoryCount = 0;
 
-                            foreach ($categoriesArray as $categoryRow) {
+                            while ($categoryRow = mysqli_fetch_assoc($sql_query)) {
                                 $categories = $categoryRow['categories'];
                                 $totalRatings = [0, 0, 0, 0, 0];
                                 $ratingCount = 0;
@@ -163,7 +169,6 @@ include "../../model/dbconnection.php";
                                 }
                             }
 
-                            // FORMULA KUNG PAANO KINUHA YUNG FINAL AVERAGE PER EVALUATION FORM
                             $finalAverageRating = ($categoryCount > 0) ? round($totalAverage / $categoryCount, 2) : 0;
 
                             // VERBAL INTERPRETATION NG FINAL AVERAGE RATING
@@ -197,38 +202,36 @@ include "../../model/dbconnection.php";
                             $formattedDate = $date->format('F j, Y');
 
                             echo '
-                                <div class="rating-row" data-average="' . $finalAverageRating . '" style="display:flex; justify-content: center;">
-                                    <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
-                                        <div class="d-flex justify-content-center align-items-center">
-                                            <span style="font-size: 30px;">' . $ratingRow['subject'] . '</span>
-                                        </div>
-                                        <div class="d-flex justify-content-evenly align-items-center m-2">
-                                            <span>Semester: ' . $ratingRow['semester'] . ' </span>
-                                            <span>Academic Year:' . $ratingRow['academic_year'] . '</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
-                                            <span class="text-secondary">' . $formattedDate . '</span>
-                                        </div>
-                                        <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['comment'] . '</p>
-                                    </div>
-                                </div>';
-
-                            mysqli_data_seek($sql_query, 0);
-
-                        }
-                }
-
-                ?>
-                    <!-- IF NO RESULT ITO YUNG LALABAS -->
-                    <div id="no-results-message" style="display: none; text-align: center; margin-top: 20px;">
-                        <h1 style="color: red;">No results found for the selected filter.</h1>
+                <div class="rating-row" 
+                     data-average="' . $finalAverageRating . '" 
+                     data-semester="' . $ratingRow['semester'] . '" 
+                     data-academic-year="' . $ratingRow['academic_year'] . '" 
+                     style="display:flex; justify-content: center;">
+                    <div class="border rounded-3 m-5 p-2 border-danger flex-column" style="width: 700px;">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <span style="font-size: 30px;">Anonymous</span>
+                        </div>
+                        <div class="d-flex justify-content-evenly align-items-center m-2">
+                            <span>Semester: ' . $ratingRow['semester'] . ' </span>
+                            <span>Academic Year: ' . $ratingRow['academic_year'] . '</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="font-size: 30px;">' . $verbalInterpretation . '</span>
+                            <span class="text-secondary">' . $formattedDate . '</span>
+                        </div>
+                        <p class="mx-5 my-3 py-0 text-center">' . $ratingRow['comment'] . '</p>
                     </div>
-
                 </div>
-
+                ';
+                            mysqli_data_seek($sql_query, 0);
+                        }
+                        ?>
+                        <div id="no-results-message" style="display: none; text-align: center; margin-top: 20px;">
+                            <h1 style="color: red;">No results found for the selected filter.</h1>
+                        </div>
+                    </div>
+                <?php } ?>
             </div>
-
         </div>
 
     </div>
@@ -243,20 +246,24 @@ include "../../model/dbconnection.php";
             fetchFilteredResults();
         });
 
-
-        // STAR RATING FEEDBACK FILTER
-        $('#apply-filter').on('click', function () {
+        $('#rating-filter, #semester-filter, #academic-year-filter').on('change', function () {
             var selectedRating = $('#rating-filter').val();
-            console.log("Selected Rating:", selectedRating);
+            var selectedSemester = $('#semester-filter').val();
+            var selectedAcademicYear = $('#academic-year-filter').val();
 
             let visibleCount = 0;
 
             $('.rating-row').each(function () {
                 var averageRating = parseFloat($(this).data('average'));
                 var flooredRating = Math.floor(averageRating);
-                console.log("Average Rating (floored):", flooredRating);
+                var rowSemester = $(this).data('semester');
+                var rowAcademicYear = $(this).data('academic-year');
 
-                if (selectedRating === 'all' || flooredRating == selectedRating) {
+                var ratingMatch = (selectedRating === 'all' || flooredRating == selectedRating);
+                var semesterMatch = (selectedSemester === 'all' || rowSemester == selectedSemester);
+                var academicYearMatch = (selectedAcademicYear === 'all' || rowAcademicYear == selectedAcademicYear);
+
+                if (ratingMatch && semesterMatch && academicYearMatch) {
                     $(this).show();
                     visibleCount++;
                 } else {
@@ -287,7 +294,6 @@ include "../../model/dbconnection.php";
                     fetchAll: true
                 },
                 success: function (data) {
-                    console.log(data);
                     $('#result').html(data);
                 },
 
@@ -301,7 +307,6 @@ include "../../model/dbconnection.php";
                     academic_year: academicYear
                 },
                 success: function (data) {
-                    console.log(data);
                     $('#result').html(data);
                 },
             });

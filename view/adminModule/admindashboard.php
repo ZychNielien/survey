@@ -4,6 +4,7 @@ require '../../vendor/autoload.php';
 use PhpOffice\PhpSpreadsheet\IOFactory;
 include "../../model/dbconnection.php";
 
+
 function sanitizeColumnName($name)
 {
     return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));

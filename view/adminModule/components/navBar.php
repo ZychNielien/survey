@@ -7,6 +7,10 @@ $path = parse_url($directoryURI, PHP_URL_PATH);
 $components = explode("/", $path);
 $page = $components[4];
 
+if (!isset($_SESSION["userid"])) {
+    header("location:../loginModule/index.php");
+}
+
 
 $userId = $_SESSION["userid"];
 
@@ -25,7 +29,7 @@ $userRow = mysqli_fetch_assoc($usersql_query);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <link rel="shortcut icon" href="../../public/picture/cics.png" type="image/x-icon" />
     <link rel="stylesheet" href="../../public/css/navBar.css">
     <link rel="stylesheet" href="../../public/css/googleapis.css">
     <link rel="stylesheet" href="../../bootstrap/css/bootstrap.css">
@@ -245,7 +249,7 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="../controller/changepass.php" method="POST">
+                    <form action="../../controller/changepassAdminFaculty.php" method="POST">
                         <div class="mb-3">
                             <label for="exampleInputPassword1" class="form-label">Current Password</label>
                             <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
@@ -263,7 +267,7 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" name="changePass" class="btn btn-primary">Confirm</button>
+                    <button type="submit" name="changePassAdmin" class="btn btn-primary">Confirm</button>
                 </div>
                 </form>
             </div>

@@ -12,41 +12,52 @@ $userRow = mysqli_fetch_assoc($usersql_query);
 $FacultyID = $userRow['faculty_Id'];
 
 // FUNCTION FOR VERBAL INTERPRETATION
-function getVerbalInterpretationAndLinks($averageRating, $fetchedLink, $fetchedLinkText)
+function getVerbalInterpretationAndLinks($averageRating, $linkOne, $linkTwo, $linkThree)
 {
-    $result = ['interpretation' => '', 'links' => ''];
+    $result = [
+        'interpretation' => '',
+        'links' => []
+    ];
 
     if ($averageRating >= 0 && $averageRating < 1) {
         $result['interpretation'] = 'None';
-        $result['links'] = !empty($fetchedLink) && !empty($fetchedLinkText)
-            ? '<ul style="list-style: none;"><li><a href="' . htmlspecialchars($fetchedLink) . '">' . htmlspecialchars($fetchedLinkText) . '</a></li></ul>'
-            : 'No links available';
 
     } elseif ($averageRating >= 1 && $averageRating < 2) {
         $result['interpretation'] = 'Poor';
-        $result['links'] = !empty($fetchedLink) && !empty($fetchedLinkText)
-            ? '<ul style="list-style: none;"><li><a href="' . htmlspecialchars($fetchedLink) . '">' . htmlspecialchars($fetchedLinkText) . '</a></li></ul>'
-            : 'No links available';
-
     } elseif ($averageRating >= 2 && $averageRating < 3) {
         $result['interpretation'] = 'Fair';
-        $result['links'] = 'No recommendation needed';
     } elseif ($averageRating >= 3 && $averageRating < 4) {
         $result['interpretation'] = 'Satisfactory';
-        $result['links'] = 'No recommendation needed';
     } elseif ($averageRating >= 4 && $averageRating < 5) {
         $result['interpretation'] = 'Very Satisfactory';
-        $result['links'] = 'No recommendation needed';
     } elseif ($averageRating == 5) {
         $result['interpretation'] = 'Outstanding';
-        $result['links'] = 'No recommendation needed';
     } else {
         $result['interpretation'] = 'No description';
-        $result['links'] = 'No links available';
+    }
+
+    if ($averageRating < 2) {
+        if (!empty($linkOne)) {
+            $result['links'][] = [
+                'text' => 'Link One',
+                'url' => htmlspecialchars($linkOne)
+            ];
+        }
+        if (!empty($linkTwo)) {
+            $result['links'][] = [
+                'text' => 'Link Two',
+                'url' => htmlspecialchars($linkTwo)
+            ];
+        }
+    }
+
+    if (empty($result['links'])) {
+        $result['links'] = [['text' => 'No links available for this subject', 'url' => '']];
     }
 
     return $result;
 }
+
 
 // FUNCTION FOR REMOVING UNDESIRABLE CHARACTERS
 function sanitizeColumnName($name)
@@ -62,8 +73,9 @@ $sqlSubject = "
         s.subject, 
         sf.semester, 
         sf.academic_year, 
-        s.link, 
-        s.linkText
+        s.linkOne, 
+        s.linkTwo, 
+        s.linkThree
     FROM instructor i
     JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
     JOIN subject s ON a.subject_id = s.subject_id
@@ -87,11 +99,11 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         ?>
 
         <div class="d-flex justify-content-between">
-            <h5><?php echo $subject['subject'] ?></h5>
+            <h5><?php echo htmlspecialchars($subject['subject']) ?></h5>
             <h5>(Semester:
-                <?php echo $subject['semester'] ?>,
+                <?php echo htmlspecialchars($subject['semester']) ?>,
                 Academic Year :
-                <?php echo $subject['academic_year'] ?> )
+                <?php echo htmlspecialchars($subject['academic_year']) ?> )
             </h5>
         </div>
 
@@ -161,16 +173,39 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                 $totalAverage += $averageRating;
                                 $categoryCount++;
 
-                                $fetchedLink = $subject['link'];
-                                $fetchedLinkText = $subject['linkText'];
-                                $interpretationData = getVerbalInterpretationAndLinks($averageRating, $fetchedLink, $fetchedLinkText);
+                                $linkOne = $subject['linkOne'];
+                                $linkTwo = $subject['linkTwo'];
+                                $linkThree = $subject['linkThree'];
+                                $interpretationData = getVerbalInterpretationAndLinks($averageRating, $linkOne, $linkTwo, $linkThree);
                                 ?>
                                 <tr>
-                                    <td><?php echo $categories; ?></td>
+                                    <td><?php echo htmlspecialchars($categories); ?></td>
                                     <td><?php echo number_format((float) $averageRating, 2, '.', ''); ?></td>
-                                    <td><?php echo $interpretationData['interpretation']; ?></td>
-                                    <td><?php echo $interpretationData['links']; ?></td>
+                                    <td><?php echo htmlspecialchars($interpretationData['interpretation']); ?></td>
+                                    <td>
+                                        <?php
+                                        if ($averageRating < 2) {
+                                            if (is_array($interpretationData['links'])) {
+                                                echo "<ul style='list-style: none; padding: 0; margin: 0;'>";
+                                                foreach ($interpretationData['links'] as $link) {
+                                                    if (!empty($link['url'])) {
+                                                        echo "<li><a href=\"" . htmlspecialchars($link['url']) . "\" target=\"_blank\">" . htmlspecialchars($link['text']) . "</a></li>";
+                                                    } else {
+                                                        echo "<li>" . htmlspecialchars($link['text']) . "</li>";
+                                                    }
+                                                }
+                                                echo "</ul>";
+                                            } else {
+                                                echo htmlspecialchars($interpretationData['links']);
+                                            }
+                                        } else {
+                                            echo "No recommendation needed.";
+                                        }
+                                        ?>
+                                    </td>
                                 </tr>
+
+
                                 <?php
                             }
                         }

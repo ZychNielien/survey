@@ -178,6 +178,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button class="nav-link fs-5" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile"
                 type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Faculty Evaluation Criteria
                 for Students</button>
+            <button class="nav-link fs-5" id="nav-links-tab" data-bs-toggle="tab" data-bs-target="#nav-links"
+                type="button" role="tab" aria-controls="nav-links" aria-selected="false">Links for
+                Recommendations</button>
         </div>
     </nav>
 
@@ -752,7 +755,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div>
-                <h3 id="actionLabel" class="fw-bold text-center">Assigning Random IDs</h3>
+                <h3 id="actionLabelStudent" class="fw-bold text-center">Assigning Random IDs</h3>
             </div>
             <!-- Student Evaluation Panel -->
             <div class="overflow-auto" style="max-height: 580px">
@@ -917,6 +920,127 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
         </div>
+
+        <div class="tab-pane fade " id="nav-links" role="tabpanel" aria-labelledby="nav-links-tab">
+            <div class="d-flex justify-content-between mb-3">
+                <div class="mb-3 mx-5  w-100">
+                    <input type="text" id="searchSubject" class="form-control" placeholder="Search for subjects..." />
+                </div>
+
+            </div>
+            <!-- Student Evaluation Panel -->
+            <div class="overflow-auto" style="max-height: 580px">
+
+                <!-- Search Input -->
+
+
+                <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
+                    <thead>
+                        <tr class="bg-danger text-center align-middle">
+                            <th>Subject Code</th>
+                            <th>Subject</th>
+                            <th>Link</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $sql = "SELECT * FROM `subject`";
+                        $result = mysqli_query($con, $sql);
+
+                        if ($result) {
+                            while ($subjectResult = mysqli_fetch_assoc($result)) {
+                                ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($subjectResult['subject_code']); ?></td>
+                                    <td><?php echo htmlspecialchars($subjectResult['subject']); ?></td>
+                                    <td>
+                                        <ul style="list-style: none; padding: 0; margin: 0;">
+                                            <?php
+                                            // Check and display linkOne
+                                            if (!empty($subjectResult['linkOne'])) {
+                                                ?>
+                                                <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                        target="_blank">Link One</a></li>
+                                                <?php
+                                            }
+
+                                            // Check and display linkTwo
+                                            if (!empty($subjectResult['linkTwo'])) {
+                                                ?>
+                                                <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                        target="_blank">Link Two</a></li>
+                                                <?php
+                                            }
+                                            if (!empty($subjectResult['linkThree'])) {
+                                                ?>
+                                                <li><a href="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                        target="_blank">Link Three</a></li>
+                                                <?php
+                                            }
+                                            if (empty($subjectResult['linkOne']) && empty($subjectResult['linkTwo'])) {
+                                                echo 'No links available for this subject';
+                                            }
+                                            ?>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary mx-2 editLinks-btn"
+                                            data-subjectid="<?php echo htmlspecialchars($subjectResult['subject_id']); ?>"
+                                            data-linkone="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                            data-linktwo="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                            data-linkthree="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                            data-bs-toggle="modal" data-bs-target="#linksModal">Update
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="modal fade" id="linksModal" tabindex="-1" aria-labelledby="linksModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="linksModalLabel">Update Faculty Evaluation Criteria for Students
+                        </h5>
+                        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form action="../../controller/criteria.php" method="POST" id="linksForm">
+                        <input type="hidden" id="linkId" name="linkId">
+                        <div class="modal-body">
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link One here:</label>
+                                <textarea class="form-control" id="linkOne" name="linkOne" rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Two here:</label>
+                                <textarea class="form-control" id="linkTwo" name="linkTwo" rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Three here:</label>
+                                <textarea class="form-control" id="linkThree" name="linkThree" rows="3"></textarea>
+                                <!-- Change this to 'linkThree' -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" name="updateLink" class="btn btn-success">Update</button>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+
 
     </div>
 
@@ -1186,6 +1310,52 @@ if (isset($_SESSION['success'])) {
                 });
             }
         });
+
+        // LINKS FOR EDITING
+
+        $('#searchSubject').on('keyup', function () {
+            const value = $(this).val().toLowerCase();
+            $('#subjectTable tbody tr').filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+        // Attach click event to dynamically loaded buttons
+        $('.editLinks-btn').on('click', function () {
+            const linkId = $(this).data('subjectid');  // Getting the correct subject ID
+            const linkEdit = $(this).data('linkone');  // Correct attribute name
+            const linkTextEdit = $(this).data('linktwo');  // Correct attribute name
+            const linkTextEdittwo = $(this).data('linkthree');  // Correct attribute name
+
+            // Fill modal fields with data
+            $('#linkId').val(linkId);
+            $('#linkOne').val(linkEdit);
+            $('#linkTwo').val(linkTextEdit);
+            $('#linkThree').val(linkTextEdittwo);  // Make sure this matches the input's ID
+        });
+
+
+
+        // Handle form submission via AJAX
+        $('#linksForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = $(this).serialize();
+
+            $.ajax({
+                url: '../../controller/criteria.php',
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    location.reload();  // Reload the page to reflect updates
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+
+
 
         // LOCALSTORAGE FOR SEMESTER AND ACADEMIC YEAR
         const storedSemester = localStorage.getItem('semester');
@@ -1463,8 +1633,8 @@ if (isset($_SESSION['success'])) {
         }
 
         function updateStatusLabel(status) {
-            const labelText = status === 'assign' ? 'The peer-to-peer evaluation is OPEN.' : 'The peer-to-peer evaluation is CLOSED.';
-            $('#actionLabel').text(labelText).css('color', status === 'assign' ? 'green' : 'red');
+            const labelText = status === 'assign' ? 'The Faculty evaluation is OPEN.' : 'The Faculty evaluation is CLOSED.';
+            $('#actionLabelStudent').text(labelText).css('color', status === 'assign' ? 'green' : 'red');
         }
 
         function resetStatusState() {
