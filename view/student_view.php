@@ -2,6 +2,17 @@
 
 session_start();
 include "../model/dbconnection.php";
+
+if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
+
+  if (isset($_SESSION["user"]) && $_SESSION["user"] === "admin") {
+    header("location: ../adminModule/admindashboard.php");
+    exit();
+  } else if (isset($_SESSION["user"]) && $_SESSION["user"] === "faculty") {
+    header("location: ../facultyModule/dashboard.php");
+    exit();
+  }
+}
 ?>
 
 <!DOCTYPE html>

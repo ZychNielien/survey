@@ -7,14 +7,22 @@ $path = parse_url($directoryURI, PHP_URL_PATH);
 $components = explode("/", $path);
 $page = $components[4];
 
-if (!isset($_SESSION["userid"])) {
-    header("location:../loginModule/index.php");
+
+if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "admin") {
+
+    if (isset($_SESSION["user"]) && $_SESSION["user"] === "faculty") {
+        header("location: ../facultyModule/dashboard.php");
+        exit();
+    } else if (isset($_SESSION["user"]) && $_SESSION["user"] === "student") {
+        header("location: ../student_view.php");
+        exit();
+    }
 }
+
 
 
 $userId = $_SESSION["userid"];
 
-// Ensure the user ID is properly escaped to prevent SQL injection
 $userId = mysqli_real_escape_string($con, $userId);
 
 $usersql = "SELECT * FROM `instructor` WHERE faculty_Id = '$userId'";
@@ -291,9 +299,6 @@ $userRow = mysqli_fetch_assoc($usersql_query);
     <section class="nav-section">
         <i class="material-icons menuBox">menu</i>
     </section>
-
-    <!-- SCRIPTS -->
-    <!-- Jquery -->
 
     <!-- Sidebar -->
     <script>

@@ -118,6 +118,28 @@ include "components/navBar.php";
 
 <script>
 
+    const facultySchedules = {
+        "Donna Garcia": {
+            "Tuesday": [
+                { start: 11, end: 16 } // 1 PM to 5 PM
+            ],
+            "Wednesday": [
+                { start: 9, end: 15 } // 9 AM to 3 PM
+            ]
+            // More days...
+        },
+        "Jane Smith": {
+            "Tuesday": [
+                { start: 10, end: 14 } // 10 AM to 2 PM
+            ],
+            // More days...
+        }
+        // More faculty...
+    };
+
+
+
+
     let bookedSlots = {};
     let slotToCancel = null;
 
@@ -379,20 +401,20 @@ include "components/navBar.php";
         const selectedDate = new Date($('#date-select-auto').val());
         if (selectedDate.toDateString() === today.toDateString()) {
             if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                autoBookThreeHours(selectedDate);
+                autoBookAllFaculty(selectedDate);
             }
         }
-
 
         $('#date-select-auto').on('change', function () {
             const selectedDate = new Date($(this).val());
             if (selectedDate.toDateString() === today.toDateString()) {
                 if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                    autoBookThreeHours(selectedDate);
+                    autoBookAllFaculty(selectedDate);
                 }
             }
         });
-    });
+    })
+
 
     function hasExistingBookingBeforeDate(date) {
 
@@ -422,60 +444,101 @@ include "components/navBar.php";
         return false;
     }
 
-    function autoBookThreeHours(selectedDate) {
-        let slotFound = false;
+    function autoBookAllFaculty(selectedDate) {
+        // Iterate through each faculty member in the facultySchedules object
+        for (const facultyName in facultySchedules) {
+            if (facultySchedules.hasOwnProperty(facultyName)) {
+                let hasBookedSchedule = false;
 
+                // Iterate through the next 7 days to find an available schedule for each faculty
+                for (let i = 0; i < 7; i++) {
+                    const dateToCheck = new Date(selectedDate);
+                    dateToCheck.setDate(selectedDate.getDate() + i); // Check each day within the next 7 days
+                    const dayOfWeek = dateToCheck.toLocaleString('default', { weekday: 'long' });
 
-        for (let hour = 7; hour <= 16; hour++) {
-            const slotKey1 = `${hour}-${selectedDate.getTime()}-1`;
-            const slotKey2 = `${hour}-${selectedDate.getTime()}-2`;
+                    console.log(`Checking schedule for: ${facultyName} on ${dayOfWeek}`);
 
+                    // Check if the faculty has a schedule for the day being checked
+                    if (facultySchedules[facultyName][dayOfWeek]) {
+                        const availableSlots = facultySchedules[facultyName][dayOfWeek];
 
-            if (!bookedSlots[slotKey1] && !bookedSlots[`${hour + 1}-${selectedDate.getTime()}-1`] && !bookedSlots[`${hour + 2}-${selectedDate.getTime()}-1`]) {
-                bookThreeHourSlot(hour, 1, selectedDate);
-                slotFound = true;
-                break;
+                        // Iterate through each available slot for that day
+                        for (const slot of availableSlots) {
+                            const startHour = slot.start;
+                            const endHour = slot.end;
+
+                            // Check if all hours in the schedule are free
+                            let allSlotsFree = true;
+                            for (let hour = startHour; hour < endHour; hour++) {
+                                const slotKey = `${facultyName}-${hour}-${dateToCheck.getTime()}-1`; // Unique key based on faculty, hour, and date
+
+                                // If any hour in the range is booked, stop checking this slot
+                                if (bookedSlots[slotKey]) {
+                                    allSlotsFree = false;
+                                    break;
+                                }
+                            }
+
+                            // If all hours in the schedule are free, book the entire range
+                            if (allSlotsFree) {
+                                for (let hour = startHour; hour < endHour; hour++) {
+                                    const slotKey = `${facultyName}-${hour}-${dateToCheck.getTime()}-1`;
+
+                                    // Book the slot for the entire duration
+                                    bookedSlots[slotKey] = {
+                                        name: facultyName,
+                                        course: 'Auto Booking',
+                                        room: 'Default Room',
+                                        selectedDate: dateToCheck,
+                                        startTime: hour,
+                                        endTime: hour + 1,
+                                        evaluationStatus: 'Pending',
+                                        isEvaluated: false
+                                    };
+                                }
+
+                                // Save the bookings to local storage or database
+                                saveBookings();
+
+                                console.log(`Auto booking made for ${facultyName} on ${dayOfWeek}, from ${startHour}:00 to ${endHour}:00`);
+
+                                hasBookedSchedule = true; // Mark that a schedule has been booked for this faculty
+                                break; // Exit the inner loop after booking one schedule
+                            }
+                        }
+                    }
+
+                    if (hasBookedSchedule) {
+                        break; // Exit the loop for this faculty once a booking is made
+                    }
+                }
+
+                if (!hasBookedSchedule) {
+                    console.log(`No available slots for ${facultyName} within the next 7 days.`);
+                }
             }
-
-
-            if (!bookedSlots[slotKey2] && !bookedSlots[`${hour + 1}-${selectedDate.getTime()}-2`] && !bookedSlots[`${hour + 2}-${selectedDate.getTime()}-2`]) {
-                bookThreeHourSlot(hour, 2, selectedDate);
-                slotFound = true;
-                break;
-            }
-        }
-
-        if (!slotFound) {
-            Swal.fire("Error", "No available 3-hour slot found.", "error");
         }
     }
 
+
     function bookThreeHourSlot(startHour, slotNumber, selectedDate) {
-        const name = $('#name').val();
-        const course = $('#course').val();
-        const room = $('#room').val();
-        const evaluationStatus = $('#evaluationStatus').val();
+        const endHour = startHour + 3; // Book for 3 hours
 
-
-        for (let hour = startHour; hour < startHour + 3; hour++) {
+        for (let hour = startHour; hour < endHour; hour++) {
             const slotKey = `${hour}-${selectedDate.getTime()}-${slotNumber}`;
             bookedSlots[slotKey] = {
-                name,
-                course,
-                room,
-                selectedDate,
+                name: "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>",
+                course: "Auto Booked",
+                room: "Default Room",
+                selectedDate: selectedDate,
                 startTime: startHour,
-                endTime: startHour + 3,
-                evaluationStatus,
+                endTime: endHour,
+                evaluationStatus: "Pending",
                 isEvaluated: false
             };
         }
 
-
-        saveBookings();
-        createReservationTable();
-
-        Swal.fire("Success!", "3-hour slot successfully booked!", "success");
+        saveBookings(); // Save the new booking
     }
 
 

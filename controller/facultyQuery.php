@@ -79,13 +79,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
 
-        if ($action === 'update') {
+        if ($_POST['action'] === 'update') {
             // Update functionality
             $id = $_POST['faculty_Id'];
             $firstname = $_POST['first_name'];
             $lastname = $_POST['last_name'];
-            $image = $_POST['image'];
 
+            // Handle the image upload
+            if (isset($_FILES['new_image']) && $_FILES['new_image']['error'] === UPLOAD_ERR_OK) {
+                // File upload directory
+                $uploadDir = '../public/picture/facultyMembers/';
+
+                // Create the directory if it doesn't exist
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                // Get the uploaded file's extension and create a unique filename
+                $fileTmpPath = $_FILES['new_image']['tmp_name'];
+                $fileName = basename($_FILES['new_image']['name']);
+                $newFilePath = $uploadDir . uniqid() . '-' . $fileName;
+
+                // Move the uploaded file to the designated directory
+                if (move_uploaded_file($fileTmpPath, $newFilePath)) {
+                    $image = $newFilePath; // Store the new file path in the database
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Image upload failed.']);
+                    exit();
+                }
+            } else {
+                // If no new image was uploaded, don't change the image path in the database
+                $stmt = $con->prepare("SELECT image FROM instructor WHERE faculty_Id = ?");
+                $stmt->bind_param("i", $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                $image = $row['image']; // Keep the existing image path
+                $stmt->close();
+            }
+
+            // Update the database
             $stmt = $con->prepare("UPDATE instructor SET first_name = ?, last_name = ?, image = ? WHERE faculty_Id = ?");
             $stmt->bind_param("sssi", $firstname, $lastname, $image, $id);
 

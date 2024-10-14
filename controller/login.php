@@ -22,6 +22,7 @@ if (isset($_POST['studentLogin'])) {
             while ($row = mysqli_fetch_assoc($sql_query)) {
 
                 $_SESSION["studentSRCode"] = $row["srcode"];
+                $_SESSION["user"] = $row["usertype"];
             }
 
             header("location: ../view/student_view.php");
@@ -51,11 +52,12 @@ if (isset($_POST['facultyadmin'])) {
             $_SESSION['status-code'] = "success";
             while ($row = mysqli_fetch_assoc($sql_query)) {
 
-                if ($row['usertype'] == "faculty") {
-
+                if ($row['usertype'] === "faculty") {
+                    $_SESSION["user"] = $row["usertype"];
                     $_SESSION["userid"] = $row["faculty_Id"];
                     header("location: ../view/facultyModule/dashboard.php");
-                } else if ($row['usertype'] == "admin") {
+                } else if ($row['usertype'] === "admin") {
+                    $_SESSION["user"] = $row["usertype"];
                     $_SESSION["userid"] = $row["faculty_Id"];
                     header("location: ../view/adminModule/admindashboard.php");
                 }

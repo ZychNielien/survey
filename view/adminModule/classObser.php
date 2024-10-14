@@ -73,10 +73,9 @@ include "components/navBar.php";
                         <div class="p-4 rounded-4">
                             <div class="text-center">
                                 <label for="view-date-select" class="form-label fw-bold text-danger">Select
-                                    Date:</label>
-                                <input type="date"
-                                    class="form-control form-control-lg shadow-sm rounded-3  border-2 border-danger"
-                                    id="view-date-select" style="background-color: #ffe5e5;">
+                                    Date:</label><br>
+                                <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 border-danger"
+                                    id="view-date-select" style="background-color: #ffe5e5; padding-right: 10px; ">
                             </div>
                         </div>
                     </div>
@@ -456,9 +455,7 @@ include "components/navBar.php";
         <div class="tab-pane fade " id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
 
             <form id="searchForm" class="d-flex flex-wrap justify-content-center align-items-center">
-
                 <div class="form-group me-3 mb-3">
-
                     <label for="facultySelect">Select Instructor:</label>
                     <select name="facultySelect" id="facultySelect" class="form-select">
                         <option value="">Select Instructor</option>
@@ -467,15 +464,12 @@ include "components/navBar.php";
                         $facultyResult = mysqli_query($con, $facultyQuery);
                         while ($facultyRow = mysqli_fetch_assoc($facultyResult)) {
                             echo '<option value="' . htmlspecialchars($facultyRow['faculty_Id'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($facultyRow['first_name'], ENT_QUOTES, 'UTF-8') . ' ' . htmlspecialchars($facultyRow['last_name'], ENT_QUOTES, 'UTF-8') . '</option>';
-
                         }
                         ?>
                     </select>
-
                 </div>
 
                 <div class="form-group me-3 mb-3">
-
                     <label for="adminSelect">Select Observer:</label>
                     <select name="adminSelect" id="adminSelect" class="form-select">
                         <option value="">Select Observer</option>
@@ -487,11 +481,7 @@ include "components/navBar.php";
                         }
                         ?>
                     </select>
-
                 </div>
-
-                <button type="button" id="searchButton" class="btn btn-primary mb-3">Search</button>
-
             </form>
 
             <div class="overflow-auto" style="max-height: 520px">
@@ -554,17 +544,13 @@ include "components/navBar.php";
 
     $(document).ready(function () {
 
-        loadTableData();
-
-        $('#searchButton').on('click', function () {
+        $('#facultySelect, #adminSelect').on('change', function () {
             var facultySelect = $('#facultySelect').val();
             var adminSelect = $('#adminSelect').val();
-
             loadTableData(facultySelect, adminSelect);
         });
 
         function loadTableData(facultySelect = '', adminSelect = '') {
-
             let params = $.param({
                 facultySelect: facultySelect,
                 adminSelect: adminSelect
@@ -581,6 +567,9 @@ include "components/navBar.php";
                 }
             });
         }
+
+        // Optional: Initial load to show data if needed
+        loadTableData();
 
         $('input[type="radio"]').click(function () {
             const groupName = $(this).attr('name');
