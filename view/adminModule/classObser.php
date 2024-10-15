@@ -66,20 +66,35 @@ include "components/navBar.php";
     <div class="tab-content p-3 border shadow-md overflow-auto" id="nav-tabContent">
         <div class="tab-pane fade active show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
 
+            <div class="text-center d-flex justify-content-evenly align-items-center">
+                <label for="view-date-select" class="form-label fw-bold px-3 py-2">Select a date one week before
+                    the end of classroom observation for
+                    auto-booking:</label>
+                <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 " id="date-select-auto"
+                    style=" padding-right: 10px; ">
+            </div>
+
             <!-- DATE SELECTION -->
             <div class="row justify-content-center align-items-center">
-                <div class="row justify-content-center align-items-center ">
+                <div class="row justify-content-evenly align-items-center ">
                     <div class="col-md-6 col-lg-4">
                         <div class="p-4 rounded-4">
                             <div class="text-center">
-                                <label for="view-date-select" class="form-label fw-bold text-danger">Select
+                                <label for="view-date-select" class="form-label fw-bold ">Select
                                     Date:</label><br>
-                                <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 border-danger"
-                                    id="view-date-select" style="background-color: #ffe5e5; padding-right: 10px; ">
+                                <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 "
+                                    id="view-date-select" style=" padding-right: 10px; ">
                             </div>
                         </div>
                     </div>
+
                 </div>
+            </div>
+            <div class="d-flex justify-content-end">
+
+
+
+                <button class="btn btn-danger mx-3" id="clear-btn">Clear All Reservations</button>
             </div>
 
             <!-- CLASSROOM OBSERVATION TABLE -->
@@ -540,7 +555,34 @@ include "components/navBar.php";
         <?php unset($_SESSION['status']); ?>
     <?php endif; ?>
 
+    const facultySchedules = [
+        <?php
+        $preferredScheduleSQL = "SELECT * FROM `preferredschedule`";
+        $preferredScheduleSQL_query = mysqli_query($con, $preferredScheduleSQL);
+
+        if ($preferredScheduleSQL_query && mysqli_num_rows($preferredScheduleSQL_query) > 0) {
+            while ($preferredScheduleRow = mysqli_fetch_assoc($preferredScheduleSQL_query)) {
+                ?>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
+                    name: "<?php echo $preferredScheduleRow['first_name'] . ' ' . $preferredScheduleRow['last_name'] ?>",
+                    schedule: {
+                        "<?php echo $preferredScheduleRow['dayOfWeek'] ?>": [
+                            { start: <?php echo $preferredScheduleRow['startTimePreferred'] ?>, end: <?php echo $preferredScheduleRow['endTimePreferred'] ?> } // 11 AM to 4 PM
+                        ],
+                        "<?php echo $preferredScheduleRow['dayOfWeekTwo'] ?>": [
+                            { start: <?php echo $preferredScheduleRow['startTimeSecondary'] ?>, end: <?php echo $preferredScheduleRow['endTimeSecondary'] ?> } // 9 AM to 3 PM
+                        ]
+                    }
+                },
+                <?php
+            }
+        }
+
+        ?>
+    ];
+
     let bookedSlots = {};
+    let slotToCancel = null;
 
     $(document).ready(function () {
 
@@ -568,7 +610,6 @@ include "components/navBar.php";
             });
         }
 
-        // Optional: Initial load to show data if needed
         loadTableData();
 
         $('input[type="radio"]').click(function () {
@@ -598,7 +639,6 @@ include "components/navBar.php";
         });
 
         $('#multi-step-form').on('submit', function (event) {
-
 
             const slotKey = $('#slot-key').val();
             const booking = bookedSlots[slotKey];
@@ -692,8 +732,7 @@ include "components/navBar.php";
 
         function createViewReservationTable() {
             const selectedDate = new Date($('#view-date-select').val());
-            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
             const headerRow = $('<tr>').css({
                 'background-color': '#b71c1c',
@@ -828,7 +867,6 @@ include "components/navBar.php";
                         $('#dateInput').val(formattedDateText);
                         $('#cancel-booking-btn').data('slotKey', slotKey);
                         $('#bookingDetailsModal').modal('show');
-                        console.log(booking);
                     } else {
                         Swal.fire({
                             icon: 'warning',
@@ -854,6 +892,220 @@ include "components/navBar.php";
                 }
             }
         });
+
+
+        $(document).ready(function () {
+            const today = new Date().toISOString().split('T')[0];
+            $('#date-select').attr('min', today).val(today);
+            loadBookings();
+            createViewReservationTable();
+
+            $('#date-select').change(function () {
+                createViewReservationTable();
+                updateSlotOptions();
+            });
+
+            $('#clear-btn').click(clearBookings);
+        });
+
+        function loadBookings() {
+            const storedBookings = localStorage.getItem('bookedSlots');
+            if (storedBookings) {
+                bookedSlots = JSON.parse(storedBookings);
+            }
+        }
+
+        function saveBookings() {
+            localStorage.setItem('bookedSlots', JSON.stringify(bookedSlots));
+        }
+
+        function hasBookingForSelectedDate(selectedDate) {
+            const userName = "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>";
+
+
+            for (let key in bookedSlots) {
+                const bookingDate = new Date(parseInt(key.split('-')[1]));
+                if (bookingDate.toDateString() === selectedDate.toDateString() && bookedSlots[key].name === userName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        $(document).ready(function () {
+            const today = new Date();
+            const todayString = today.toISOString().split("T")[0];
+            $('#date-select-auto');
+
+            checkAndAutoBook();
+
+            $('#date-select-auto').on('change', function () {
+                checkAndAutoBook();
+            });
+        });
+
+        function checkAndAutoBook() {
+            const selectedDate = new Date($('#date-select-auto').val());
+
+            facultySchedules.forEach(faculty => {
+                if (!hasBookingForSelectedDate(selectedDate, faculty.name)) {
+
+                    autoBookFullRange(selectedDate, faculty.name);
+                }
+            });
+        }
+
+        function hasBookingForSelectedDate(selectedDate, facultyName) {
+            for (let key in bookedSlots) {
+                const bookingDate = new Date(parseInt(key.split('-')[1]));
+                if (bookingDate.toDateString() === selectedDate.toDateString() && bookedSlots[key].name === facultyName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function isBookedThisWeek(facultyName, selectedDate) {
+            const startOfWeek = new Date(selectedDate);
+            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+
+
+            for (let date = startOfWeek; date <= endOfWeek; date.setDate(date.getDate() + 1)) {
+                const slotKey1 = `${date.getTime()}-1`;
+                const slotKey2 = `${date.getTime()}-2`;
+
+                if ((bookedSlots[slotKey1]?.name === facultyName) || (bookedSlots[slotKey2]?.name === facultyName)) {
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function autoBookFullRange(selectedDate, facultyName) {
+            if (isBookedThisWeek(facultyName, selectedDate)) {
+                return;
+            }
+
+            const faculty = facultySchedules.find(f => f.name === facultyName);
+            if (!faculty) {
+                return;
+            }
+
+            let hasBookedThisWeek = false;
+            let scheduleFound = false;
+
+            for (let i = 0; i <= 6; i++) {
+                if (hasBookedThisWeek) break;
+
+                const currentDate = new Date(selectedDate);
+                currentDate.setDate(selectedDate.getDate() + i);
+                const dayOfWeek = currentDate.toLocaleString('default', { weekday: 'long' });
+
+
+                for (const [day, slots] of Object.entries(faculty.schedule)) {
+                    if (day === dayOfWeek) {
+                        scheduleFound = true;
+                        let slot1Booked = false;
+
+                        let canBookInSlot1 = true;
+                        let bookedHoursSlot1 = [];
+
+                        for (const slot of slots) {
+                            const { start, end } = slot;
+                            for (let hour = start; hour < end; hour++) {
+                                const slotKey1 = `${hour}-${currentDate.getTime()}-1`;
+                                if (bookedSlots[slotKey1]) {
+                                    canBookInSlot1 = false;
+                                    break;
+                                }
+                                bookedHoursSlot1.push(hour);
+                            }
+                            if (!canBookInSlot1) break;
+                        }
+
+                        if (canBookInSlot1) {
+                            for (const hour of bookedHoursSlot1) {
+                                const slotKey1 = `${hour}-${currentDate.getTime()}-1`;
+                                bookedSlots[slotKey1] = {
+                                    name: facultyName,
+                                    room: "Auto Booked",
+                                    selectedDate: currentDate,
+                                    startTime: hour,
+                                    endTime: hour + 1,
+                                    evaluationStatus: 'Pending',
+                                    isEvaluated: false
+                                };
+                            }
+                            slot1Booked = true;
+
+                            hasBookedThisWeek = true;
+                            break;
+                        }
+
+                        if (!slot1Booked) {
+                            let bookedHoursSlot2 = [];
+                            for (const slot of slots) {
+                                const { start, end } = slot;
+                                for (let hour = start; hour < end; hour++) {
+                                    const slotKey2 = `${hour}-${currentDate.getTime()}-2`;
+                                    if (!bookedSlots[slotKey2]) {
+                                        bookedHoursSlot2.push(hour);
+                                    }
+                                }
+                            }
+
+                            if (bookedHoursSlot2.length > 0) {
+                                for (const hour of bookedHoursSlot2) {
+                                    const slotKey2 = `${hour}-${currentDate.getTime()}-2`;
+                                    bookedSlots[slotKey2] = {
+                                        name: facultyName,
+                                        room: "Auto Booked",
+                                        selectedDate: currentDate,
+                                        startTime: hour,
+                                        endTime: hour + 1,
+                                        evaluationStatus: 'Pending',
+                                        isEvaluated: false
+                                    };
+                                }
+
+                                hasBookedThisWeek = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            saveBookings();
+            createViewReservationTable();
+        }
+
+        $('#clear-btn').on('click', clearBookings);
+
+        function clearBookings() {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Once cleared, you will not be able to recover your bookings!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, clear them!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true,
+                focusCancel: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    bookedSlots = {};
+                    saveBookings();
+                    createViewReservationTable();
+                    Swal.fire("Success!", "All bookings cleared.", "success");
+                }
+            });
+        }
 
     });
 

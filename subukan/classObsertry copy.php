@@ -16,6 +16,122 @@ include "components/navBar.php";
 
     <h3 class="fw-bold text-danger text-center">Classroom Observation</h3>
 
+    <div class="autobook my-3 d-flex justify-content-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+            data-bs-target="#preferredSchedule">Preffered
+            Schedule for Autobooking</button>
+    </div>
+
+    <?php
+    // Fetch preferred schedule from the database
+    $preferredScheduleQuery = "SELECT * FROM preferredschedule WHERE faculty_Id = ?";
+    $stmt = $con->prepare($preferredScheduleQuery);
+    $stmt->bind_param("s", $userRow['faculty_Id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $preferredSchedule = $result->fetch_assoc();
+    ?>
+
+    <div class="modal fade" id="preferredSchedule" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="preferredScheduleLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title text-center text-white" id="preferredScheduleLabel">Preferred Schedule</h5>
+                    <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="../../controller/facultyQuery.php">
+                        <div hidden>
+                            <input type="text" name="faculty_Id" value="<?php echo $userRow['faculty_Id'] ?>">
+                            <input type="text" name="first_name" value="<?php echo $userRow['first_name'] ?>">
+                            <input type="text" name="last_name" value="<?php echo $userRow['last_name'] ?>">
+                        </div>
+                        <h5 class="mt-3 fw-bold text-center">Please select your primary preferred schedule.</h5>
+                        <div class="d-flex justify-content-between">
+                            <div class="mb-3">
+                                <select class="form-select" id="dayOfWeek" name="dayOfWeek" required>
+                                    <option selected disabled value="">Select Day</option>
+                                    <?php
+                                    $daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                                    foreach ($daysOfWeek as $day) {
+                                        $selected = (isset($preferredSchedule['dayOfWeek']) && $preferredSchedule['dayOfWeek'] == $day) ? 'selected' : '';
+                                        echo "<option value=\"$day\" $selected>$day</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <select class="form-select" id="startTimePreferred" name="startTimePreferred" required>
+                                    <option selected disabled value="">Select Start Time</option>
+                                    <?php for ($i = 7; $i <= 19; $i++): ?>
+                                        <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['startTimePreferred']) && $preferredSchedule['startTimePreferred'] == $i) ? 'selected' : ''; ?>>
+                                            <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                        </option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <select class="form-select" id="endTimePreferred" name="endTimePreferred" required>
+                                    <option selected disabled value="">Select End Time</option>
+                                    <?php for ($i = 7; $i <= 19; $i++): ?>
+                                        <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['endTimePreferred']) && $preferredSchedule['endTimePreferred'] == $i) ? 'selected' : ''; ?>>
+                                            <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                        </option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-3 fw-bold text-center">Please select your secondary preferred schedule.</h5>
+                        <div class="d-flex justify-content-between">
+                            <div class="mb-3">
+                                <select class="form-select" id="dayOfWeekTwo" name="dayOfWeekTwo" required>
+                                    <option selected disabled value="">Select Day</option>
+                                    <?php
+                                    foreach ($daysOfWeek as $day) {
+                                        $selected = (isset($preferredSchedule['dayOfWeekTwo']) && $preferredSchedule['dayOfWeekTwo'] == $day) ? 'selected' : '';
+                                        echo "<option value=\"$day\" $selected>$day</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <select class="form-select" id="startTimeSecondary" name="startTimeSecondary" required>
+                                    <option selected disabled value="">Select Start Time</option>
+                                    <?php for ($i = 7; $i <= 19; $i++): ?>
+                                        <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['startTimeSecondary']) && $preferredSchedule['startTimeSecondary'] == $i) ? 'selected' : ''; ?>>
+                                            <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                        </option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <select class="form-select" id="endTimeSecondary" name="endTimeSecondary" required>
+                                    <option selected disabled value="">Select End Time</option>
+                                    <?php for ($i = 7; $i <= 19; $i++): ?>
+                                        <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['endTimeSecondary']) && $preferredSchedule['endTimeSecondary'] == $i) ? 'selected' : ''; ?>>
+                                            <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                        </option>
+                                    <?php endfor; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" name="preferredSched">Save</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="d-flex justify-content-evenly align-items-center">
         <div class="form-group">
             <label for="date-select">Select Date:</label>
@@ -113,30 +229,93 @@ include "components/navBar.php";
 
 </section>
 
+<script>
+    $(document).ready(function () {
+        function populateEndTime(startTimeSelect, endTimeSelect) {
+            $(startTimeSelect).change(function () {
+                var selectedStartTime = parseInt($(this).val());
 
+                // Clear existing options in the end time dropdown
+                endTimeSelect.find('option').not(':first').remove();
+
+                // Populate end time options based on the selected start time
+                for (var i = selectedStartTime + 1; i <= 19; i++) { // Start from selectedStartTime + 1
+                    endTimeSelect.append('<option value="' + i + '">' +
+                        (i === 12 ? '12:00 PM' :
+                            (i < 12 ? i + ':00 AM' : (i - 12) + ':00 PM')) +
+                        '</option>');
+                }
+            });
+        }
+
+        // Populate end times for primary schedule
+        populateEndTime('#startTimePreferred', $('#endTimePreferred'));
+
+        // Populate end times for secondary schedule
+        populateEndTime('#startTimeSecondary', $('#endTimeSecondary'));
+    });
+</script>
 
 
 <script>
 
-    const facultySchedules = {
-        "Donna Garcia": {
-            "Tuesday": [
-                { start: 11, end: 16 } // 1 PM to 5 PM
-            ],
-            "Wednesday": [
-                { start: 9, end: 15 } // 9 AM to 3 PM
-            ]
-            // More days...
-        },
-        "Jane Smith": {
-            "Tuesday": [
-                { start: 10, end: 14 } // 10 AM to 2 PM
-            ],
-            // More days...
-        }
-        // More faculty...
-    };
 
+
+
+    const facultySchedules = [
+        <?php
+        $preferredScheduleSQL = "SELECT * FROM `preferredschedule`";
+        $preferredScheduleSQL_query = mysqli_query($con, $preferredScheduleSQL);
+
+        // Check if the query was successful and has rows
+        if ($preferredScheduleSQL_query && mysqli_num_rows($preferredScheduleSQL_query) > 0) {
+            while ($preferredScheduleRow = mysqli_fetch_assoc($preferredScheduleSQL_query)) {
+                ?>
+                                            {
+                    name: "<?php echo $preferredScheduleRow['first_name'] . ' ' . $preferredScheduleRow['last_name'] ?>",
+                    schedule: {
+                        "<?php echo $preferredScheduleRow['dayOfWeek'] ?>": [
+                            { start: <?php echo $preferredScheduleRow['startTimePreferred'] ?>, end: <?php echo $preferredScheduleRow['endTimePreferred'] ?> } // 11 AM to 4 PM
+                        ],
+                        "<?php echo $preferredScheduleRow['dayOfWeekTwo'] ?>": [
+                            { start: <?php echo $preferredScheduleRow['startTimeSecondary'] ?>, end: <?php echo $preferredScheduleRow['endTimeSecondary'] ?> } // 9 AM to 3 PM
+                        ]
+                    }
+                },
+                <?php
+            }
+        }
+
+        // Add other default schedules if there are no rows from the database
+        ?>
+    {
+            name: "Jane Smith",
+            schedule: {
+                "Tuesday": [
+                    { start: 9, end: 12 } // 10 AM to 2 PM
+                ]
+            }
+        },
+        {
+            name: "May Smith",
+            schedule: {
+                "Tuesday": [
+                    { start: 7, end: 11 } // 10 AM to 2 PM
+                ]
+            }
+        },
+        {
+            name: "Sad",
+            schedule: {
+                "Tuesday": [
+                    { start: 7, end: 9 } // 10 AM to 2 PM
+                ],
+                "Wednesday": [
+                    { start: 9, end: 12 } // 9 AM to 3 PM
+                ]
+            }
+        }
+    ];
 
 
 
@@ -145,7 +324,6 @@ include "components/navBar.php";
 
     $(document).ready(function () {
         const today = new Date().toISOString().split('T')[0];
-        $('#date-select-auto').attr('min', today).val(today);
         $('#date-select').attr('min', today).val(today);
         loadBookings();
         createReservationTable();
@@ -184,7 +362,7 @@ include "components/navBar.php";
 
     function createReservationTable() {
         const selectedDate = new Date($('#date-select').val());
-        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const headerRow = $('<tr>').addClass('bg-danger text-white py-3').css('border', '2px solid white').append($('<th rowspan="2" style="vertical-align: middle">DATE / TIME</th>'));
 
         for (let i = 0; i < 2; i++) {
@@ -328,6 +506,7 @@ include "components/navBar.php";
             });
         }
     }
+
     function openForm() {
         $('#reservationModal').modal('show');
     }
@@ -392,30 +571,6 @@ include "components/navBar.php";
         $('#reservationModal').modal('hide');
     }
 
-    $(document).ready(function () {
-        const today = new Date();
-        const todayString = today.toISOString().split("T")[0];
-        $('#date-select-auto').attr('min', todayString).val(todayString);
-
-
-        const selectedDate = new Date($('#date-select-auto').val());
-        if (selectedDate.toDateString() === today.toDateString()) {
-            if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                autoBookAllFaculty(selectedDate);
-            }
-        }
-
-        $('#date-select-auto').on('change', function () {
-            const selectedDate = new Date($(this).val());
-            if (selectedDate.toDateString() === today.toDateString()) {
-                if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                    autoBookAllFaculty(selectedDate);
-                }
-            }
-        });
-    })
-
-
     function hasExistingBookingBeforeDate(date) {
 
         const userName = "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>";
@@ -444,82 +599,180 @@ include "components/navBar.php";
         return false;
     }
 
-    function autoBookAllFaculty(selectedDate) {
-        // Iterate through each faculty member in the facultySchedules object
-        for (const facultyName in facultySchedules) {
-            if (facultySchedules.hasOwnProperty(facultyName)) {
-                let hasBookedSchedule = false;
+    $(document).ready(function () {
+        // Set the value of #date-select-auto to today's date
+        const today = new Date();
+        const todayString = today.toISOString().split("T")[0];
+        $('#date-select-auto');
 
-                // Iterate through the next 7 days to find an available schedule for each faculty
-                for (let i = 0; i < 7; i++) {
-                    const dateToCheck = new Date(selectedDate);
-                    dateToCheck.setDate(selectedDate.getDate() + i); // Check each day within the next 7 days
-                    const dayOfWeek = dateToCheck.toLocaleString('default', { weekday: 'long' });
+        // Trigger auto-booking on page load
+        checkAndAutoBook();
 
-                    console.log(`Checking schedule for: ${facultyName} on ${dayOfWeek}`);
+        // Re-trigger auto-booking when the date changes
+        $('#date-select-auto').on('change', function () {
+            checkAndAutoBook();
+        });
+    });
 
-                    // Check if the faculty has a schedule for the day being checked
-                    if (facultySchedules[facultyName][dayOfWeek]) {
-                        const availableSlots = facultySchedules[facultyName][dayOfWeek];
+    function checkAndAutoBook() {
+        const selectedDate = new Date($('#date-select-auto').val());
 
-                        // Iterate through each available slot for that day
-                        for (const slot of availableSlots) {
-                            const startHour = slot.start;
-                            const endHour = slot.end;
-
-                            // Check if all hours in the schedule are free
-                            let allSlotsFree = true;
-                            for (let hour = startHour; hour < endHour; hour++) {
-                                const slotKey = `${facultyName}-${hour}-${dateToCheck.getTime()}-1`; // Unique key based on faculty, hour, and date
-
-                                // If any hour in the range is booked, stop checking this slot
-                                if (bookedSlots[slotKey]) {
-                                    allSlotsFree = false;
-                                    break;
-                                }
-                            }
-
-                            // If all hours in the schedule are free, book the entire range
-                            if (allSlotsFree) {
-                                for (let hour = startHour; hour < endHour; hour++) {
-                                    const slotKey = `${facultyName}-${hour}-${dateToCheck.getTime()}-1`;
-
-                                    // Book the slot for the entire duration
-                                    bookedSlots[slotKey] = {
-                                        name: facultyName,
-                                        course: 'Auto Booking',
-                                        room: 'Default Room',
-                                        selectedDate: dateToCheck,
-                                        startTime: hour,
-                                        endTime: hour + 1,
-                                        evaluationStatus: 'Pending',
-                                        isEvaluated: false
-                                    };
-                                }
-
-                                // Save the bookings to local storage or database
-                                saveBookings();
-
-                                console.log(`Auto booking made for ${facultyName} on ${dayOfWeek}, from ${startHour}:00 to ${endHour}:00`);
-
-                                hasBookedSchedule = true; // Mark that a schedule has been booked for this faculty
-                                break; // Exit the inner loop after booking one schedule
-                            }
-                        }
-                    }
-
-                    if (hasBookedSchedule) {
-                        break; // Exit the loop for this faculty once a booking is made
-                    }
-                }
-
-                if (!hasBookedSchedule) {
-                    console.log(`No available slots for ${facultyName} within the next 7 days.`);
-                }
+        facultySchedules.forEach(faculty => {
+            if (!hasBookingForSelectedDate(selectedDate, faculty.name)) {
+                console.log("Triggering auto-booking for", faculty.name, "on", selectedDate.toDateString());
+                autoBookFullRange(selectedDate, faculty.name);
+            } else {
+                console.log("Booking already exists for", faculty.name, "on", selectedDate.toDateString());
             }
-        }
+        });
     }
 
+    function hasBookingForSelectedDate(selectedDate, facultyName) {
+        for (let key in bookedSlots) {
+            const bookingDate = new Date(parseInt(key.split('-')[1]));
+            if (bookingDate.toDateString() === selectedDate.toDateString() && bookedSlots[key].name === facultyName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isBookedInRange(facultyName, startDate, endDate) {
+        return Object.entries(bookedSlots).some(([key, slot]) => {
+            const bookedDate = new Date(parseInt(key.split('-')[0]));
+            return slot.name === facultyName && bookedDate >= startDate && bookedDate <= endDate;
+        });
+    }
+
+    function isBookedThisWeek(facultyName, selectedDate) {
+        const startOfWeek = new Date(selectedDate);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Set to Sunday
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Set to Saturday
+
+        console.log(`Checking bookings for ${facultyName} from ${startOfWeek.toDateString()} to ${endOfWeek.toDateString()}`);
+
+        for (let date = startOfWeek; date <= endOfWeek; date.setDate(date.getDate() + 1)) {
+            const slotKey1 = `${date.getTime()}-1`;
+            const slotKey2 = `${date.getTime()}-2`;
+
+            if ((bookedSlots[slotKey1]?.name === facultyName) || (bookedSlots[slotKey2]?.name === facultyName)) {
+                console.log(`${facultyName} is already booked this week.`);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function autoBookFullRange(selectedDate, facultyName) {
+        if (isBookedThisWeek(facultyName, selectedDate)) {
+            console.log(`${facultyName} cannot be booked again this week.`);
+            return;
+        }
+
+        const faculty = facultySchedules.find(f => f.name === facultyName);
+        if (!faculty) {
+            console.log(`Faculty ${facultyName} not found.`);
+            return;
+        }
+
+        let hasBookedThisWeek = false;
+        let scheduleFound = false;
+
+        for (let i = 0; i <= 6; i++) {
+            if (hasBookedThisWeek) break;
+
+            const currentDate = new Date(selectedDate);
+            currentDate.setDate(selectedDate.getDate() + i);
+            const dayOfWeek = currentDate.toLocaleString('default', { weekday: 'long' });
+
+            console.log(`Attempting to book for ${facultyName} on ${dayOfWeek} (${currentDate.toDateString()})`);
+
+            for (const [day, slots] of Object.entries(faculty.schedule)) {
+                if (day === dayOfWeek) {
+                    scheduleFound = true;
+                    let slot1Booked = false;
+
+                    let canBookInSlot1 = true;
+                    let bookedHoursSlot1 = [];
+
+                    for (const slot of slots) {
+                        const { start, end } = slot;
+                        for (let hour = start; hour < end; hour++) {
+                            const slotKey1 = `${hour}-${currentDate.getTime()}-1`;
+                            if (bookedSlots[slotKey1]) {
+                                canBookInSlot1 = false;
+                                break;
+                            }
+                            bookedHoursSlot1.push(hour);
+                        }
+                        if (!canBookInSlot1) break;
+                    }
+
+                    if (canBookInSlot1) {
+                        for (const hour of bookedHoursSlot1) {
+                            const slotKey1 = `${hour}-${currentDate.getTime()}-1`;
+                            bookedSlots[slotKey1] = {
+                                name: facultyName,
+                                room: "Auto Booked",
+                                selectedDate: currentDate,
+                                startTime: hour,
+                                endTime: hour + 1,
+                                evaluationStatus: 'Pending',
+                                isEvaluated: false
+                            };
+                        }
+                        slot1Booked = true;
+                        console.log(`Booked ${facultyName} in Slot 1 on ${currentDate.toDateString()} from ${bookedHoursSlot1[0]} to ${bookedHoursSlot1[bookedHoursSlot1.length - 1] + 1}.`);
+                        hasBookedThisWeek = true;
+                        break;
+                    }
+
+                    if (!slot1Booked) {
+                        let bookedHoursSlot2 = [];
+                        for (const slot of slots) {
+                            const { start, end } = slot;
+                            for (let hour = start; hour < end; hour++) {
+                                const slotKey2 = `${hour}-${currentDate.getTime()}-2`;
+                                if (!bookedSlots[slotKey2]) {
+                                    bookedHoursSlot2.push(hour);
+                                }
+                            }
+                        }
+
+                        if (bookedHoursSlot2.length > 0) {
+                            for (const hour of bookedHoursSlot2) {
+                                const slotKey2 = `${hour}-${currentDate.getTime()}-2`;
+                                bookedSlots[slotKey2] = {
+                                    name: facultyName,
+                                    room: "Auto Booked",
+                                    selectedDate: currentDate,
+                                    startTime: hour,
+                                    endTime: hour + 1,
+                                    evaluationStatus: 'Pending',
+                                    isEvaluated: false
+                                };
+                            }
+                            console.log(`Booked ${facultyName} in Slot 2 on ${currentDate.toDateString()} from ${bookedHoursSlot2[0]} to ${bookedHoursSlot2[bookedHoursSlot2.length - 1] + 1}.`);
+                            hasBookedThisWeek = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!scheduleFound) {
+                console.log(`No schedule found for ${facultyName} on ${dayOfWeek}.`);
+            }
+        }
+
+        if (!hasBookedThisWeek) {
+            console.log(`${facultyName} was not able to be booked for any day this week.`);
+        }
+
+        saveBookings();
+        createReservationTable();
+    }
 
     function bookThreeHourSlot(startHour, slotNumber, selectedDate) {
         const endHour = startHour + 3; // Book for 3 hours

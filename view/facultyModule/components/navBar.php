@@ -17,6 +17,10 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "faculty") {
         exit();
     }
 }
+if (!isset($_SESSION["userid"])) {
+    header("location: ../loginModule\index.php");
+    exit();
+}
 
 $userId = $_SESSION["userid"];
 
