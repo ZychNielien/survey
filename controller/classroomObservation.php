@@ -5,7 +5,6 @@ session_start();
 include "../model/dbconnection.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Retrieve booking data from POST request
     $course = $_POST['course'];
     $name = $_POST['name'];
     $room = $_POST['room'];
@@ -15,14 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $selectedSlot = $_POST['selected_slot'];
     $evaluationStatus = $_POST['evaluation_status'];
 
-    // Format date and time
-    $formattedDate = $selectedDate->format('F d, Y'); // e.g., September 09, 2023
-    $formattedStartTime = date('g:i A', strtotime("$startTime:00")); // e.g., 7:00 AM
-    $formattedEndTime = date('g:i A', strtotime("$endTime:00")); // e.g., 8:00 AM
+    $formattedDate = $selectedDate->format('F d, Y');
+    $formattedStartTime = date('g:i A', strtotime("$startTime:00"));
+    $formattedEndTime = date('g:i A', strtotime("$endTime:00"));
 
-    // Prepare the email notification
     $url = "https://script.google.com/macros/s/AKfycbyxelEgiJLf-a-EuL6qdg5QZOaZC6L-EzYNQ4akLi2lImaPvVtavLbgNotMVijqv-g9wA/exec";
-    $recipient = 'cicsmalvarevaluation@gmail.com'; // Change to your admin email address
+    $recipient = 'cicsmalvarevaluation@gmail.com';
     $subject = 'New Classroom Observation Booking';
     $body = "
     Dear Admin,
@@ -35,10 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Your Booking System
     ";
 
-    // Initialize cURL
     $ch = curl_init($url);
 
-    // Set cURL options
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
@@ -50,19 +45,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ])
     ]);
 
-    // Execute cURL request
     $result = curl_exec($ch);
 
-    // Check for cURL errors
     if ($result === false) {
         echo 'cURL Error: ' . curl_error($ch);
-        exit; // Exit if there's an error
+        exit;
     }
 
-    // Close cURL session
     curl_close($ch);
 
-    // Respond with JSON
     echo json_encode(['status' => 'success', 'message' => 'Booking created successfully. Notification sent to admin.']);
 } else {
     echo json_encode(['status' => 'error', 'message' => 'Invalid request.']);
@@ -70,14 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-// Get the query parameters sent from JavaScript
 $facultySelect = isset($_GET['facultySelect']) ? $_GET['facultySelect'] : '';
 $adminSelect = isset($_GET['adminSelect']) ? $_GET['adminSelect'] : '';
 
-// Base query
 $archivedSQL = "SELECT * FROM classroomobservation WHERE 1";
 
-// Apply filters if faculty or admin is selected
 if (!empty($facultySelect)) {
     $archivedSQL .= " AND toFacultyID = '$facultySelect'";
 }
@@ -86,14 +74,12 @@ if (!empty($adminSelect)) {
     $archivedSQL .= " AND fromFacultyID = '$adminSelect'";
 }
 
-// Execute query
 $archivedSQL_query = mysqli_query($con, $archivedSQL);
 
 if (!$archivedSQL_query) {
     die("Database query failed: " . mysqli_error($con));
 }
 
-// Return the filtered table rows or all results if no filters are applied
 if (mysqli_num_rows($archivedSQL_query) > 0) {
     while ($archivedRow = mysqli_fetch_assoc($archivedSQL_query)) {
         $toFaculty = htmlspecialchars($archivedRow['toFaculty'], ENT_QUOTES, 'UTF-8');
@@ -131,15 +117,12 @@ if (mysqli_num_rows($archivedSQL_query) > 0) {
         printWindow.document.close();
         printWindow.focus();
 
-        // Trigger print
         printWindow.print();
 
-        // Close the print window and modal immediately
         printWindow.close();
         $('#officialviewmodal').modal('hide');
     }
 
-    // SweetAlert Function
     function showSweetAlert(facultyName) {
         Swal.fire({
             title: `The Classroom Observation Form Has Been Successfully Generated`,
@@ -152,22 +135,19 @@ if (mysqli_num_rows($archivedSQL_query) > 0) {
             cancelButtonText: 'Close',
         }).then((result) => {
             if (result.isConfirmed) {
-                printPartOfPage(143); // Call your print function
+                printPartOfPage(143);
             } else {
-                $('#officialviewmodal').modal('hide'); // Hide modal if closed
+                $('#officialviewmodal').modal('hide');
             }
         });
     }
 
-    // Show View Modal for Resident
     $('.view-btn').click(function (e) {
         e.preventDefault();
 
-        // Get the official_id and faculty name from the table row
         var official_id = $(this).closest('tr').find('.official_id').text();
         const facultyName = $(this).closest('tr').find('td[data-faculty]').data('faculty');
 
-        // Perform the AJAX request
         $.ajax({
             type: "POST",
             url: "../../view/adminModule/printClassroomObservation.php",
@@ -176,15 +156,12 @@ if (mysqli_num_rows($archivedSQL_query) > 0) {
                 'official_id': official_id,
             },
             success: function (response) {
-                // Update modal content and show the modal
                 $('.officialviewmodal').html(response);
                 $('#officialviewmodal').modal('show');
 
-                // Call SweetAlert after showing the modal
-                showSweetAlert(facultyName); // Pass the faculty name to the SweetAlert function
+                showSweetAlert(facultyName);
             },
             error: function (xhr, status, error) {
-                // Handle errors
                 console.error("AJAX Error: " + status + ": " + error);
                 alert("An error occurred while processing your request. Please try again.");
             }

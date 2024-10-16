@@ -316,27 +316,27 @@ $semestersJson = json_encode($semesters);
 
                     if ($eval['isOpen'] == 0) {
                         ?>
-                            <div class="file-drop-area">
-                                <label class="choose-file-button" for="excel_file">Choose Excel File</label>
-                                <span class="file-message">or drag and drop files here</span>
-                                <input type="file" name="excel_file" accept=".xlsx, .xls" class="form-control file-input"
-                                    id="excel_file">
-                            </div>
-                            <button type="submit" class="btn btn-secondary my-2" disabled>Upload</button>
+                        <div class="file-drop-area">
+                            <label class="choose-file-button" for="excel_file">Choose Excel File</label>
+                            <span class="file-message">or drag and drop files here</span>
+                            <input type="file" name="excel_file" accept=".xlsx, .xls" class="form-control file-input"
+                                id="excel_file">
+                        </div>
+                        <button type="submit" class="btn btn-secondary my-2" disabled>Upload</button>
 
-                            <?php
+                        <?php
 
                     } else {
                         ?>
-                            <div class="file-drop-area">
-                                <label class="choose-file-button" for="excel_file">Choose Excel File</label>
-                                <span class="file-message">or drag and drop files here</span>
-                                <input type="file" name="excel_file" accept=".xlsx, .xls" required
-                                    class="form-control file-input" id="excel_file">
-                            </div>
-                            <button type="submit" class="btn btn-primary my-2">Upload</button>
+                        <div class="file-drop-area">
+                            <label class="choose-file-button" for="excel_file">Choose Excel File</label>
+                            <span class="file-message">or drag and drop files here</span>
+                            <input type="file" name="excel_file" accept=".xlsx, .xls" required
+                                class="form-control file-input" id="excel_file">
+                        </div>
+                        <button type="submit" class="btn btn-primary my-2">Upload</button>
 
-                            <?php
+                        <?php
                     }
 
                     ?>
@@ -365,7 +365,7 @@ $semestersJson = json_encode($semesters);
                         <select id="startSemesterFilter" class="form-control">
                             <option value="">Select Start Semester</option>
                             <?php foreach ($semesters as $semester): ?>
-                                    <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
+                                <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
                             <?php endforeach; ?>
                         </select>
 
@@ -386,9 +386,14 @@ $semestersJson = json_encode($semesters);
                         <select id="subjectFilter" class="form-control">
                             <option value="all">All Subjects</option>
                             <?php foreach (array_keys($subjectData) as $subject): ?>
-                                    <option value="<?php echo $subject; ?>"><?php echo $subject; ?></option>
+                                <option value="<?php echo $subject; ?>"><?php echo $subject; ?></option>
                             <?php endforeach; ?>
                         </select>
+
+                    </div>
+                    <div class="form-group">
+
+                        <button class="btn btn-success" id="printBtn">Print</button>
 
                     </div>
 
@@ -602,21 +607,21 @@ $semestersJson = json_encode($semesters);
         $(document).ready(function () {
 
             <?php if (isset($_SESSION['status'])): ?>
-                    Swal.fire({
-                        title: '<?php echo $_SESSION['status']; ?>',
-                        icon: '<?php echo ($_SESSION['status-code'] == 'success' ? 'success' : 'error'); ?>',
-                        confirmButtonText: 'OK'
-                    });
-                    <?php unset($_SESSION['status']); ?>
+                Swal.fire({
+                    title: '<?php echo $_SESSION['status']; ?>',
+                    icon: '<?php echo ($_SESSION['status-code'] == 'success' ? 'success' : 'error'); ?>',
+                    confirmButtonText: 'OK'
+                });
+                <?php unset($_SESSION['status']); ?>
             <?php endif; ?>
 
             <?php if (!empty($message)): ?>
-                    Swal.fire({
-                        icon: <?php echo strpos($message, 'Error') === 0 || strpos($message, 'Invalid') === 0 ? "'error'" : "'success'"; ?>,
-                        title: '<?= htmlspecialchars($message) ?>',
-                        showConfirmButton: true,
-                        timer: 5000
-                    });
+                Swal.fire({
+                    icon: <?php echo strpos($message, 'Error') === 0 || strpos($message, 'Invalid') === 0 ? "'error'" : "'success'"; ?>,
+                    title: '<?= htmlspecialchars($message) ?>',
+                    showConfirmButton: true,
+                    timer: 5000
+                });
             <?php endif; ?>
 
             $(document).on('change', '.file-input', function () {
@@ -629,6 +634,41 @@ $semestersJson = json_encode($semesters);
                 } else {
                     textbox.text(filesCount + ' files selected');
                 }
+            });
+
+
+            function printPartOfPage(elementId) {
+                var originalCanvas = document.getElementById(elementId);
+
+                var windowUrl = 'about:blank';
+                var uniqueName = new Date();
+                var windowName = 'Print' + uniqueName.getTime();
+                var printWindow = window.open(windowUrl, windowName, 'width=800,height=600');
+
+                printWindow.document.write('<html><head><title>Print Canvas</title></head><body>');
+                printWindow.document.write('<canvas id="printCanvas" width="500" height="300" style="border:1px solid #ccc;"></canvas>');
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+
+                var printCanvas = printWindow.document.getElementById('printCanvas');
+                var printCtx = printCanvas.getContext('2d');
+
+                const scaleFactor = 0.65;
+                printCanvas.width = originalCanvas.width * scaleFactor;
+                printCanvas.height = originalCanvas.height * scaleFactor;
+
+                printCtx.scale(scaleFactor, scaleFactor);
+                printCtx.drawImage(originalCanvas, 0, 0);
+
+                setTimeout(function () {
+                    printWindow.print();
+                    printWindow.close();
+                }, 100);
+            }
+
+            $('#printBtn').click(function () {
+                printPartOfPage('lineChart');
             });
         });
 

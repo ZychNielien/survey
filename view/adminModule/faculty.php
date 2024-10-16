@@ -253,28 +253,22 @@ include "../../model/dbconnection.php";
         $('#new_image').on('change', function () {
             var input = this;
 
-            // Ensure the input has a file
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
 
-                // Set the preview image source when file is loaded
                 reader.onload = function (e) {
-                    $('#facultyImage').attr('src', e.target.result).show(); // Show the image with new source
+                    $('#facultyImage').attr('src', e.target.result).show();
                 }
-
-                // Read the image file
                 reader.readAsDataURL(input.files[0]);
             }
         });
 
         // PARA MAKUHA YUNG MGA DATA NI FACULTY AT MAPUNTA SA EDIT MODAL
         $('.edit-btn').on('click', function () {
-            // Populate form fields
             $('#faculty_Id').val($(this).data('faculty-id'));
             $('#first_name').val($(this).data('first-name'));
             $('#last_name').val($(this).data('last-name'));
 
-            // Set the image URL and display the image
             var imageUrl = $(this).data('image');
             if (imageUrl) {
                 $('#facultyImage').attr('src', imageUrl).show();
@@ -333,18 +327,17 @@ include "../../model/dbconnection.php";
         });
 
         $('#saveChanges').on('click', function () {
-            var form = $('#editForm')[0]; // Get the form element
-            var formData = new FormData(form); // Create FormData object
+            var form = $('#editForm')[0];
+            var formData = new FormData(form);
 
-            // Append additional data if needed
             formData.append('action', 'update');
 
             $.ajax({
                 type: 'POST',
                 url: '../../controller/facultyQuery.php',
-                data: formData, // Use FormData object
-                processData: false, // Prevent jQuery from automatically processing the data
-                contentType: false, // Set content type to false for FormData
+                data: formData,
+                processData: false,
+                contentType: false,
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
@@ -353,7 +346,7 @@ include "../../model/dbconnection.php";
                             title: 'Updated!',
                             text: 'Instructor details updated successfully.',
                         }).then(() => {
-                            location.reload(); // Reload the page after success
+                            location.reload();
                         });
                     } else {
                         Swal.fire({

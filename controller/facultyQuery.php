@@ -69,7 +69,6 @@ if (isset($_POST['preferredSched'])) {
 
 
 
-// Insert a Faculty Member
 if (isset($_POST['addFaculty'])) {
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $file_name = $_FILES['image']['name'];
@@ -83,18 +82,17 @@ if (isset($_POST['addFaculty'])) {
             return preg_replace('/\s+/', '', $value);
         }, $_POST);
 
-        // Get cleaned first and last names
+
         $trimFirstName = isset($clearWhiteSpaces['first_name']) ? $clearWhiteSpaces['first_name'] : '';
         $trimLastName = isset($clearWhiteSpaces['last_name']) ? $clearWhiteSpaces['last_name'] : '';
 
-        // Create the G Suite email address with a dot separator
         $gsuite = strtolower($trimFirstName . '.' . $trimLastName . '@g.batstate-u.edu.ph');
         $firstname = trim($_POST['first_name']);
         $lastname = trim($_POST['last_name']);
         $password = strtoupper($trimLastName);
         $usertype = trim('faculty');
 
-        if ($file_size > 2 * 1024 * 1024) { // Limit to 2MB
+        if ($file_size > 2 * 1024 * 1024) {
             $_SESSION['status'] = "File size exceeds 2MB limit.";
             $_SESSION['status-code'] = "error";
             header('Location: ../view/adminModule/faculty.php');

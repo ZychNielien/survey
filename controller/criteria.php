@@ -443,7 +443,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $questionid = $_POST['questionid'];
         $question = $_POST['question'];
 
-        // Prepare and execute the update query
         $sqlUpdate = "UPDATE `classroomquestions` SET questions = ? WHERE id = ?";
         $stmt = mysqli_prepare($con, $sqlUpdate);
         mysqli_stmt_bind_param($stmt, 'si', $question, $questionid);
@@ -458,13 +457,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['linkId']) && isset($_POST['linkOne']) && isset($_POST['linkTwo']) && isset($_POST['linkThree'])) {
         $linkId = $_POST['linkId'];
-        $linkOne = $_POST['linkOne'];  // Correct variable
-        $linkTwo = $_POST['linkTwo'];  // Correct variable
-        $linkThree = $_POST['linkThree'];  // Use linkThree for the third link
+        $linkOne = $_POST['linkOne'];
+        $linkTwo = $_POST['linkTwo'];
+        $linkThree = $_POST['linkThree'];
 
         $sqlUpdate = "UPDATE `subject` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE subject_id = ?";
         $stmt = mysqli_prepare($con, $sqlUpdate);
-        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);
 
         if (mysqli_stmt_execute($stmt)) {
             $_SESSION['success'] = 'Link Updated Successfully!';
@@ -476,13 +475,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['peertopeerlinkId']) && isset($_POST['peertopeerlinkOne']) && isset($_POST['peertopeerlinkTwo']) && isset($_POST['peertopeerlinkThree'])) {
         $linkId = $_POST['peertopeerlinkId'];
-        $linkOne = $_POST['peertopeerlinkOne'];  // Correct variable
-        $linkTwo = $_POST['peertopeerlinkTwo'];  // Correct variable
-        $linkThree = $_POST['peertopeerlinkThree'];  // Use linkThree for the third link
+        $linkOne = $_POST['peertopeerlinkOne'];
+        $linkTwo = $_POST['peertopeerlinkTwo'];
+        $linkThree = $_POST['peertopeerlinkThree'];
 
         $sqlUpdate = "UPDATE `facultycategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
         $stmt = mysqli_prepare($con, $sqlUpdate);
-        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);
 
         if (mysqli_stmt_execute($stmt)) {
             $_SESSION['success'] = 'Link Updated Successfully!';
@@ -494,13 +493,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['studentslinkId']) && isset($_POST['studentslinkOne']) && isset($_POST['studentslinkTwo']) && isset($_POST['studentslinkThree'])) {
         $linkId = $_POST['studentslinkId'];
-        $linkOne = $_POST['studentslinkOne'];  // Correct variable
-        $linkTwo = $_POST['studentslinkTwo'];  // Correct variable
-        $linkThree = $_POST['studentslinkThree'];  // Use linkThree for the third link
+        $linkOne = $_POST['studentslinkOne'];
+        $linkTwo = $_POST['studentslinkTwo'];
+        $linkThree = $_POST['studentslinkThree'];
 
         $sqlUpdate = "UPDATE `studentscategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
         $stmt = mysqli_prepare($con, $sqlUpdate);
-        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);
 
         if (mysqli_stmt_execute($stmt)) {
             $_SESSION['success'] = 'Link Updated Successfully!';
@@ -512,13 +511,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['classroomlinkId']) && isset($_POST['classroomlinkOne']) && isset($_POST['classroomlinkTwo']) && isset($_POST['classroomlinkThree'])) {
         $linkId = $_POST['classroomlinkId'];
-        $linkOne = $_POST['classroomlinkOne'];  // Correct variable
-        $linkTwo = $_POST['classroomlinkTwo'];  // Correct variable
-        $linkThree = $_POST['classroomlinkThree'];  // Use linkThree for the third link
+        $linkOne = $_POST['classroomlinkOne'];
+        $linkTwo = $_POST['classroomlinkTwo'];
+        $linkThree = $_POST['classroomlinkThree'];
 
         $sqlUpdate = "UPDATE `classroomcategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
         $stmt = mysqli_prepare($con, $sqlUpdate);
-        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);
 
         if (mysqli_stmt_execute($stmt)) {
             $_SESSION['success'] = 'Link Updated Successfully!';
@@ -530,13 +529,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['vcaalinkId']) && isset($_POST['vcaalinkOne']) && isset($_POST['vcaalinkTwo']) && isset($_POST['vcaalinkThree'])) {
         $linkId = $_POST['vcaalinkId'];
-        $linkOne = $_POST['vcaalinkOne'];  // Correct variable
-        $linkTwo = $_POST['vcaalinkTwo'];  // Correct variable
-        $linkThree = $_POST['vcaalinkThree'];  // Use linkThree for the third link
+        $linkOne = $_POST['vcaalinkOne'];
+        $linkTwo = $_POST['vcaalinkTwo'];
+        $linkThree = $_POST['vcaalinkThree'];
 
         $sqlUpdate = "UPDATE `vcaacategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
         $stmt = mysqli_prepare($con, $sqlUpdate);
-        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);
 
         if (mysqli_stmt_execute($stmt)) {
             $_SESSION['success'] = 'Link Updated Successfully!';
@@ -627,7 +626,6 @@ if (isset($_POST['classroomObservationSubmit'])) {
     $columns = [];
     $values = [];
 
-    // Trim and sanitize individual inputs
     $toFacultyID = isset($_POST['toFacultyID']) ? trim($_POST['toFacultyID']) : '';
     $fromFacultyID = isset($_POST['fromFacultyID']) ? trim($_POST['fromFacultyID']) : '';
     $courseTitle = isset($_POST['courseTitle']) ? trim($_POST['courseTitle']) : '';
@@ -641,10 +639,8 @@ if (isset($_POST['classroomObservationSubmit'])) {
     $semester = isset($_POST['semester']) ? trim($_POST['semester']) : '';
     $academic_year = isset($_POST['academic_year']) ? trim($_POST['academic_year']) : '';
 
-    // Exclude keys that are not part of the dynamic insert
     $excludeKeys = ['classroomObservationSubmit', 'courseTitle', 'toFaculty', 'lengthOfCourse', 'lengthOfObservation', 'fromFaculty', 'date', 'subjectMatter', 'doneStatus', 'toFacultyID', 'fromFacultyID', 'semester', 'academic_year'];
 
-    // Filter out unwanted keys using array_diff_key
     foreach (array_diff_key($_POST, array_flip($excludeKeys)) as $key => $value) {
         $cleanKey = str_replace('_', '', trim($key));
         $cleanValue = trim($value);
@@ -655,9 +651,7 @@ if (isset($_POST['classroomObservationSubmit'])) {
         }
     }
 
-    // Ensure we have columns to insert
     if (!empty($columns) && !empty($values)) {
-        // Add static columns for the form fields
         $columns[] = 'courseTitle';
         $columns[] = 'toFaculty';
         $columns[] = 'lengthOfCourse';
@@ -684,16 +678,12 @@ if (isset($_POST['classroomObservationSubmit'])) {
         $values[] = $semester;
         $values[] = $academic_year;
 
-        // Construct the placeholders for the prepared statement
         $placeholders = implode(', ', array_fill(0, count($columns), '?'));
 
-        // Prepare the SQL statement
         $sql = "INSERT INTO `classroomobservation` (" . implode(", ", $columns) . ") VALUES ($placeholders)";
 
-        // Prepare and execute the statement
         if ($stmt = mysqli_prepare($con, $sql)) {
-            // Bind parameters dynamically
-            $types = str_repeat('s', count($values)); // Assuming all values are strings
+            $types = str_repeat('s', count($values));
             mysqli_stmt_bind_param($stmt, $types, ...$values);
 
             if (mysqli_stmt_execute($stmt)) {
@@ -735,13 +725,12 @@ if (isset($_POST['studentSubmit'])) {
     $subject = isset($_POST['subject']) ? trim($_POST['subject']) : '';
 
     foreach ($_POST as $key => $value) {
-        // Filter out unnecessary keys
+
         if ($key !== 'studentSubmit' && $key !== 'toFaculty' && $key !== 'toFacultyID' && $key !== 'fromStudents' && $key !== 'fromStudentID' && $key !== 'semester' && $key !== 'academic_year' && $key !== 'date' && $key !== 'comment' && $key !== 'enrolled' && $key !== 'subject') { // Exclude these keys
-            // Remove underscores and trim whitespace from key and value
+
             $cleanKey = str_replace('_', '', trim($key));
             $cleanValue = trim($value);
 
-            // Check if cleanKey is not empty
             if (!empty($cleanKey)) {
                 $columns[] = mysqli_real_escape_string($con, $cleanKey);
                 $values[] = mysqli_real_escape_string($con, $cleanValue);
@@ -750,12 +739,12 @@ if (isset($_POST['studentSubmit'])) {
     }
 
 
-    // Create a dynamic query if we have valid columns
+
     if (!empty($columns) && !empty($values)) {
-        // Construct the SQL query, adding doneStatus directly
+
         $sql = "INSERT INTO `studentsform` (" . implode(", ", $columns) . ", toFaculty, toFacultyID, fromStudents, fromStudentID, semester, academic_year, date,comment, subject) VALUES ('" . implode("', '", $values) . "', '$toFaculty', '$toFacultyID', '$fromStudents', '$fromStudentID', '$semester', '$academic_year', '$date','$comment','$subject')";
 
-        // Execute the query
+
         if (mysqli_query($con, $sql)) {
             $SQLUpdate = "UPDATE `enrolled_subject` SET eval_status = '1' WHERE id ='$enrolled'";
             $SQLUpdate_query = mysqli_query($con, $SQLUpdate);

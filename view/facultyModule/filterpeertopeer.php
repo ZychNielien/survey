@@ -200,21 +200,18 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                             if (is_array($interpretationData['links'])) {
                                                 echo "<ul style='list-style: none; padding: 0; margin: 0;'>";
                                                 foreach ($interpretationData['links'] as $link) {
-                                                    // Ensure $link is an array with 'text' and optionally 'url'
                                                     if (is_array($link) && !empty($link['text'])) {
-                                                        $text = is_string($link['text']) ? htmlspecialchars($link['text']) : ''; // Ensure text is a string
+                                                        $text = is_string($link['text']) ? htmlspecialchars($link['text']) : '';
                                                         if (!empty($link['url']) && is_string($link['url'])) {
-                                                            // Ensure url is a string before using htmlspecialchars
                                                             $url = htmlspecialchars($link['url']);
                                                             echo "<li><a href=\"$url\" target=\"_blank\">$text</a></li>";
                                                         } else {
-                                                            echo "<li>$text</li>"; // Only display the text if no URL
+                                                            echo "<li>$text</li>";
                                                         }
                                                     }
                                                 }
                                                 echo "</ul>";
                                             } else {
-                                                // If links is not an array, ensure it's a string before processing
                                                 echo htmlspecialchars(is_string($interpretationData['links']) ? $interpretationData['links'] : '');
                                             }
                                         } else {

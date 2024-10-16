@@ -277,8 +277,7 @@ $userRow = mysqli_fetch_assoc($usersql_query);
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="exampleModalLabel">Change
-                        Password</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Change Password</h5>
                     <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -286,39 +285,43 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                     <form action="../../controller/changepassAdminFaculty.php" method="POST" class="needs-validation">
                         <div class="mb-3">
                             <label for="exampleInputPassword1" class="form-label">Current Password</label>
-                            <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
+                                <button type="button" class="btn btn-outline-secondary" id="toggleOldPass">Show</button>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="validationPassword" class="form-label">New Password</label>
-                            <input type="password" class="form-control" name="newpass" id="validationPassword">
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="newpass" id="validationPassword">
+                                <button type="button" class="btn btn-outline-secondary" id="toggleNewPass">Show</button>
+                            </div>
                             <div class="progress" style="height: 5px;">
                                 <div id="progressbar" class="progress-bar progress-bar-striped progress-bar-animated"
                                     role="progressbar" style="width: 10%;" aria-valuenow="50" aria-valuemin="0"
                                     aria-valuemax="100">
                                 </div>
-
                             </div>
                             <small id="passwordHelpBlock" class="form-text text-muted">
                                 Your password must be 8-20 characters long, must contain special characters "!@#$%&*_?",
                                 numbers, lower and upper letters only.
                             </small>
-
                             <div id="feedbackin" class="valid-feedback">
                                 Strong Password!
                             </div>
                             <div id="feedbackirn" class="invalid-feedback">
-                                Atlead 8 characters,
-                                Number, special character
-                                Caplital Letter and Small letters
+                                At least 8 characters, Number, special character, Capital Letter, and Small letters.
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="exampleInputPassword1" class="form-label">Re-enter New
-                                Password</label>
-                            <input type="password" class="form-control" name="conpass" id="exampleInputPassword3"
-                                disabled>
+                            <label for="exampleInputPassword3" class="form-label">Re-enter New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="conpass" id="exampleInputPassword3"
+                                    disabled>
+                                <button type="button" class="btn btn-outline-secondary" id="toggleReEnterPass"
+                                    disabled>Show</button>
+                            </div>
                         </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -373,10 +376,10 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                         passwordInput.addEventListener('keypress', function (event) {
                             const chr = String.fromCharCode(event.which);
                             const criteria = [
-                                /[!@#$%&*_?]/, // Special Character
-                                /[A-Z]/,       // Uppercase
-                                /[0-9]/,       // Numbers
-                                /[a-z]/        // Lowercase
+                                /[!@#$%&*_?]/,
+                                /[A-Z]/,
+                                /[0-9]/,
+                                /[a-z]/
                             ];
 
                             const isValidInput = criteria.some(regex => regex.test(chr));
@@ -422,33 +425,64 @@ $userRow = mysqli_fetch_assoc($usersql_query);
 
         });
         document.addEventListener("DOMContentLoaded", function () {
+            const oldPasswordInput = document.getElementById('exampleInputPassword1');
             const newPasswordInput = document.getElementById('validationPassword');
             const reEnterPasswordInput = document.getElementById('exampleInputPassword3');
-            const feedbackIn = document.getElementById('feedbackin');
-            const feedbackIrn = document.getElementById('feedbackirn');
-            const progressBar = document.getElementById('progressbar');
+            const toggleOldPass = document.getElementById('toggleOldPass');
+            const toggleNewPass = document.getElementById('toggleNewPass');
+            const toggleReEnterPass = document.getElementById('toggleReEnterPass');
 
-            // Regular expression for password validation
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*_?])[A-Za-z0-9!@#$%&*_?]{8,20}$/;
+            function isValidPassword(password) {
+                const minLength = password.length >= 8 && password.length <= 20;
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasLowerCase = /[a-z]/.test(password);
+                const hasNumbers = /\d/.test(password);
+                const hasSpecialChars = /[!@#$%&*_?]/.test(password);
+                return minLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChars;
+            }
+
+            toggleOldPass.addEventListener('click', function () {
+                if (oldPasswordInput.type === "password") {
+                    oldPasswordInput.type = "text";
+                    toggleOldPass.textContent = "Hide";
+                } else {
+                    oldPasswordInput.type = "password";
+                    toggleOldPass.textContent = "Show";
+                }
+            });
+
+            toggleNewPass.addEventListener('click', function () {
+                if (newPasswordInput.type === "password") {
+                    newPasswordInput.type = "text";
+                    toggleNewPass.textContent = "Hide";
+                } else {
+                    newPasswordInput.type = "password";
+                    toggleNewPass.textContent = "Show";
+                }
+            });
 
             newPasswordInput.addEventListener('input', function () {
-                const password = newPasswordInput.value;
-
-                // Validate password
-                if (passwordRegex.test(password)) {
-                    feedbackIn.style.display = 'block';
-                    feedbackIrn.style.display = 'none';
-                    progressBar.style.width = '100%'; // Change this according to your logic
-
-                    // Enable the re-enter password input if the new password is valid
-                    reEnterPasswordInput.disabled = false;
+                if (newPasswordInput.value) {
+                    if (isValidPassword(newPasswordInput.value)) {
+                        toggleReEnterPass.disabled = false;
+                        reEnterPasswordInput.disabled = false;
+                    } else {
+                        toggleReEnterPass.disabled = true;
+                        reEnterPasswordInput.disabled = true;
+                    }
                 } else {
-                    feedbackIn.style.display = 'none';
-                    feedbackIrn.style.display = 'block';
-                    progressBar.style.width = '10%'; // Reset or adjust according to your logic
-
-                    // Disable the re-enter password input if the new password is invalid
+                    toggleReEnterPass.disabled = true;
                     reEnterPasswordInput.disabled = true;
+                }
+            });
+
+            toggleReEnterPass.addEventListener('click', function () {
+                if (reEnterPasswordInput.type === "password") {
+                    reEnterPasswordInput.type = "text";
+                    toggleReEnterPass.textContent = "Hide";
+                } else {
+                    reEnterPasswordInput.type = "password";
+                    toggleReEnterPass.textContent = "Show";
                 }
             });
         });

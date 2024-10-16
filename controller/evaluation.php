@@ -19,15 +19,15 @@ include "../model/dbconnection.php";
         printWindow.document.close();
         printWindow.focus();
 
-        // Trigger print
+
         printWindow.print();
 
-        // Close the print window and modal immediately
+
         printWindow.close();
         $('#officialviewmodal').modal('hide');
     }
 
-    // SweetAlert Function
+
     function showSweetAlert(facultyName) {
         Swal.fire({
             title: `The Classroom Observation Form Has Been Successfully Generated`,
@@ -40,22 +40,20 @@ include "../model/dbconnection.php";
             cancelButtonText: 'Close',
         }).then((result) => {
             if (result.isConfirmed) {
-                printPartOfPage(143); // Call your print function
+                printPartOfPage(143);
             } else {
-                $('#officialviewmodal').modal('hide'); // Hide modal if closed
+                $('#officialviewmodal').modal('hide');
             }
         });
     }
 
-    // Show View Modal for Resident
+
     $('.view-btn').click(function (e) {
         e.preventDefault();
 
-        // Get the official_id and faculty name from the table row
         var official_id = $(this).closest('tr').find('.official_id').text();
         const facultyName = $(this).closest('tr').find('td[data-faculty]').data('faculty');
 
-        // Perform the AJAX request
         $.ajax({
             type: "POST",
             url: "../../view/adminModule/printClassroomObservation.php",
@@ -64,15 +62,12 @@ include "../model/dbconnection.php";
                 'official_id': official_id,
             },
             success: function (response) {
-                // Update modal content and show the modal
                 $('.officialviewmodal').html(response);
                 $('#officialviewmodal').modal('show');
 
-                // Call SweetAlert after showing the modal
-                showSweetAlert(facultyName); // Pass the faculty name to the SweetAlert function
+                showSweetAlert(facultyName);
             },
             error: function (xhr, status, error) {
-                // Handle errors
                 console.error("AJAX Error: " + status + ": " + error);
                 alert("An error occurred while processing your request. Please try again.");
             }
