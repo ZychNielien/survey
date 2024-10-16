@@ -99,7 +99,7 @@ include "components/navBar.php"
                     </div>
                 </form>
 
-                <div class="overflow-auto" style="max-height: 500px">
+                <div class="overflow-auto" style="max-height: 520px">
                     <!-- RESULT OF DATA FROM THE STUDENTS EVALUATION -->
                     <div id="result"></div>
                 </div>

@@ -189,9 +189,26 @@ include "components/navBar.php";
                                                         </div>
                                                     </th>
                                                 </tr>
+
+
+                                                <?php
+                                                $sqlSAYSelect = "SELECT * FROM academic_year_semester WHERE id =2";
+                                                $result = mysqli_query($con, $sqlSAYSelect);
+                                                $selectSAY = mysqli_fetch_assoc($result);
+
+                                                $semester = $selectSAY['semester'];
+                                                $academic_year = $selectSAY['academic_year'];
+
+                                                ?>
                                                 <input type="hidden" id="slot-key">
                                                 <input type="hidden" name="fromFacultyID"
                                                     value="<?php echo $userRow["faculty_Id"]; ?>">
+
+
+                                                <input type="hidden" name="semester"
+                                                    value="<?php echo $selectSAY['semester']; ?>">
+                                                <input type="hidden" name="academic_year"
+                                                    value="<?php echo $selectSAY['academic_year']; ?>">
                                                 <input type="hidden" name="toFacultyID" id="toFacultyID">
                                                 <tr>
                                                     <th colspan="2" class="col-6" style="color: #000 !important;">
@@ -563,7 +580,7 @@ include "components/navBar.php";
         if ($preferredScheduleSQL_query && mysqli_num_rows($preferredScheduleSQL_query) > 0) {
             while ($preferredScheduleRow = mysqli_fetch_assoc($preferredScheduleSQL_query)) {
                 ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
                     name: "<?php echo $preferredScheduleRow['first_name'] . ' ' . $preferredScheduleRow['last_name'] ?>",
                     schedule: {
                         "<?php echo $preferredScheduleRow['dayOfWeek'] ?>": [
@@ -572,7 +589,8 @@ include "components/navBar.php";
                         "<?php echo $preferredScheduleRow['dayOfWeekTwo'] ?>": [
                             { start: <?php echo $preferredScheduleRow['startTimeSecondary'] ?>, end: <?php echo $preferredScheduleRow['endTimeSecondary'] ?> } // 9 AM to 3 PM
                         ]
-                    }
+                    },
+                    subject: "<?php echo $preferredScheduleRow['courseClassroom'] ?>"
                 },
                 <?php
             }
@@ -862,7 +880,7 @@ include "components/navBar.php";
                         $('#toFacultyID').val(booking.fromFacultyID);
                         $('#booking-room').text(booking.room);
                         $('#facultyInput').val(booking.name);
-                        $('#courseInput').val(booking.course);
+                        $('#courseInput').val(booking.subject);
                         $('#slot-key').val(slotKey);
                         $('#dateInput').val(formattedDateText);
                         $('#cancel-booking-btn').data('slotKey', slotKey);
@@ -1032,6 +1050,7 @@ include "components/navBar.php";
                                 const slotKey1 = `${hour}-${currentDate.getTime()}-1`;
                                 bookedSlots[slotKey1] = {
                                     name: facultyName,
+                                    subject: faculty.subject,
                                     room: "Auto Booked",
                                     selectedDate: currentDate,
                                     startTime: hour,
@@ -1063,6 +1082,7 @@ include "components/navBar.php";
                                     const slotKey2 = `${hour}-${currentDate.getTime()}-2`;
                                     bookedSlots[slotKey2] = {
                                         name: facultyName,
+                                        subject: faculty.subject,
                                         room: "Auto Booked",
                                         selectedDate: currentDate,
                                         startTime: hour,

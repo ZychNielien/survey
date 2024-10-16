@@ -18,7 +18,10 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "admin") {
         exit();
     }
 }
-
+if (!isset($_SESSION["userid"])) {
+    header("location: ../loginModule/index.php");
+    exit();
+}
 
 
 $userId = $_SESSION["userid"];
@@ -209,6 +212,29 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                         <li>
                             <a href="#" class="linkName">
                                 Peer to Peer Evaluation Result
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="peertopeer.php" class="
+                    <?php
+                    if ($page == "peertopeer.php") {
+                        echo "linkName active";
+                    } else {
+                        echo "linkName";
+                    }
+                    ?>
+                    ">
+
+                        <i class="material-icons">group</i>
+                        <span>Maintenance Table</span>
+
+                    </a>
+                    <ul class="subMenu blank">
+                        <li>
+                            <a href="#" class="linkName">
+                                Maintenance Table
                             </a>
                         </li>
                     </ul>

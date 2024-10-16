@@ -15,6 +15,7 @@ if (isset($_POST['preferredSched'])) {
     $dayOfWeekTwo = $_POST['dayOfWeekTwo'];
     $startTimeSecondary = $_POST['startTimeSecondary'];
     $endTimeSecondary = $_POST['endTimeSecondary'];
+    $courseClassroom = $_POST['courseClassroom'];
 
     $checkQuery = "SELECT * FROM preferredschedule WHERE faculty_Id = ?";
     $stmt = $con->prepare($checkQuery);
@@ -29,11 +30,12 @@ if (isset($_POST['preferredSched'])) {
             endTimePreferred = ?, 
             dayOfWeekTwo = ?, 
             startTimeSecondary = ?, 
-            endTimeSecondary = ? 
+            endTimeSecondary = ?, 
+            courseClassroom = ? 
             WHERE faculty_Id = ?";
 
         $updateStmt = $con->prepare($updateQuery);
-        $updateStmt->bind_param("ssssssi", $dayOfWeek, $startTimePreferred, $endTimePreferred, $dayOfWeekTwo, $startTimeSecondary, $endTimeSecondary, $faculty_Id);
+        $updateStmt->bind_param("sssssssi", $dayOfWeek, $startTimePreferred, $endTimePreferred, $dayOfWeekTwo, $startTimeSecondary, $endTimeSecondary, $courseClassroom, $faculty_Id);
 
         if ($updateStmt->execute()) {
             $_SESSION['status'] = "Preferred schedule updated successfully.";
@@ -44,10 +46,10 @@ if (isset($_POST['preferredSched'])) {
         }
         $updateStmt->close();
     } else {
-        $insertQuery = "INSERT INTO preferredschedule (faculty_Id,first_name, last_name, dayOfWeek, startTimePreferred, endTimePreferred, dayOfWeekTwo, startTimeSecondary, endTimeSecondary) VALUES (?,?,?, ?, ?, ?, ?, ?, ?)";
+        $insertQuery = "INSERT INTO preferredschedule (faculty_Id,first_name, last_name, dayOfWeek, startTimePreferred, endTimePreferred, dayOfWeekTwo, startTimeSecondary, endTimeSecondary,courseClassroom) VALUES (?,?,?, ?, ?, ?, ?, ?, ?)";
 
         $insertStmt = $con->prepare($insertQuery);
-        $insertStmt->bind_param("sssssssss", $faculty_Id, $first_name, $last_name, $dayOfWeek, $startTimePreferred, $endTimePreferred, $dayOfWeekTwo, $startTimeSecondary, $endTimeSecondary);
+        $insertStmt->bind_param("ssssssssss", $faculty_Id, $first_name, $last_name, $dayOfWeek, $startTimePreferred, $endTimePreferred, $dayOfWeekTwo, $startTimeSecondary, $endTimeSecondary, $courseClassroom);
 
         if ($insertStmt->execute()) {
             $_SESSION['status'] = "Preferred schedule inserted successfully.";

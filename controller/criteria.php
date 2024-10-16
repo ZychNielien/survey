@@ -8,6 +8,37 @@ function sanitizeColumnName($name)
     return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
 }
 
+if (isset($_POST['setSAYClassroom'])) {
+    // Retrieve values from the POST request and sanitize them
+    $semesterSelectClassroom = mysqli_real_escape_string($con, $_POST['semesterSelectClassroom']);
+    $academicYearSelectClassroom = mysqli_real_escape_string($con, $_POST['academicYearSelectClassroom']);
+
+    // Check for empty values
+    if (empty($semesterSelectClassroom) || empty($academicYearSelectClassroom)) {
+        echo "Both semester and academic year must be selected.";
+        return; // Exit the script
+    }
+
+    // Prepare the SQL statement
+    $sql = "UPDATE `academic_year_semester` SET semester = '$semesterSelectClassroom', academic_year = '$academicYearSelectClassroom' WHERE id = 2";
+
+
+    // Execute the SQL query
+    $sql_query = mysqli_query($con, $sql);
+
+    // Check if the query was successful
+    if ($sql_query) {
+        $_SESSION['success'] = 'The semester and academic year have been set.';
+        header('location:../view/adminModule/questionsTab.php');
+    } else {
+        // Log the error for debugging purposes
+        error_log("SQL Error: " . mysqli_error($con));
+        echo "Error updating semester and academic year: " . mysqli_error($con);
+    }
+}
+
+
+
 // ADDING NEW CLASSROOM CATEGORY
 if (isset($_POST['addClassroomCategory'])) {
     $newCategorie = strtoupper($_POST['newCategory']);
@@ -443,7 +474,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_close($stmt);
     }
 
+    if (isset($_POST['peertopeerlinkId']) && isset($_POST['peertopeerlinkOne']) && isset($_POST['peertopeerlinkTwo']) && isset($_POST['peertopeerlinkThree'])) {
+        $linkId = $_POST['peertopeerlinkId'];
+        $linkOne = $_POST['peertopeerlinkOne'];  // Correct variable
+        $linkTwo = $_POST['peertopeerlinkTwo'];  // Correct variable
+        $linkThree = $_POST['peertopeerlinkThree'];  // Use linkThree for the third link
 
+        $sqlUpdate = "UPDATE `facultycategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
+        $stmt = mysqli_prepare($con, $sqlUpdate);
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+
+        if (mysqli_stmt_execute($stmt)) {
+            $_SESSION['success'] = 'Link Updated Successfully!';
+        } else {
+            echo "Error updating Link: " . mysqli_error($con);
+        }
+        mysqli_stmt_close($stmt);
+    }
+
+    if (isset($_POST['studentslinkId']) && isset($_POST['studentslinkOne']) && isset($_POST['studentslinkTwo']) && isset($_POST['studentslinkThree'])) {
+        $linkId = $_POST['studentslinkId'];
+        $linkOne = $_POST['studentslinkOne'];  // Correct variable
+        $linkTwo = $_POST['studentslinkTwo'];  // Correct variable
+        $linkThree = $_POST['studentslinkThree'];  // Use linkThree for the third link
+
+        $sqlUpdate = "UPDATE `studentscategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
+        $stmt = mysqli_prepare($con, $sqlUpdate);
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+
+        if (mysqli_stmt_execute($stmt)) {
+            $_SESSION['success'] = 'Link Updated Successfully!';
+        } else {
+            echo "Error updating Link: " . mysqli_error($con);
+        }
+        mysqli_stmt_close($stmt);
+    }
+
+    if (isset($_POST['classroomlinkId']) && isset($_POST['classroomlinkOne']) && isset($_POST['classroomlinkTwo']) && isset($_POST['classroomlinkThree'])) {
+        $linkId = $_POST['classroomlinkId'];
+        $linkOne = $_POST['classroomlinkOne'];  // Correct variable
+        $linkTwo = $_POST['classroomlinkTwo'];  // Correct variable
+        $linkThree = $_POST['classroomlinkThree'];  // Use linkThree for the third link
+
+        $sqlUpdate = "UPDATE `classroomcategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
+        $stmt = mysqli_prepare($con, $sqlUpdate);
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+
+        if (mysqli_stmt_execute($stmt)) {
+            $_SESSION['success'] = 'Link Updated Successfully!';
+        } else {
+            echo "Error updating Link: " . mysqli_error($con);
+        }
+        mysqli_stmt_close($stmt);
+    }
+
+    if (isset($_POST['vcaalinkId']) && isset($_POST['vcaalinkOne']) && isset($_POST['vcaalinkTwo']) && isset($_POST['vcaalinkThree'])) {
+        $linkId = $_POST['vcaalinkId'];
+        $linkOne = $_POST['vcaalinkOne'];  // Correct variable
+        $linkTwo = $_POST['vcaalinkTwo'];  // Correct variable
+        $linkThree = $_POST['vcaalinkThree'];  // Use linkThree for the third link
+
+        $sqlUpdate = "UPDATE `vcaacategories` SET linkOne = ?, linkTwo = ?, linkThree = ? WHERE id = ?";
+        $stmt = mysqli_prepare($con, $sqlUpdate);
+        mysqli_stmt_bind_param($stmt, 'sssi', $linkOne, $linkTwo, $linkThree, $linkId);  // Use correct types and order
+
+        if (mysqli_stmt_execute($stmt)) {
+            $_SESSION['success'] = 'Link Updated Successfully!';
+        } else {
+            echo "Error updating Link: " . mysqli_error($con);
+        }
+        mysqli_stmt_close($stmt);
+    }
 
 
 }
@@ -537,9 +638,11 @@ if (isset($_POST['classroomObservationSubmit'])) {
     $date = isset($_POST['date']) ? trim($_POST['date']) : '';
     $subjectMatter = isset($_POST['subjectMatter']) ? trim($_POST['subjectMatter']) : '';
     $doneStatus = isset($_POST['doneStatus']) ? trim($_POST['doneStatus']) : '';
+    $semester = isset($_POST['semester']) ? trim($_POST['semester']) : '';
+    $academic_year = isset($_POST['academic_year']) ? trim($_POST['academic_year']) : '';
 
     // Exclude keys that are not part of the dynamic insert
-    $excludeKeys = ['classroomObservationSubmit', 'courseTitle', 'toFaculty', 'lengthOfCourse', 'lengthOfObservation', 'fromFaculty', 'date', 'subjectMatter', 'doneStatus', 'toFacultyID', 'fromFacultyID'];
+    $excludeKeys = ['classroomObservationSubmit', 'courseTitle', 'toFaculty', 'lengthOfCourse', 'lengthOfObservation', 'fromFaculty', 'date', 'subjectMatter', 'doneStatus', 'toFacultyID', 'fromFacultyID', 'semester', 'academic_year'];
 
     // Filter out unwanted keys using array_diff_key
     foreach (array_diff_key($_POST, array_flip($excludeKeys)) as $key => $value) {
@@ -565,6 +668,8 @@ if (isset($_POST['classroomObservationSubmit'])) {
         $columns[] = 'doneStatus';
         $columns[] = 'toFacultyID';
         $columns[] = 'fromFacultyID';
+        $columns[] = 'semester';
+        $columns[] = 'academic_year';
 
         $values[] = $courseTitle;
         $values[] = $toFaculty;
@@ -576,6 +681,8 @@ if (isset($_POST['classroomObservationSubmit'])) {
         $values[] = $doneStatus;
         $values[] = $toFacultyID;
         $values[] = $fromFacultyID;
+        $values[] = $semester;
+        $values[] = $academic_year;
 
         // Construct the placeholders for the prepared statement
         $placeholders = implode(', ', array_fill(0, count($columns), '?'));
