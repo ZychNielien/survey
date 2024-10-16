@@ -3,15 +3,9 @@
 session_start();
 include "../model/dbconnection.php";
 
-if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
-
-  if (isset($_SESSION["user"]) && $_SESSION["user"] === "admin") {
-    header("location: ../adminModule/admindashboard.php");
-    exit();
-  } else if (isset($_SESSION["user"]) && $_SESSION["user"] === "faculty") {
-    header("location: ../facultyModule/dashboard.php");
-    exit();
-  }
+if (!isset($_SESSION['studentSRCode'])) {
+  header('Location: ../view/loginModule/index.php');
+  exit();
 }
 ?>
 
@@ -122,8 +116,8 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
         </div>
         <div class="row">
           <div class="col">
-            <p class="fw-bold">
-              <i class="fa-solid fa-play text-muted"></i> SERVICE MANAGEMENT
+            <p class="fw-bold"  id="usermajor2">
+              <i class="fa-solid fa-play text-muted"></i> <span id="usermajor"></span>
             </p>
           </div>
         </div>
@@ -184,31 +178,14 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
     <!-- START SECOND NAVBAR -->
     <div class="container-fluid bg-light p-4 d-flex justify-content-around shadow">
       <div>
-        <?php
-        $SQLEnrollment = "SELECT * FROM `academic_year_semester` WHERE id = 1";
-        $SQLEnrollment_query = mysqli_query($con, $SQLEnrollment);
-        $enrollment = mysqli_fetch_assoc($SQLEnrollment_query);
-
-        if ($enrollment['isOpen'] == 0) {
-          ?>
-          <button type="button" id="enroll-btn" class="btn btn-secondary d-flex align-items-center"
-            data-bs-target="#enroll_modal" data-bs-toggle="modal" disabled>
-            <h2><i class="fa-solid fa-desktop"></i></h2>
-            <h6 style="font-family: monospace;" class="px-2">Online
-              Registration<br>for First Semester</h6 style="font-family: monospace;">
-          </button>
-          <?php
-        } else {
-          ?>
+        
           <button type="button" id="enroll-btn" class="btn btn-success d-flex align-items-center"
             data-bs-target="#enroll_modal" data-bs-toggle="modal">
             <h2><i class="fa-solid fa-desktop"></i></h2>
             <h6 style="font-family: monospace;" class="px-2">Online
-              Registration<br>for First Semester</h6 style="font-family: monospace;">
+              Registration<br>for <span id="getSem2"></span> Semester</h6 style="font-family: monospace;">
           </button>
-          <?php
-        }
-        ?>
+          
 
 
 
@@ -216,7 +193,7 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
       </div>
       <h1 style="display: none;"><?php echo $_SESSION['studentSRCode'] ?></h1>
       <div id="major">
-        <button class="btn btn-success d-flex align-items-center">
+        <button class="btn btn-success d-flex align-items-center" data-bs-target="#major_modal" data-bs-toggle="modal">
           <h2><i class="fa-solid fa-graduation-cap"></i>
             <h6 style="font-family: monospace;" class="px-2">Choose A Major</h6>
         </button>
@@ -224,7 +201,7 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
     </div>
     <!-- END SECOND NAVBAR -->
     <!-- START ENROLLED TABLE -->
-    <div class="container bg-light d-flex align-items-center justify-content-center shadow" style="height: 60vh auto">
+    <div class="container bg-light d-flex align-items-center justify-content-center shadow" style="height: auto; min-height: 40vh">
       <div class="p-3">
         <h1 class="text-center" style="font-family: monospace">
           ENROLLED SUBJECTS
@@ -676,6 +653,48 @@ if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "student") {
     </div>
   </div>
   <!-- END ENROLL MODAL -->
+
+  <!-- START MAJOR MODAL -->
+  <div class="modal fade" id="major_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger">
+          <h5 class="modal-title text-light" id="enroll_modalLabel">Choose your Major</h5>
+          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form action="../controller/controller.php" method="POST">
+            <div class="p-3">
+              <div class="row mb-3">
+                <label for="srcode" class="form-label fw-bold">SR_CODE:</label>
+                <input type="text" name="srcode" class="form-control" value="<?php echo $_SESSION['studentSRCode'] ?>" readonly>
+              </div>
+              <div class="row">
+                <label for="major" class="form-label fw-bold">MAJOR:</label>
+                <select name="major" class="form-select">
+                  <option value="selected" selected>---Select Your major---</option>
+                  <option value="Service Management">Service Management</option>
+                  <option value="Network Technology">Network Technology</option>
+                  <option value="Business Analytics">Business Analytics</option>
+                </select>
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          
+            <div>
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
+                class="fa-regular fa-circle-xmark"></i> Close</button>
+            </div>
+            <div>
+              <button type="submit" name="submitMajor" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END MAJOR MODAL -->
 
   <script>
     $(document).ready(function () {

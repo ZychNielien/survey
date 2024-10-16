@@ -20,19 +20,57 @@ $(document).ready(function () {
     $('#maxunit').text('21');
   }
 
-  if(year == 'THIRD' && semester == 'FIRST'){
+
+  $.ajax({
+    url: '../controller/getMajor.php',
+    type: 'GET',
+    data: {srcode: srcode},
+    dataType: 'json',
+    success: function(data){
+      localStorage.setItem('GetMajor', JSON.stringify(data));
+    }
+  })
+  var getM = JSON.parse(localStorage.getItem("GetMajor"));
+  var getMajor = getM[0].major;
+
+
+  $.ajax({
+    url: '../controller/getSem.php',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data){
+      localStorage.setItem('GetSemester', JSON.stringify(data));
+    }
+  })
+  var getSem = JSON.parse(localStorage.getItem("GetSemester"));
+  var GetSems = getSem[0].semester;
+  $('#getSem, #getSem2').text(GetSems);
+
+
+
+  if(year == 'THIRD' && semester == 'FIRST' && getMajor == 0){
     $('#major').css('display', 'flex');
     Swal.fire({
       title: "Choose your Major",
-      text: "You need to choose your Major",
+      text: "Welcome new Third Year Student",
       icon: "warning",
       showCancelButton: true,
       cancelButtonText: "Close",
       cancelButtonColor: "#d33",
       showConfirmButton: false,
     });
+    $('#usermajor2').css('display', 'none');
   }else{
     $('#major').css('display', 'none');
+    $.ajax({
+      url: '../controller/getMajor.php',
+      type: 'GET',
+      data: {srcode: srcode},
+      dataType: 'json',
+      success: function(data){
+        $('#usermajor').text(data[0].major);
+      }
+    })
   }
 
   $.ajax({
@@ -101,6 +139,9 @@ $(document).ready(function () {
             },
           },
         ],
+        "language": {
+            "emptyTable": "No data available in this table"
+        },
         data: data,
       });
     },

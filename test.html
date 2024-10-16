@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Temperature Comparison Graph</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <canvas id="temperatureChart" width="400" height="200"></canvas>
+
+        <script>
+        const ctx = document.getElementById('temperatureChart').getContext('2d');
+        const temperatureChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: '10 Year Average',
+                    data: [29, 29.5, 29.2, 28.5, 28, 27, 26, 27, 28, 28.5, 29, 29.2],
+                    borderColor: 'blue',
+                    fill: false,
+                    pointStyle: 'circle',
+                    pointRadius: 5,
+                    pointBackgroundColor: 'blue'
+                },
+                {
+                    label: '2016 ENSO event',
+                    data: [30, 30.2, 29.8, 29.5, 28.8, 26.8, 25, 26.5, 28, 29.5, 30, 29.5],
+                    borderColor: 'red',
+                    fill: false,
+                    pointStyle: 'rect',
+                    pointRadius: 5,
+                    pointBackgroundColor: 'red'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 24,
+                        max: 31
+                    }
+                }
+            }
+        });
+    </script>
+    </body>
+</html>

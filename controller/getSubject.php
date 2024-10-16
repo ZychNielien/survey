@@ -117,7 +117,7 @@ if (isset($_GET['year_level'])) {
                     INNER JOIN semester SE
                         ON S.semester = SE.sem_id
                     WHERE F.sr_code = '$srcode'
-                    AND SE.semester = '$sem';";
+                    AND SE.semester = '$sem'";
 
     $query_run = mysqli_query($con, $query);
 
