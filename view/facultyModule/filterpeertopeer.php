@@ -5,26 +5,18 @@ include "../../model/dbconnection.php";
 session_start();
 
 $userId = $_SESSION["userid"];
-if (!isset($userId)) {
-    die("User not logged in.");
-}
-
 $usersql = "SELECT * FROM `instructor` WHERE faculty_Id = '$userId'";
 $usersql_query = mysqli_query($con, $usersql);
-if (!$usersql_query) {
-    die("Query Failed: " . mysqli_error($con));
-}
 $userRow = mysqli_fetch_assoc($usersql_query);
-if (!$userRow) {
-    die("No user found.");
-}
 
 $FacultyID = $userRow['faculty_Id'];
 
-// FUNCTION FOR VERBAL INTERPRETATION
-function getVerbalInterpretationAndLinks($averageRating)
+function getVerbalInterpretationAndLinks($averageRating, $category, $con)
 {
-    $result = ['interpretation' => '', 'links' => ''];
+    $result = [
+        'interpretation' => '',
+        'links' => []
+    ];
 
     if ($averageRating >= 0 && $averageRating < 1) {
         $result['interpretation'] = 'None';
@@ -32,25 +24,65 @@ function getVerbalInterpretationAndLinks($averageRating)
         $result['interpretation'] = 'Poor';
     } elseif ($averageRating >= 2 && $averageRating < 3) {
         $result['interpretation'] = 'Fair';
-        $result['links'] = 'No recommendation needed';
     } elseif ($averageRating >= 3 && $averageRating < 4) {
         $result['interpretation'] = 'Satisfactory';
-        $result['links'] = 'No recommendation needed';
     } elseif ($averageRating >= 4 && $averageRating < 5) {
         $result['interpretation'] = 'Very Satisfactory';
-        $result['links'] = 'No recommendation needed';
     } elseif ($averageRating == 5) {
         $result['interpretation'] = 'Outstanding';
-        $result['links'] = 'No recommendation needed';
     } else {
         $result['interpretation'] = 'No description';
-        $result['links'] = 'No links available';
+    }
+
+    $sqlCategoryLinks = "SELECT * FROM facultycategories";
+    $sqlCategoryLinks_query = mysqli_query($con, $sqlCategoryLinks);
+
+    $categoryLinks = [];
+
+    while ($categoryLinksRow = mysqli_fetch_assoc($sqlCategoryLinks_query)) {
+        $dbCategory = $categoryLinksRow['categories'];
+
+        $categoryLinks[$dbCategory] = [
+            'linkOne' => $categoryLinksRow['linkOne'],
+            'linkTwo' => $categoryLinksRow['linkTwo'],
+            'linkThree' => $categoryLinksRow['linkThree'],
+        ];
+    }
+
+    if ($averageRating < 2) {
+        if (!empty($categoryLinks[$category])) {
+
+            if (!empty($categoryLinks[$category]['linkOne'])) {
+                $result['links'][] = [
+                    'text' => 'Recommendation Link',
+                    'url' => htmlspecialchars($categoryLinks[$category]['linkOne'])
+                ];
+            }
+
+            if (!empty($categoryLinks[$category]['linkTwo'])) {
+                $result['links'][] = [
+                    'text' => 'Recommendation Link',
+                    'url' => htmlspecialchars($categoryLinks[$category]['linkTwo'])
+                ];
+            }
+            if (!empty($categoryLinks[$category]['linkThree'])) {
+                $result['links'][] = [
+                    'text' => 'Recommendation Link',
+                    'url' => htmlspecialchars($categoryLinks[$category]['linkThree'])
+                ];
+            }
+
+        }
+
+    }
+
+    if (empty($result['links'])) {
+        $result['links'][] = ['text' => 'No links available for this category', 'url' => ''];
     }
 
     return $result;
 }
 
-// FUNCTION FOR REMOVING UNDESIRABLE CHARACTERS
 function sanitizeColumnName($name)
 {
     return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
@@ -86,9 +118,9 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
 
         <div class="d-flex justify-content-between">
             <h5>(Semester:
-                <?php echo htmlspecialchars($subject['semester']); ?>,
+                <?php echo htmlspecialchars($subject['semester']) ?>,
                 Academic Year :
-                <?php echo htmlspecialchars($subject['academic_year']); ?> )
+                <?php echo htmlspecialchars($subject['academic_year']) ?> )
             </h5>
         </div>
 
@@ -109,9 +141,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
 
                 $sql = "SELECT * FROM `facultycategories`";
                 $sql_query = mysqli_query($con, $sql);
-                if (!$sql_query) {
-                    die("Query Failed: " . mysqli_error($con));
-                }
 
                 if (mysqli_num_rows($sql_query) > 0) {
                     while ($categoriesRow = mysqli_fetch_assoc($sql_query)) {
@@ -122,9 +151,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
 
                         $sqlcriteria = "SELECT * FROM `facultycriteria` WHERE facultyCategories = '$categories'";
                         $resultCriteria = mysqli_query($con, $sqlcriteria);
-                        if (!$resultCriteria) {
-                            die("Query Failed: " . mysqli_error($con));
-                        }
 
                         if (mysqli_num_rows($resultCriteria) > 0) {
                             $selectedSemester = $subject['semester'];
@@ -135,9 +161,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                             AND academic_year = '$selectedAcademicYear'";
 
                             $SQLFaculty_query = mysqli_query($con, $SQLFaculty);
-                            if (!$SQLFaculty_query) {
-                                die("Query Failed: " . mysqli_error($con));
-                            }
 
                             while ($ratingRow = mysqli_fetch_assoc($SQLFaculty_query)) {
                                 while ($criteriaRow = mysqli_fetch_assoc($resultCriteria)) {
@@ -165,13 +188,40 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                 $totalAverage += $averageRating;
                                 $categoryCount++;
 
-                                $interpretationData = getVerbalInterpretationAndLinks($averageRating);
+                                $interpretationData = getVerbalInterpretationAndLinks($averageRating, $categories, $con);
                                 ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($categories); ?></td>
                                     <td><?php echo number_format((float) $averageRating, 2, '.', ''); ?></td>
                                     <td><?php echo htmlspecialchars($interpretationData['interpretation']); ?></td>
-                                    <td><?php echo htmlspecialchars($interpretationData['links']); ?></td>
+                                    <td>
+                                        <?php
+                                        if ($averageRating < 2) {
+                                            if (is_array($interpretationData['links'])) {
+                                                echo "<ul style='list-style: none; padding: 0; margin: 0;'>";
+                                                foreach ($interpretationData['links'] as $link) {
+                                                    // Ensure $link is an array with 'text' and optionally 'url'
+                                                    if (is_array($link) && !empty($link['text'])) {
+                                                        $text = is_string($link['text']) ? htmlspecialchars($link['text']) : ''; // Ensure text is a string
+                                                        if (!empty($link['url']) && is_string($link['url'])) {
+                                                            // Ensure url is a string before using htmlspecialchars
+                                                            $url = htmlspecialchars($link['url']);
+                                                            echo "<li><a href=\"$url\" target=\"_blank\">$text</a></li>";
+                                                        } else {
+                                                            echo "<li>$text</li>"; // Only display the text if no URL
+                                                        }
+                                                    }
+                                                }
+                                                echo "</ul>";
+                                            } else {
+                                                // If links is not an array, ensure it's a string before processing
+                                                echo htmlspecialchars(is_string($interpretationData['links']) ? $interpretationData['links'] : '');
+                                            }
+                                        } else {
+                                            echo "No recommendation needed.";
+                                        }
+                                        ?>
+                                    </td>
                                 </tr>
                                 <?php
                             }
@@ -179,7 +229,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                     }
                 }
 
-                // CALCULATE OVERALL AVERAGE FOR THE SUBJECT
                 if ($categoryCount > 0) {
                     $finalAverageRating = $totalAverage / $categoryCount;
                     ?>
@@ -201,6 +250,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "<p>No subjects found for this faculty.</p>";
+    echo "No subjects found for this instructor.";
 }
 ?>

@@ -7,10 +7,20 @@ $path = parse_url($directoryURI, PHP_URL_PATH);
 $components = explode("/", $path);
 $page = $components[4];
 
-if (!isset($_SESSION["userid"])) {
-    header("location:../loginModule/index.php");
-}
+if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "faculty") {
 
+    if (isset($_SESSION["user"]) && $_SESSION["user"] === "admin") {
+        header("location: ../adminModule/admindashboard.php");
+        exit();
+    } else if (isset($_SESSION["user"]) && $_SESSION["user"] === "student") {
+        header("location: ../student_view.php");
+        exit();
+    }
+}
+if (!isset($_SESSION["userid"])) {
+    header("location: ../loginModule\index.php");
+    exit();
+}
 
 $userId = $_SESSION["userid"];
 

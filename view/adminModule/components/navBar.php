@@ -7,14 +7,25 @@ $path = parse_url($directoryURI, PHP_URL_PATH);
 $components = explode("/", $path);
 $page = $components[4];
 
+
+if (!isset($_SESSION["userid"]) || $_SESSION["user"] !== "admin") {
+
+    if (isset($_SESSION["user"]) && $_SESSION["user"] === "faculty") {
+        header("location: ../facultyModule/dashboard.php");
+        exit();
+    } else if (isset($_SESSION["user"]) && $_SESSION["user"] === "student") {
+        header("location: ../student_view.php");
+        exit();
+    }
+}
 if (!isset($_SESSION["userid"])) {
-    header("location:../loginModule/index.php");
+    header("location: ../loginModule/index.php");
+    exit();
 }
 
 
 $userId = $_SESSION["userid"];
 
-// Ensure the user ID is properly escaped to prevent SQL injection
 $userId = mysqli_real_escape_string($con, $userId);
 
 $usersql = "SELECT * FROM `instructor` WHERE faculty_Id = '$userId'";
@@ -206,6 +217,29 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                     </ul>
                 </li>
                 <li>
+                    <a href="peertopeer.php" class="
+                    <?php
+                    if ($page == "peertopeer.php") {
+                        echo "linkName active";
+                    } else {
+                        echo "linkName";
+                    }
+                    ?>
+                    ">
+
+                        <i class="material-icons">group</i>
+                        <span>Maintenance Table</span>
+
+                    </a>
+                    <ul class="subMenu blank">
+                        <li>
+                            <a href="#" class="linkName">
+                                Maintenance Table
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
                     <a href="#" data-bs-toggle="modal" data-bs-target="#changePassModal">
                         <i class="material-icons">vpn_key</i>
                         <span>Change Password</span>
@@ -291,9 +325,6 @@ $userRow = mysqli_fetch_assoc($usersql_query);
     <section class="nav-section">
         <i class="material-icons menuBox">menu</i>
     </section>
-
-    <!-- SCRIPTS -->
-    <!-- Jquery -->
 
     <!-- Sidebar -->
     <script>

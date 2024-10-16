@@ -70,12 +70,13 @@ include "../../model/dbconnection.php";
                                     <td><img src="../' . htmlspecialchars($row['image']) . '" style="height: 130px;"></td>
                                     <td>' . htmlspecialchars($row['first_name'] . ' ' . $row['last_name']) . '</td>
                                     <td>
-                                        <a href="#" class="btn btn-primary edit-btn" 
-                                            data-faculty-id="' . $row['faculty_Id'] . '"
-                                            data-first-name="' . htmlspecialchars($row['first_name']) . '"
-                                            data-last-name="' . htmlspecialchars($row['last_name']) . '"
-                                            data-image="' . htmlspecialchars($row['image']) . '">Edit</a>
-                                        <button class="btn btn-danger delete-btn" data-faculty-id="' . $row['faculty_Id'] . '">Delete</button>
+     <a href="#" class="btn btn-primary edit-btn" 
+   data-faculty-id="' . $row['faculty_Id'] . '"
+   data-first-name="' . htmlspecialchars($row['first_name']) . '"
+   data-last-name="' . htmlspecialchars($row['last_name']) . '"
+   data-image="../' . htmlspecialchars($row['image']) . '">Edit</a>
+<button class="btn btn-danger delete-btn" data-faculty-id="' . $row['faculty_Id'] . '">Delete</button>
+
                                     </td>
                                 </tr>
                             ';
@@ -163,19 +164,31 @@ include "../../model/dbconnection.php";
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editForm">
+                    <form id="editForm" enctype="multipart/form-data">
                         <input type="hidden" id="faculty_Id" name="faculty_Id">
+
+                        <!-- Image Display -->
+                        <div class="mb-3 text-center">
+                            <img src="" alt="Faculty Image" id="facultyImage" class="img-fluid mb-3"
+                                style="display: none; max-width: 100%; max-height: 150px; text-align:center;">
+                        </div>
+
+                        <!-- Image Upload Option -->
+                        <div class="mb-3">
+                            <label for="new_image" class="form-label">Upload New Image</label>
+                            <input type="file" class="form-control" id="new_image" name="new_image">
+                        </div>
+
+                        <!-- First Name Field -->
                         <div class="mb-3">
                             <label for="first_name" class="form-label">First Name</label>
                             <input type="text" class="form-control" id="first_name" name="first_name" required>
                         </div>
+
+                        <!-- Last Name Field -->
                         <div class="mb-3">
                             <label for="last_name" class="form-label">Last Name</label>
                             <input type="text" class="form-control" id="last_name" name="last_name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Image URL</label>
-                            <input type="text" class="form-control" id="image" name="image" required>
                         </div>
                     </form>
                 </div>
@@ -186,6 +199,10 @@ include "../../model/dbconnection.php";
             </div>
         </div>
     </div>
+
+
+
+
 
 </section>
 
@@ -233,16 +250,42 @@ include "../../model/dbconnection.php";
             }
         });
 
+        $('#new_image').on('change', function () {
+            var input = this;
+
+            // Ensure the input has a file
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                // Set the preview image source when file is loaded
+                reader.onload = function (e) {
+                    $('#facultyImage').attr('src', e.target.result).show(); // Show the image with new source
+                }
+
+                // Read the image file
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+
         // PARA MAKUHA YUNG MGA DATA NI FACULTY AT MAPUNTA SA EDIT MODAL
         $('.edit-btn').on('click', function () {
+            // Populate form fields
             $('#faculty_Id').val($(this).data('faculty-id'));
             $('#first_name').val($(this).data('first-name'));
             $('#last_name').val($(this).data('last-name'));
-            $('#image').val($(this).data('image'));
+
+            // Set the image URL and display the image
+            var imageUrl = $(this).data('image');
+            if (imageUrl) {
+                $('#facultyImage').attr('src', imageUrl).show();
+            } else {
+                $('#facultyImage').attr('src', '').hide();
+            }
 
             var editModal = new bootstrap.Modal(document.getElementById('editModal'));
             editModal.show();
         });
+
 
         // HANDLE NG DELETE BUTTON
         $('.delete-btn').on('click', function () {
@@ -289,14 +332,19 @@ include "../../model/dbconnection.php";
             });
         });
 
-        // HANDLE NG CHANGES NI ADMIN SA MGA FACULTY
         $('#saveChanges').on('click', function () {
-            const formData = $('#editForm').serialize() + '&action=update';
+            var form = $('#editForm')[0]; // Get the form element
+            var formData = new FormData(form); // Create FormData object
+
+            // Append additional data if needed
+            formData.append('action', 'update');
 
             $.ajax({
                 type: 'POST',
                 url: '../../controller/facultyQuery.php',
-                data: formData,
+                data: formData, // Use FormData object
+                processData: false, // Prevent jQuery from automatically processing the data
+                contentType: false, // Set content type to false for FormData
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
@@ -305,7 +353,7 @@ include "../../model/dbconnection.php";
                             title: 'Updated!',
                             text: 'Instructor details updated successfully.',
                         }).then(() => {
-                            location.reload();
+                            location.reload(); // Reload the page after success
                         });
                     } else {
                         Swal.fire({
@@ -325,6 +373,7 @@ include "../../model/dbconnection.php";
                 }
             });
         });
+
     });
 
     // HIDDEN INPUT NI IMAGE

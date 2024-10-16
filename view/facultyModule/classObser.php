@@ -18,6 +18,214 @@ include "components/navBar.php";
 
     <h3 class="fw-bold text-danger text-center">Classroom Observation</h3>
 
+    <?php
+$preferredScheduleQuery = "SELECT * FROM preferredschedule WHERE faculty_Id = ?";
+$stmt = $con->prepare($preferredScheduleQuery);
+$stmt->bind_param("s", $userRow['faculty_Id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$preferredSchedule = $result->fetch_assoc();
+?>
+
+<div class="modal fade" id="preferredSchedule" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="preferredScheduleLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title text-center text-white" id="preferredScheduleLabel">Preferred Schedule</h5>
+                <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="../../controller/facultyQuery.php">
+                    <div hidden>
+                        <input type="text" name="faculty_Id" value="<?php echo $userRow['faculty_Id'] ?>">
+                        <input type="text" name="first_name" value="<?php echo $userRow['first_name'] ?>">
+                        <input type="text" name="last_name" value="<?php echo $userRow['last_name'] ?>">
+                    </div>
+
+                    <?php
+                    $facultyID = $userRow['faculty_Id'];
+                    $courseSQL = "SELECT s.subject, s.subject_code
+                                  FROM instructor i
+                                  JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
+                                  JOIN subject s ON a.subject_id = s.subject_id
+                                  JOIN classroomObservation sf ON sf.toFacultyID = a.faculty_Id
+                                  WHERE i.faculty_Id = ?";
+                    $courseStmt = $con->prepare($courseSQL);
+                    $courseStmt->bind_param("s", $facultyID);
+                    $courseStmt->execute();
+                    $courseSQL_query = $courseStmt->get_result();
+                    ?>
+
+                    <h5 class="mt-3 fw-bold text-center">Please select subject</h5>
+                    <div class="d-flex justify-content-center flex-column">
+                        <select id="courseClassroom" name="courseClassroom" class="form-select" required>
+                            <option value="" disabled selected>Select Course</option>
+                            <?php while ($courseRow = $courseSQL_query->fetch_assoc()): ?>
+                                <option value="<?php echo htmlspecialchars($courseRow['subject_code']); ?>" 
+                                    <?php echo (isset($preferredSchedule['courseClassroom']) && $preferredSchedule['courseClassroom'] == htmlspecialchars($courseRow['subject_code'])) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($courseRow['subject_code']); ?> - <?php echo htmlspecialchars($courseRow['subject']); ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+
+                    <h5 class="mt-3 fw-bold text-center">Please select your primary preferred schedule.</h5>
+                    <div class="d-flex justify-content-between">
+                        <div class="mb-3">
+                            <select class="form-select" id="dayOfWeek" name="dayOfWeek" required>
+                                <option selected disabled value="">Select Day</option>
+                                <?php
+                                $daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                                foreach ($daysOfWeek as $day) {
+                                    $selected = (isset($preferredSchedule['dayOfWeek']) && $preferredSchedule['dayOfWeek'] == $day) ? 'selected' : '';
+                                    echo "<option value=\"$day\" $selected>$day</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select" id="startTimePreferred" name="startTimePreferred" required>
+                                <option selected disabled value="">Select Start Time</option>
+                                <?php for ($i = 7; $i <= 19; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['startTimePreferred']) && $preferredSchedule['startTimePreferred'] == $i) ? 'selected' : ''; ?>>
+                                        <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select" id="endTimePreferred" name="endTimePreferred" required>
+                                <option selected disabled value="">Select End Time</option>
+                                <?php for ($i = 7; $i <= 19; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['endTimePreferred']) && $preferredSchedule['endTimePreferred'] == $i) ? 'selected' : ''; ?>>
+                                        <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-3 fw-bold text-center">Please select your secondary preferred schedule.</h5>
+                    <div class="d-flex justify-content-between">
+                        <div class="mb-3">
+                            <select class="form-select" id="dayOfWeekTwo" name="dayOfWeekTwo" required>
+                                <option selected disabled value="">Select Day</option>
+                                <?php
+                                foreach ($daysOfWeek as $day) {
+                                    $selected = (isset($preferredSchedule['dayOfWeekTwo']) && $preferredSchedule['dayOfWeekTwo'] == $day) ? 'selected' : '';
+                                    echo "<option value=\"$day\" $selected>$day</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select" id="startTimeSecondary" name="startTimeSecondary" required>
+                                <option selected disabled value="">Select Start Time</option>
+                                <?php for ($i = 7; $i <= 19; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['startTimeSecondary']) && $preferredSchedule['startTimeSecondary'] == $i) ? 'selected' : ''; ?>>
+                                        <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select" id="endTimeSecondary" name="endTimeSecondary" required>
+                                <option selected disabled value="">Select End Time</option>
+                                <?php for ($i = 7; $i <= 19; $i++): ?>
+                                    <option value="<?php echo $i; ?>" <?php echo (isset($preferredSchedule['endTimeSecondary']) && $preferredSchedule['endTimeSecondary'] == $i) ? 'selected' : ''; ?>>
+                                        <?php echo date("g:i A", strtotime("$i:00")); ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success" name="preferredSched">Submit</button>
+   
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div class="modal fade" id="evaluationResults" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="evaluationResultsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title text-center text-white" id="evaluationResultsleLabel">Classroom Observation
+                        Results
+                    </h5>
+                    <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php
+
+                    function sanitizeColumnName($name)
+                    {
+                        return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
+                    }
+
+                    $FacultyID = $userRow['faculty_Id'];
+                    $sqlSAY = "SELECT DISTINCT  sf.semester, sf.academic_year 
+                            FROM classroomobservation sf
+                            JOIN instructor i ON sf.toFacultyID = i.faculty_Id
+                            WHERE sf.toFacultyID = '$FacultyID'";
+
+                    $sqlSAY_query = mysqli_query($con, $sqlSAY);
+
+                    $semesters = [];
+                    $academicYears = [];
+
+                    while ($academicYearSemester = mysqli_fetch_assoc($sqlSAY_query)) {
+                        $semesters[] = $academicYearSemester['semester'];
+                        $academicYears[] = $academicYearSemester['academic_year'];
+                    }
+
+                    $selectedSemester = isset($_POST['semester']) ? $_POST['semester'] : '';
+                    $selectedAcademicYear = isset($_POST['academic_year']) ? $_POST['academic_year'] : '';
+
+                    ?>
+
+                    <!-- FILTER FOR SEMESTER AND ACADEMIC YEAR -->
+                    <form method="POST" action="" class="mb-4 d-flex justify-content-evenly text-center">
+                        <div class="mb-3">
+                            <label for="academic_year" class="form-label">Academic Year:</label>
+                            <select id="academic_year" name="academic_year" class="form-select">
+                                <option value="">Select Academic Year</option>
+                                <?php foreach (array_unique($academicYears) as $year): ?>
+                                    <option value="<?php echo $year; ?>"><?php echo $year; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="semester" class="form-label">Semester:</label>
+                            <select id="semester" name="semester" class="form-select">
+                                <option value="">Select Semester</option>
+                                <?php foreach (array_unique($semesters) as $semester): ?>
+                                    <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </form>
+
+                    <div class="overflow-auto" style="max-height: 500px">
+                        <!-- RESULT OF DATA FROM THE STUDENTS EVALUATION -->
+                        <div id="classroomResult"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" name="preferredSched">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="d-flex justify-content-evenly align-items-center">
         <div class="form-group">
             <label for="date-select">Select Date:</label>
@@ -48,7 +256,15 @@ include "components/navBar.php";
         </div>
 
         <button class="btn btn-success" id="book-btn" disabled>Book</button>
-        <!-- <button class="btn btn-danger" id="clear-btn">Clear All Reservations</button> -->
+
+    </div>
+
+    <div class="my-3 d-flex justify-content-between">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+            data-bs-target="#evaluationResults">Classroom Observation Results</button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+            data-bs-target="#preferredSchedule">Preffered
+            Schedule for Autobooking</button>
     </div>
 
     <table id="reservation-table" class="table table-bordered mt-2 "
@@ -65,19 +281,39 @@ include "components/navBar.php";
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+
+                    <?php
+                    $facultyID = $userRow['faculty_Id'];
+                    $courseSQL = "SELECT s.subject, s.subject_code
+              FROM instructor i
+              JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
+              JOIN subject s ON a.subject_id = s.subject_id
+              JOIN classroomObservation sf ON sf.toFacultyID = a.faculty_Id
+              WHERE i.faculty_Id = '$facultyID'";
+
+                    $courseSQL_query = mysqli_query($con, $courseSQL);
+                    ?>
                     <form id="form" method="POST">
-                        <div class="form-group">
+                        <div class="form-group my-2">
                             <label for="course">Course Title:</label>
-                            <input type="text" class="form-control" id="course" required>
+                            <select id="course" name="course" class="form-select" required>
+                                <option value="" disabled selected>Select Course</option>
+                                <?php while ($courseRow = mysqli_fetch_assoc($courseSQL_query)): ?>
+                                    <option value="<?php echo htmlspecialchars($courseRow['subject_code']); ?>">
+                                        <?php echo htmlspecialchars($courseRow['subject_code']); ?> -
+                                        <?php echo htmlspecialchars($courseRow['subject']); ?>
+                                    </option>
+                                <?php endwhile; ?>
+                            </select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group my-2">
                             <label for="name">Instructor:</label>
                             <input type="text" class="form-control" id="name"
                                 value="<?php echo $userRow["first_name"] . ' ' . $userRow["last_name"]; ?>" required>
                             <input type="text" class="form-control" id="fromFacultyID"
-                                value="<?php echo $userRow["faculty_Id"]; ?>" required>
+                                value="<?php echo $userRow["faculty_Id"]; ?>" required hidden>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group my-2">
                             <label for="room">Room:</label>
                             <input type="text" class="form-control" id="room" required>
                         </div>
@@ -114,7 +350,62 @@ include "components/navBar.php";
 </section>
 
 
+<script>
+    $(document).ready(function () {
 
+        fetchFilteredResults();
+
+        $('#academic_year, #semester').change(function () {
+            fetchFilteredResults();
+        });
+
+        $('#startTimePreffered').change(function () {
+            var selectedStartTime = parseInt($(this).val());
+            var endTimeSelect = $('#endTimePreffered');
+
+            endTimeSelect.find('option').not(':first').remove();
+
+            for (var i = selectedStartTime + 1; i <= 19; i++) {
+                endTimeSelect.append('<option value="' + i + '">' + (i === 12 ? '12:00 PM' : (i <= 12 ? i + ':00 AM' : (i - 12) + ':00 PM')) + '</option>');
+            }
+        });
+
+    });
+
+    // FILTER FOR SEMESTER AND ACADEMIC YEAR
+    function fetchFilteredResults() {
+        var semester = $('#semester').val();
+        var academicYear = $('#academic_year').val();
+
+        if (semester === '' && academicYear === '') {
+            $.ajax({
+                type: 'POST',
+                url: 'filterclassroom.php',
+                data: {
+                    fetchAll: true
+                },
+                success: function (data) {
+
+                    $('#classroomResult').html(data);
+                },
+
+            });
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: 'filterclassroom.php',
+                data: {
+                    semester: semester,
+                    academic_year: academicYear
+                },
+                success: function (data) {
+
+                    $('#classroomResult').html(data);
+                },
+            });
+        }
+    }
+</script>
 
 <script>
     let bookedSlots = {};
@@ -271,21 +562,17 @@ include "components/navBar.php";
         const selectedDate = new Date($('#date-select').val());
         const startTime = parseInt($('#start-time-select').val());
 
-
         if (isNaN(startTime)) {
             $('#book-btn').prop('disabled', true);
             $('#slot-select').prop('disabled', true);
             return;
         }
 
-
         const slotKey1 = `${startTime}-${selectedDate.getTime()}-1`;
         const slotKey2 = `${startTime}-${selectedDate.getTime()}-2`;
 
-
         const isSlot1Booked = bookedSlots[slotKey1];
         const isSlot2Booked = bookedSlots[slotKey2];
-
 
         checkSlotAvailability();
     }
@@ -295,21 +582,17 @@ include "components/navBar.php";
         const startTime = parseInt($('#start-time-select').val());
         const endTime = parseInt($('#end-time-select').val());
 
-
         if (isNaN(startTime) || isNaN(endTime) || endTime <= startTime) {
             $('#book-btn').prop('disabled', true);
             $('#slot-select').prop('disabled', true);
             return;
         }
 
-
         const slotKey1 = `${startTime}-${selectedDate.getTime()}-1`;
         const slotKey2 = `${startTime}-${selectedDate.getTime()}-2`;
 
-
         const isSlot1Booked = bookedSlots[slotKey1];
         const isSlot2Booked = bookedSlots[slotKey2];
-
 
         if (isSlot1Booked && isSlot2Booked) {
             $('#slot-select').prop('disabled', true);
@@ -347,14 +630,12 @@ include "components/navBar.php";
         const selectedSlot = $('#slot-select').val();
         const evaluationStatus = $('#evaluationStatus').val();
 
-
         if (isNaN(endTime) || endTime <= startTime) {
             Swal.fire("Error!", "Please select a valid end time.", "error");
             return;
         }
 
         let allAvailable = true;
-
 
         for (let hour = startTime; hour < endTime; hour++) {
             const slotKey = `${hour}-${selectedDate.getTime()}-${selectedSlot}`;
@@ -405,7 +686,6 @@ include "components/navBar.php";
             evaluation_status: evaluationStatus
         };
 
-
         $.ajax({
             type: 'POST',
             url: '../../controller/classroomObservation.php',
@@ -423,10 +703,6 @@ include "components/navBar.php";
 
         $('#reservationModal').modal('hide');
     }
-
-
-
-
 
     function openCancelModal(slotKey) {
         slotToCancel = slotKey;
@@ -478,10 +754,6 @@ include "components/navBar.php";
         }
     }
 
-
-    // $(document).ready(function () {
-    //     $('#clear-btn').on('click', clearBookings);
-    // });
     function clearBookings() {
         Swal.fire({
             title: "Are you sure?",

@@ -381,7 +381,6 @@ include "../../model/dbconnection.php";
                     <select id="nameSelect" class="form-control">
                         <option value="">Select Faculty</option>
                         <?php
-
                         $facultySQL = "SELECT * FROM instructor";
                         $facultyQuery = mysqli_query($con, $facultySQL);
                         while ($facultyRow = mysqli_fetch_assoc($facultyQuery)) {
@@ -402,6 +401,7 @@ include "../../model/dbconnection.php";
                         <option value="SECOND">2nd Semester</option>
                     </select>
                 </div>
+
                 <div class="col-auto mx-3">
                     <select id="yearSelect" class="form-control">
                         <option value="">Select Academic Year</option>
@@ -415,11 +415,7 @@ include "../../model/dbconnection.php";
                         ?>
                     </select>
                 </div>
-                <div class="col-auto mx-3">
-                    <button id="filterButton" class="btn btn-primary">Filter</button>
-                </div>
             </div>
-
 
 
             <div class="overflow-auto" style="max-height: 520px">
@@ -455,11 +451,6 @@ include "../../model/dbconnection.php";
                         }
 
                         ?>
-
-
-
-
-
                     </tbody>
                 </table>
                 <h1 id="noResults" class="text-center text-danger" style="display: none;">No results found</h1>
@@ -655,7 +646,7 @@ include "../../model/dbconnection.php";
 
     document.getElementById('dateInput').value = formattedDate;
 
-    $("#filterButton").on("click", function () {
+    function filterTable() {
         var facultyId = $("#nameSelect").val();
         var semester = $("#semesterSelect").val();
         var year = $("#yearSelect").val();
@@ -675,6 +666,8 @@ include "../../model/dbconnection.php";
         if ($("#tableBody tr:visible").length === 0) {
             $("#noResults").show();
         }
-    });
+    }
+
+    $("#nameSelect, #semesterSelect, #yearSelect").on("change", filterTable);
 
 </script>

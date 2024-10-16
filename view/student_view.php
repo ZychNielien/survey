@@ -195,7 +195,7 @@ if (!isset($_SESSION['studentSRCode'])) {
       <div id="major">
         <button class="btn btn-success d-flex align-items-center" data-bs-target="#major_modal" data-bs-toggle="modal">
           <h2><i class="fa-solid fa-graduation-cap"></i>
-          <h6 style="font-family: monospace;" class="px-2">Choose A Major</h6>
+            <h6 style="font-family: monospace;" class="px-2">Choose A Major</h6>
         </button>
       </div>
     </div>
@@ -807,7 +807,7 @@ if (!isset($_SESSION['studentSRCode'])) {
 
   </script>
 
-  
+
 </body>
 
 </html>

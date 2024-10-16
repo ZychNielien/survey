@@ -118,12 +118,53 @@ include "components/navBar.php";
 
 <script>
 
+    const facultySchedules = [
+        {
+            name: "Donna Garcia",
+            schedule: {
+                "Tuesday": [
+                    { start: 8, end: 9 } // 11 AM to 4 PM
+                ],
+                "Wednesday": [
+                    { start: 9, end: 15 } // 9 AM to 3 PM
+                ]
+            }
+        },
+        {
+            name: "Jane Smith",
+            schedule: {
+                "Tuesday": [
+                    { start: 9, end: 12 } // 10 AM to 2 PM
+                ]
+            }
+        },
+        {
+            name: "May Smith",
+            schedule: {
+                "Tuesday": [
+                    { start: 7, end: 11 } // 10 AM to 2 PM
+                ]
+            }
+        },
+        {
+            name: "sad",
+            schedule: {
+                "Tuesday": [
+                    { start: 7, end: 9 } // 10 AM to 2 PM
+                ],
+                "Wednesday": [
+                    { start: 9, end: 12 } // 9 AM to 3 PM
+                ]
+            }
+        }
+    ];
+
+
     let bookedSlots = {};
     let slotToCancel = null;
 
     $(document).ready(function () {
         const today = new Date().toISOString().split('T')[0];
-        $('#date-select-auto').attr('min', today).val(today);
         $('#date-select').attr('min', today).val(today);
         loadBookings();
         createReservationTable();
@@ -162,7 +203,7 @@ include "components/navBar.php";
 
     function createReservationTable() {
         const selectedDate = new Date($('#date-select').val());
-        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const headerRow = $('<tr>').addClass('bg-danger text-white py-3').css('border', '2px solid white').append($('<th rowspan="2" style="vertical-align: middle">DATE / TIME</th>'));
 
         for (let i = 0; i < 2; i++) {
@@ -306,6 +347,7 @@ include "components/navBar.php";
             });
         }
     }
+
     function openForm() {
         $('#reservationModal').modal('show');
     }
@@ -370,30 +412,6 @@ include "components/navBar.php";
         $('#reservationModal').modal('hide');
     }
 
-    $(document).ready(function () {
-        const today = new Date();
-        const todayString = today.toISOString().split("T")[0];
-        $('#date-select-auto').attr('min', todayString).val(todayString);
-
-
-        const selectedDate = new Date($('#date-select-auto').val());
-        if (selectedDate.toDateString() === today.toDateString()) {
-            if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                autoBookThreeHours(selectedDate);
-            }
-        }
-
-
-        $('#date-select-auto').on('change', function () {
-            const selectedDate = new Date($(this).val());
-            if (selectedDate.toDateString() === today.toDateString()) {
-                if (!hasExistingBookingBeforeDate(selectedDate) && !hasBookingForSelectedDate(selectedDate)) {
-                    autoBookThreeHours(selectedDate);
-                }
-            }
-        });
-    });
-
     function hasExistingBookingBeforeDate(date) {
 
         const userName = "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>";
@@ -422,60 +440,199 @@ include "components/navBar.php";
         return false;
     }
 
-    function autoBookThreeHours(selectedDate) {
-        let slotFound = false;
+    $(document).ready(function () {
+        // Set the value of #date-select-auto to today's date
+        const today = new Date();
+        const todayString = today.toISOString().split("T")[0];
+        $('#date-select-auto');
 
+        // Trigger auto-booking on page load
+        checkAndAutoBook();
 
-        for (let hour = 7; hour <= 16; hour++) {
-            const slotKey1 = `${hour}-${selectedDate.getTime()}-1`;
-            const slotKey2 = `${hour}-${selectedDate.getTime()}-2`;
+        // Re-trigger auto-booking when the date changes
+        $('#date-select-auto').on('change', function () {
+            checkAndAutoBook();
+        });
+    });
 
+    function checkAndAutoBook() {
+        const selectedDate = new Date($('#date-select-auto').val());
 
-            if (!bookedSlots[slotKey1] && !bookedSlots[`${hour + 1}-${selectedDate.getTime()}-1`] && !bookedSlots[`${hour + 2}-${selectedDate.getTime()}-1`]) {
-                bookThreeHourSlot(hour, 1, selectedDate);
-                slotFound = true;
-                break;
+        facultySchedules.forEach(faculty => {
+            if (!hasBookingForSelectedDate(selectedDate, faculty.name)) {
+                console.log("Triggering auto-booking for", faculty.name, "on", selectedDate.toDateString());
+                autoBookFullRange(selectedDate, faculty.name);
+            } else {
+                console.log("Booking already exists for", faculty.name, "on", selectedDate.toDateString());
+            }
+        });
+    }
+
+    function hasBookingForSelectedDate(selectedDate, facultyName) {
+        for (let key in bookedSlots) {
+            const bookingDate = new Date(parseInt(key.split('-')[1]));
+            if (bookingDate.toDateString() === selectedDate.toDateString() && bookedSlots[key].name === facultyName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function isBookedInRange(facultyName, startDate, endDate) {
+        return Object.entries(bookedSlots).some(([key, slot]) => {
+            const bookedDate = new Date(parseInt(key.split('-')[0]));
+            return slot.name === facultyName && bookedDate >= startDate && bookedDate <= endDate;
+        });
+    }
+
+    function isBookedThisWeek(facultyName, selectedDate) {
+        const startOfWeek = new Date(selectedDate);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Set to Sunday
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // Set to Saturday
+
+        console.log(`Checking bookings for ${facultyName} from ${startOfWeek.toDateString()} to ${endOfWeek.toDateString()}`);
+
+        for (let date = startOfWeek; date <= endOfWeek; date.setDate(date.getDate() + 1)) {
+            const slotKey1 = `${date.getTime()}-1`;
+            const slotKey2 = `${date.getTime()}-2`;
+
+            if ((bookedSlots[slotKey1]?.name === facultyName) || (bookedSlots[slotKey2]?.name === facultyName)) {
+                console.log(`${facultyName} is already booked this week.`);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function autoBookFullRange(selectedDate, facultyName) {
+        if (isBookedThisWeek(facultyName, selectedDate)) {
+            console.log(`${facultyName} cannot be booked again this week.`);
+            return;
+        }
+
+        const faculty = facultySchedules.find(f => f.name === facultyName);
+        if (!faculty) {
+            console.log(`Faculty ${facultyName} not found.`);
+            return;
+        }
+
+        let hasBookedThisWeek = false;
+        let scheduleFound = false;
+
+        for (let i = 0; i <= 6; i++) {
+            if (hasBookedThisWeek) break;
+
+            const currentDate = new Date(selectedDate);
+            currentDate.setDate(selectedDate.getDate() + i);
+            const dayOfWeek = currentDate.toLocaleString('default', { weekday: 'long' });
+
+            console.log(`Attempting to book for ${facultyName} on ${dayOfWeek} (${currentDate.toDateString()})`);
+
+            for (const [day, slots] of Object.entries(faculty.schedule)) {
+                if (day === dayOfWeek) {
+                    scheduleFound = true;
+                    let slot1Booked = false;
+
+                    let canBookInSlot1 = true;
+                    let bookedHoursSlot1 = [];
+
+                    for (const slot of slots) {
+                        const { start, end } = slot;
+                        for (let hour = start; hour < end; hour++) {
+                            const slotKey1 = `${hour}-${currentDate.getTime()}-1`;
+                            if (bookedSlots[slotKey1]) {
+                                canBookInSlot1 = false;
+                                break;
+                            }
+                            bookedHoursSlot1.push(hour);
+                        }
+                        if (!canBookInSlot1) break;
+                    }
+
+                    if (canBookInSlot1) {
+                        for (const hour of bookedHoursSlot1) {
+                            const slotKey1 = `${hour}-${currentDate.getTime()}-1`;
+                            bookedSlots[slotKey1] = {
+                                name: facultyName,
+                                room: "Auto Booked",
+                                selectedDate: currentDate,
+                                startTime: hour,
+                                endTime: hour + 1,
+                                evaluationStatus: 'Pending',
+                                isEvaluated: false
+                            };
+                        }
+                        slot1Booked = true;
+                        console.log(`Booked ${facultyName} in Slot 1 on ${currentDate.toDateString()} from ${bookedHoursSlot1[0]} to ${bookedHoursSlot1[bookedHoursSlot1.length - 1] + 1}.`);
+                        hasBookedThisWeek = true;
+                        break;
+                    }
+
+                    if (!slot1Booked) {
+                        let bookedHoursSlot2 = [];
+                        for (const slot of slots) {
+                            const { start, end } = slot;
+                            for (let hour = start; hour < end; hour++) {
+                                const slotKey2 = `${hour}-${currentDate.getTime()}-2`;
+                                if (!bookedSlots[slotKey2]) {
+                                    bookedHoursSlot2.push(hour);
+                                }
+                            }
+                        }
+
+                        if (bookedHoursSlot2.length > 0) {
+                            for (const hour of bookedHoursSlot2) {
+                                const slotKey2 = `${hour}-${currentDate.getTime()}-2`;
+                                bookedSlots[slotKey2] = {
+                                    name: facultyName,
+                                    room: "Auto Booked",
+                                    selectedDate: currentDate,
+                                    startTime: hour,
+                                    endTime: hour + 1,
+                                    evaluationStatus: 'Pending',
+                                    isEvaluated: false
+                                };
+                            }
+                            console.log(`Booked ${facultyName} in Slot 2 on ${currentDate.toDateString()} from ${bookedHoursSlot2[0]} to ${bookedHoursSlot2[bookedHoursSlot2.length - 1] + 1}.`);
+                            hasBookedThisWeek = true;
+                            break;
+                        }
+                    }
+                }
             }
 
-
-            if (!bookedSlots[slotKey2] && !bookedSlots[`${hour + 1}-${selectedDate.getTime()}-2`] && !bookedSlots[`${hour + 2}-${selectedDate.getTime()}-2`]) {
-                bookThreeHourSlot(hour, 2, selectedDate);
-                slotFound = true;
-                break;
+            if (!scheduleFound) {
+                console.log(`No schedule found for ${facultyName} on ${dayOfWeek}.`);
             }
         }
 
-        if (!slotFound) {
-            Swal.fire("Error", "No available 3-hour slot found.", "error");
+        if (!hasBookedThisWeek) {
+            console.log(`${facultyName} was not able to be booked for any day this week.`);
         }
+
+        saveBookings();
+        createReservationTable();
     }
 
     function bookThreeHourSlot(startHour, slotNumber, selectedDate) {
-        const name = $('#name').val();
-        const course = $('#course').val();
-        const room = $('#room').val();
-        const evaluationStatus = $('#evaluationStatus').val();
+        const endHour = startHour + 3; // Book for 3 hours
 
-
-        for (let hour = startHour; hour < startHour + 3; hour++) {
+        for (let hour = startHour; hour < endHour; hour++) {
             const slotKey = `${hour}-${selectedDate.getTime()}-${slotNumber}`;
             bookedSlots[slotKey] = {
-                name,
-                course,
-                room,
-                selectedDate,
+                name: "<?php echo htmlspecialchars($userRow['first_name'] . ' ' . $userRow['last_name'], ENT_QUOTES); ?>",
+                course: "Auto Booked",
+                room: "Default Room",
+                selectedDate: selectedDate,
                 startTime: startHour,
-                endTime: startHour + 3,
-                evaluationStatus,
+                endTime: endHour,
+                evaluationStatus: "Pending",
                 isEvaluated: false
             };
         }
 
-
-        saveBookings();
-        createReservationTable();
-
-        Swal.fire("Success!", "3-hour slot successfully booked!", "success");
+        saveBookings(); // Save the new booking
     }
 
 

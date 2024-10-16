@@ -2,107 +2,107 @@
 include "components/navBar.php";
 include "../../model/dbconnection.php";
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];
 
-// TOGGLE FOR OPENING AND CLOSING EVALUATION FOR PEER TO PEER
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($action === 'assign') {
 
-    if (isset($_POST['action'])) {
-        $action = $_POST['action'];
-
-        if ($action === 'assign') {
-
-            $semester = $_POST['semester'] ?? null;
-            $academicYear = $_POST['academicYear'] ?? null;
+        $semester = $_POST['semester'] ?? null;
+        $academicYear = $_POST['academicYear'] ?? null;
 
 
-            $sql = "SELECT faculty_Id FROM instructor";
-            $result = $con->query($sql);
+        $sql = "SELECT faculty_Id FROM instructor";
+        $result = $con->query($sql);
 
-            if ($result->num_rows > 0) {
-                $userIds = [];
-                while ($row = $result->fetch_assoc()) {
-                    $userIds[] = $row['faculty_Id'];
-                }
+        if ($result->num_rows > 0) {
+            $userIds = [];
+            while ($row = $result->fetch_assoc()) {
+                $userIds[] = $row['faculty_Id'];
+            }
 
-                foreach ($userIds as $userId) {
+            foreach ($userIds as $userId) {
 
-                    $filteredIds = array_filter($userIds, function ($id) use ($userId) {
-                        return $id != $userId;
-                    });
+                $filteredIds = array_filter($userIds, function ($id) use ($userId) {
+                    return $id != $userId;
+                });
 
-                    if (count($filteredIds) >= 3) {
+                if (count($filteredIds) >= 3) {
 
-                        $randomIds = array_rand(array_flip($filteredIds), 5);
-                        foreach ($randomIds as $randomId) {
-                            $insertStmt = $con->prepare("INSERT INTO randomfaculty (faculty_Id, random_Id, semester, academic_year) VALUES (?, ?, ?, ?)");
-                            if ($insertStmt === false) {
-                                echo json_encode(["status" => "error", "message" => "Error in prepare: " . $con->error]);
-                                exit;
-                            }
-                            $insertStmt->bind_param("iiss", $userId, $randomId, $semester, $academicYear);
-                            if (!$insertStmt->execute()) {
-                                echo json_encode(["status" => "error", "message" => "Execute failed: " . $insertStmt->error]);
-                                exit;
-                            }
+                    $randomIds = array_rand(array_flip($filteredIds), 5);
+                    foreach ($randomIds as $randomId) {
+                        $insertStmt = $con->prepare("INSERT INTO randomfaculty (faculty_Id, random_Id, semester, academic_year) VALUES (?, ?, ?, ?)");
+                        if ($insertStmt === false) {
+                            echo json_encode(["status" => "error", "message" => "Error in prepare: " . $con->error]);
+                            exit;
+                        }
+                        $insertStmt->bind_param("iiss", $userId, $randomId, $semester, $academicYear);
+                        if (!$insertStmt->execute()) {
+                            echo json_encode(["status" => "error", "message" => "Execute failed: " . $insertStmt->error]);
+                            exit;
                         }
                     }
                 }
-                echo json_encode(["status" => "success", "message" => "Tatlong random IDs na-assign sa bawat user!"]);
-            } else {
-                echo json_encode(["status" => "error", "message" => "Walang users na natagpuan."]);
             }
-        } elseif ($_POST['action'] === 'clear') {
-            $clearSql = "DELETE FROM randomfaculty";
-            if ($con->query($clearSql) === TRUE) {
-
-                echo json_encode(["status" => "success", "message" => "Nabura ang lahat ng random IDs at ang mga napiling Academic Year at Semester."]);
-            } else {
-                echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
-            }
+            $_SESSION['toggle_state'] = 'assign';
+            echo json_encode(["status" => "success", "message" => "Tatlong random IDs na-assign sa bawat user!"]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Walang users na natagpuan."]);
         }
-        exit;
-    }
+    } elseif ($_POST['action'] === 'clear') {
+        $clearSql = "DELETE FROM randomfaculty";
+        if ($con->query($clearSql) === TRUE) {
+            $_SESSION['toggle_state'] = 'clear';
 
-    if (isset($_POST['studentaction'])) {
-        $action = $_POST['studentaction'];
-
-        if ($action === 'assign') {
-            $semester = $_POST['semester'] ?? null;
-            $academicYear = $_POST['academicYear'] ?? null;
-
-            if (is_null($semester) || is_null($academicYear)) {
-                echo json_encode(["status" => "error", "message" => "Semester and Academic Year are required."]);
-                exit;
-            }
-
-            $updateSQL = "UPDATE `academic_year_semester` SET semester=?, academic_year=?, isOpen='1' WHERE id=1";
-            $stmt = $con->prepare($updateSQL);
-            if ($stmt) {
-                $stmt->bind_param("ss", $semester, $academicYear);
-                $success = $stmt->execute();
-                $stmt->close();
-
-                if ($success) {
-
-                    echo json_encode(["status" => "success", "message" => "Evaluation opened."]);
-                } else {
-                    echo json_encode(["status" => "error", "message" => "Failed to update semester and academic year."]);
-                }
-            } else {
-                echo json_encode(["status" => "error", "message" => "Failed to prepare the SQL statement."]);
-            }
-
-        } elseif ($action === 'clear') {
-            $clearSql = "UPDATE `academic_year_semester` SET semester = '', academic_year = '', isOpen = '0' WHERE id=1";
-            if ($con->query($clearSql) === TRUE) {
-
-                echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
-            } else {
-                echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
-            }
+            echo json_encode(["status" => "success", "message" => "Nabura ang lahat ng random IDs at ang mga napiling Academic Year at Semester."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
         }
-        exit;
     }
+    exit;
+}
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
+
+    $action = $_POST['studentaction'];
+
+    if ($action === 'assign') {
+        $semester = $_POST['semester'] ?? null;
+        $academicYear = $_POST['academicYear'] ?? null;
+
+        if (is_null($semester) || is_null($academicYear)) {
+            echo json_encode(["status" => "error", "message" => "Semester and Academic Year are required."]);
+            exit;
+        }
+
+        $updateSQL = "UPDATE `academic_year_semester` SET semester=?, academic_year=?, isOpen='1' WHERE id=1";
+        $stmt = $con->prepare($updateSQL);
+        if ($stmt) {
+            $stmt->bind_param("ss", $semester, $academicYear);
+            $success = $stmt->execute();
+            $stmt->close();
+
+            if ($success) {
+
+                echo json_encode(["status" => "success", "message" => "Evaluation opened."]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Failed to update semester and academic year."]);
+            }
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed to prepare the SQL statement."]);
+        }
+
+    } elseif ($action === 'clear') {
+        $clearSql = "UPDATE `academic_year_semester` SET semester = '', academic_year = '', isOpen = '0' WHERE id=1";
+        if ($con->query($clearSql) === TRUE) {
+
+            echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
+        }
+    }
+    exit;
+
 }
 
 ?>
@@ -179,7 +179,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Faculty Evaluation Criteria
                 for Students</button>
             <button class="nav-link fs-5" id="nav-links-tab" data-bs-toggle="tab" data-bs-target="#nav-links"
-                type="button" role="tab" aria-controls="nav-links" aria-selected="false">Links for
+                type="button" role="tab" aria-controls="nav-links" aria-selected="false">Subject
+                Recommendations</button>
+            <button class="nav-link fs-5" id="nav-categoriesLinks-tab" data-bs-toggle="tab"
+                data-bs-target="#nav-categoriesLinks" type="button" role="tab" aria-controls="nav-categoriesLinks"
+                aria-selected="false">Categories
                 Recommendations</button>
         </div>
     </nav>
@@ -192,7 +196,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- CLASSROOM EVALUATION PANEL -->
         <div class="tab-pane fade active show" id="nav-classroom" role="tabpanel" aria-labelledby="nav-classroom-tab">
 
-            <div class="d-flex justify-content-end mb-3 ">
+            <div class="d-flex justify-content-between mb-3 ">
+                <div>
+                    <?php
+
+                    $sqlSAYSelect = "SELECT * FROM academic_year_semester WHERE id =2";
+                    $result = mysqli_query($con, $sqlSAYSelect);
+                    $selectSAY = mysqli_fetch_assoc($result);
+
+                    $semester = $selectSAY['semester'];
+                    $academic_year = $selectSAY['academic_year'];
+                    ?>
+
+                    <form action="../../controller/criteria.php" method="POST">
+                        <div class="d-flex px-3">
+                            <div class="d-flex flex-column align-items-center px-2">
+                                <select id="semesterSelectClassroom" name="semesterSelectClassroom" class="form-select"
+                                    required>
+                                    <option value="" disabled>Select Semester</option>
+                                    <option value="FIRST" <?php echo (isset($semester) && $semester === 'FIRST') ? 'selected' : ''; ?>>1st Semester</option>
+                                    <option value="SECOND" <?php echo (isset($semester) && $semester === 'SECOND') ? 'selected' : ''; ?>>2nd Semester</option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex flex-column align-items-center px-2">
+                                <select id="academicYearSelectClassroom" name="academicYearSelectClassroom"
+                                    class="form-select" required>
+                                    <option value="" disabled>Select Academic Year</option>
+                                    <?php
+                                    $currentYear = date("Y");
+                                    $nextYear = $currentYear + 3; // Extend three years into the future
+                                    
+                                    // Generate future academic year options
+                                    for ($year = $currentYear; $year <= $nextYear; $year++) {
+                                        // Check if this year is the same as the one from the database
+                                        $value = "$year-" . ($year + 1);
+                                        $selected = (isset($academic_year) && $academic_year === $value) ? 'selected' : '';
+                                        echo "<option value='$value' $selected>$year - " . ($year + 1) . "</option>";
+                                    } ?>
+                                    </option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-success float-right mx-3" type="submit"
+                                name="setSAYClassroom">Set</button>
+                        </div>
+
+                    </form>
+
+                </div>
                 <div>
                     <button class="btn btn-success float-right mx-3" data-bs-toggle="modal"
                         data-bs-target="#classroomCategoriesModal">+ Categories</button>
@@ -921,6 +973,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
+        <!-- SUBJECT LINKS -->
         <div class="tab-pane fade " id="nav-links" role="tabpanel" aria-labelledby="nav-links-tab">
             <div class="d-flex justify-content-between mb-3">
                 <div class="mb-3 mx-5  w-100">
@@ -1004,6 +1057,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
+        <!-- UPDATE SUBJECT LINKS MODAL -->
         <div class="modal fade" id="linksModal" tabindex="-1" aria-labelledby="linksModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -1041,7 +1095,460 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
+        <!-- CATEGORIES LINKS -->
+        <div class="tab-pane fade " id="nav-categoriesLinks" role="tabpanel" aria-labelledby="nav-categoriesLinks-tab">
 
+            <div class="overflow-auto" style="max-height: 580px">
+
+                <!-- PEER TO PEER EVALUATION CATEGORIES LINKS -->
+                <div class="my-3">
+                    <h4 class="px-3 fw-bold">Peer to Peer Evaluation Links</h4>
+                    <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
+                        <thead>
+                            <tr class="bg-danger text-center align-middle">
+                                <th>Category</th>
+                                <th>Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sql = "SELECT * FROM `facultycategories`";
+                            $result = mysqli_query($con, $sql);
+
+                            if ($result) {
+                                while ($subjectResult = mysqli_fetch_assoc($result)) {
+                                    ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td>
+                                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                                <?php
+                                                // Check and display linkOne
+                                                if (!empty($subjectResult['linkOne'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                            target="_blank">Link One</a></li>
+                                                    <?php
+                                                }
+
+                                                // Check and display linkTwo
+                                                if (!empty($subjectResult['linkTwo'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                            target="_blank">Link Two</a></li>
+                                                    <?php
+                                                }
+                                                if (!empty($subjectResult['linkThree'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                            target="_blank">Link Three</a></li>
+                                                    <?php
+                                                }
+                                                if (empty($subjectResult['linkOne']) && empty($subjectResult['linkTwo'])) {
+                                                    echo 'No links available for this subject';
+                                                }
+                                                ?>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary mx-2 peertopeerLinks-btn"
+                                                data-peertopeerid="<?php echo htmlspecialchars($subjectResult['id']); ?>"
+                                                data-peertopeerlinkone="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                data-peertopeerlinktwo="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                data-peertopeerlinkthree="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                data-bs-toggle="modal" data-bs-target="#peertopeerModal">
+                                                Update
+                                            </button>
+
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- STUDENTS EVALUATION CATEGORIES LINKS -->
+                <div class="my-3">
+                    <h4 class="px-3 fw-bold">Students Evaluation Links</h4>
+                    <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
+                        <thead>
+                            <tr class="bg-danger text-center align-middle">
+                                <th>Category</th>
+                                <th>Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sql = "SELECT * FROM `studentscategories` WHERE NOT categories = 'TEACHING EFFECTIVENESS' ";
+                            $result = mysqli_query($con, $sql);
+
+                            if ($result) {
+                                while ($subjectResult = mysqli_fetch_assoc($result)) {
+                                    ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td>
+                                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                                <?php
+                                                // Check and display linkOne
+                                                if (!empty($subjectResult['linkOne'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                            target="_blank">Link One</a></li>
+                                                    <?php
+                                                }
+
+                                                // Check and display linkTwo
+                                                if (!empty($subjectResult['linkTwo'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                            target="_blank">Link Two</a></li>
+                                                    <?php
+                                                }
+                                                if (!empty($subjectResult['linkThree'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                            target="_blank">Link Three</a></li>
+                                                    <?php
+                                                }
+                                                if (empty($subjectResult['linkOne']) && empty($subjectResult['linkTwo'])) {
+                                                    echo 'No links available for this subject';
+                                                }
+                                                ?>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary mx-2 studentsLinks-btn"
+                                                data-studentsid="<?php echo htmlspecialchars($subjectResult['id']); ?>"
+                                                data-studentslinkone="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                data-studentslinktwo="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                data-studentslinkthree="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                data-bs-toggle="modal" data-bs-target="#studentsModal">
+                                                Update
+                                            </button>
+
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- CLASSROOM OBSERVATION CATEGORIES LINKS -->
+                <div class="my-3">
+                    <h4 class="px-3 fw-bold">Classroom Observation Links</h4>
+                    <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
+                        <thead>
+                            <tr class="bg-danger text-center align-middle">
+                                <th>Category</th>
+                                <th>Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sql = "SELECT * FROM `classroomcategories` WHERE NOT categories = 'CONTENT KNOWLEDGE AND RELEVANCE' ";
+                            $result = mysqli_query($con, $sql);
+
+                            if ($result) {
+                                while ($subjectResult = mysqli_fetch_assoc($result)) {
+                                    ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td>
+                                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                                <?php
+                                                // Check and display linkOne
+                                                if (!empty($subjectResult['linkOne'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                            target="_blank">Link One</a></li>
+                                                    <?php
+                                                }
+
+                                                // Check and display linkTwo
+                                                if (!empty($subjectResult['linkTwo'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                            target="_blank">Link Two</a></li>
+                                                    <?php
+                                                }
+                                                if (!empty($subjectResult['linkThree'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                            target="_blank">Link Three</a></li>
+                                                    <?php
+                                                }
+                                                if (empty($subjectResult['linkOne']) && empty($subjectResult['linkTwo'])) {
+                                                    echo 'No links available for this subject';
+                                                }
+                                                ?>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary mx-2 classroomLinks-btn"
+                                                data-classroomid="<?php echo htmlspecialchars($subjectResult['id']); ?>"
+                                                data-classroomlinkone="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                data-classroomlinktwo="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                data-classroomlinkthree="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                data-bs-toggle="modal" data-bs-target="#classroomModal">
+                                                Update
+                                            </button>
+
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- VC AA LINKS -->
+                <div class="my-3">
+                    <h4 class="px-3 fw-bold">VCAA Links</h4>
+                    <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
+                        <thead>
+                            <tr class="bg-danger text-center align-middle">
+                                <th>Category</th>
+                                <th>Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sql = "SELECT * FROM `vcaacategories` WHERE NOT categories = 'KNOWLEDGE OF THE SUBJECT' ";
+                            $result = mysqli_query($con, $sql);
+
+                            if ($result) {
+                                while ($subjectResult = mysqli_fetch_assoc($result)) {
+                                    ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td>
+                                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                                <?php
+                                                if (!empty($subjectResult['linkOne'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                            target="_blank">Link One</a></li>
+                                                    <?php
+                                                }
+                                                if (!empty($subjectResult['linkTwo'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                            target="_blank">Link Two</a></li>
+                                                    <?php
+                                                }
+                                                if (!empty($subjectResult['linkThree'])) {
+                                                    ?>
+                                                    <li><a href="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                            target="_blank">Link Three</a></li>
+                                                    <?php
+                                                }
+                                                if (empty($subjectResult['linkOne']) && empty($subjectResult['linkTwo'])) {
+                                                    echo 'No links available for this subject';
+                                                }
+                                                ?>
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-primary mx-2 vcaaLinks-btn"
+                                                data-vcaaid="<?php echo htmlspecialchars($subjectResult['id']); ?>"
+                                                data-vcaalinkone="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
+                                                data-vcaalinktwo="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
+                                                data-vcaalinkthree="<?php echo htmlspecialchars($subjectResult['linkThree']); ?>"
+                                                data-bs-toggle="modal" data-bs-target="#vcaaModal">
+                                                Update
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPDATE MODAL FOR PEER TO PEER EVALUATION -->
+        <div class="modal fade" id="peertopeerModal" tabindex="-1" aria-labelledby="peertopeerModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="peertopeerModalLabel">Update Recommendation Links for Peer to Peer
+                            Evaluation
+                        </h5>
+                        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form action="../../controller/criteria.php" method="POST" id="peertopeerlinksForm">
+                        <input type="hidden" id="peertopeerlinkId" name="peertopeerlinkId">
+                        <div class="modal-body">
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link One here:</label>
+                                <textarea class="form-control" id="peertopeerlinkOne" name="peertopeerlinkOne"
+                                    rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Two here:</label>
+                                <textarea class="form-control" id="peertopeerlinkTwo" name="peertopeerlinkTwo"
+                                    rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Three here:</label>
+                                <textarea class="form-control" id="peertopeerlinkThree" name="peertopeerlinkThree"
+                                    rows="3"></textarea>
+                                <!-- Change this to 'linkThree' -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" name="updatepeertopeerLink" class="btn btn-success">Update</button>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- UPDATE MODAL FOR STUDENTS EVALUATION -->
+        <div class="modal fade" id="studentsModal" tabindex="-1" aria-labelledby="studentsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="studentsModalLabel">Update Recommendation Links for Faculty
+                            Evaluation
+                        </h5>
+                        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form action="../../controller/criteria.php" method="POST" id="studentslinksForm">
+                        <input type="hidden" id="studentslinkId" name="studentslinkId">
+                        <div class="modal-body">
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link One here:</label>
+                                <textarea class="form-control" id="studentslinkOne" name="studentslinkOne"
+                                    rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Two here:</label>
+                                <textarea class="form-control" id="studentslinkTwo" name="studentslinkTwo"
+                                    rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Three here:</label>
+                                <textarea class="form-control" id="studentslinkThree" name="studentslinkThree"
+                                    rows="3"></textarea>
+                                <!-- Change this to 'linkThree' -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" name="updatestudentsLink" class="btn btn-success">Update</button>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- UPDATE MODAL FOR CLASSROOM OBSERVATION -->
+        <div class="modal fade" id="classroomModal" tabindex="-1" aria-labelledby="classroomModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="classroomModalLabel">Update Recommendation Links for Classroom
+                            Observation
+                        </h5>
+                        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form action="../../controller/criteria.php" method="POST" id="classroomlinksForm">
+                        <input type="hidden" id="classroomlinkId" name="classroomlinkId">
+                        <div class="modal-body">
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link One here:</label>
+                                <textarea class="form-control" id="classroomlinkOne" name="classroomlinkOne"
+                                    rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Two here:</label>
+                                <textarea class="form-control" id="classroomlinkTwo" name="classroomlinkTwo"
+                                    rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Three here:</label>
+                                <textarea class="form-control" id="classroomlinkThree" name="classroomlinkThree"
+                                    rows="3"></textarea>
+                                <!-- Change this to 'linkThree' -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" name="updateclassroomLink" class="btn btn-success">Update</button>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- UPDATE MODAL FOR VCAA -->
+        <div class="modal fade" id="vcaaModal" tabindex="-1" aria-labelledby="vcaaModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="vcaaModalLabel">Update Recommendation Links for VCAA
+                        </h5>
+                        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <form action="../../controller/criteria.php" method="POST" id="vcaalinksForm">
+                        <input type="hidden" id="vcaalinkId" name="vcaalinkId">
+                        <div class="modal-body">
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link One here:</label>
+                                <textarea class="form-control" id="vcaalinkOne" name="vcaalinkOne" rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Two here:</label>
+                                <textarea class="form-control" id="vcaalinkTwo" name="vcaalinkTwo" rows="3"></textarea>
+                            </div>
+                            <div class="form-group p-2 mb-2">
+                                <label for="link" class="form-label">Paste link Three here:</label>
+                                <textarea class="form-control" id="vcaalinkThree" name="vcaalinkThree"
+                                    rows="3"></textarea>
+                                <!-- Change this to 'linkThree' -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" name="updatevcaaLink" class="btn btn-success">Update</button>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
     </div>
 
 </section>
@@ -1311,6 +1818,7 @@ if (isset($_SESSION['success'])) {
             }
         });
 
+
         // LINKS FOR EDITING
 
         $('#searchSubject').on('keyup', function () {
@@ -1319,23 +1827,21 @@ if (isset($_SESSION['success'])) {
                 $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
             });
         });
-        // Attach click event to dynamically loaded buttons
-        $('.editLinks-btn').on('click', function () {
-            const linkId = $(this).data('subjectid');  // Getting the correct subject ID
-            const linkEdit = $(this).data('linkone');  // Correct attribute name
-            const linkTextEdit = $(this).data('linktwo');  // Correct attribute name
-            const linkTextEdittwo = $(this).data('linkthree');  // Correct attribute name
 
-            // Fill modal fields with data
+        // SUBJECT EDIT BUTTON
+        $('.editLinks-btn').on('click', function () {
+            const linkId = $(this).data('subjectid');
+            const linkEdit = $(this).data('linkone');
+            const linkTextEdit = $(this).data('linktwo');
+            const linkTextEdittwo = $(this).data('linkthree');
+
             $('#linkId').val(linkId);
             $('#linkOne').val(linkEdit);
             $('#linkTwo').val(linkTextEdit);
-            $('#linkThree').val(linkTextEdittwo);  // Make sure this matches the input's ID
+            $('#linkThree').val(linkTextEdittwo);
         });
 
-
-
-        // Handle form submission via AJAX
+        // SUBJECT SUBMIT FORM
         $('#linksForm').on('submit', function (e) {
             e.preventDefault();
 
@@ -1346,13 +1852,143 @@ if (isset($_SESSION['success'])) {
                 method: 'POST',
                 data: formData,
                 success: function (data) {
-                    location.reload();  // Reload the page to reflect updates
+                    location.reload();
                 },
                 error: function (error) {
                     console.error('Error:', error);
                 }
             });
         });
+
+        // PEER TO PEER EDIT BUTTON
+        $('.peertopeerLinks-btn').on('click', function () {
+            const linkId = $(this).data('peertopeerid');
+            const linkOne = $(this).data('peertopeerlinkone');
+            const linkTwo = $(this).data('peertopeerlinktwo');
+            const linkThree = $(this).data('peertopeerlinkthree');
+
+            $('#peertopeerlinkId').val(linkId);
+            $('#peertopeerlinkOne').val(linkOne);
+            $('#peertopeerlinkTwo').val(linkTwo);
+            $('#peertopeerlinkThree').val(linkThree);
+        });
+
+        // PEER TO PEER SUBMIT FORM
+        $('#peertopeerlinksForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = $(this).serialize();
+
+            $.ajax({
+                url: '../../controller/criteria.php',
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+        // STUDENT EDIT BUTTON
+        $('.studentsLinks-btn').on('click', function () {
+            const linkId = $(this).data('studentsid');
+            const linkOne = $(this).data('studentslinkone');
+            const linkTwo = $(this).data('studentslinktwo');
+            const linkThree = $(this).data('studentslinkthree');
+
+            $('#studentslinkId').val(linkId);
+            $('#studentslinkOne').val(linkOne);
+            $('#studentslinkTwo').val(linkTwo);
+            $('#studentslinkThree').val(linkThree);
+        });
+
+        // STUDENT SUBMIT FORM
+        $('#studentslinksForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = $(this).serialize();
+
+            $.ajax({
+                url: '../../controller/criteria.php',
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+        // CLASSROOM EDIT BUTTON
+        $('.classroomLinks-btn').on('click', function () {
+            const linkId = $(this).data('classroomid');
+            const linkOne = $(this).data('classroomlinkone');
+            const linkTwo = $(this).data('classroomlinktwo');
+            const linkThree = $(this).data('classroomlinkthree');
+
+            $('#classroomlinkId').val(linkId);
+            $('#classroomlinkOne').val(linkOne);
+            $('#classroomlinkTwo').val(linkTwo);
+            $('#classroomlinkThree').val(linkThree);
+        });
+
+        // CLASSROOM SUBMIT FORM
+        $('#classroomlinksForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = $(this).serialize();
+
+            $.ajax({
+                url: '../../controller/criteria.php',
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+        // CLASSROOM EDIT BUTTON
+        $('.vcaaLinks-btn').on('click', function () {
+            const linkId = $(this).data('vcaaid');
+            const linkOne = $(this).data('vcaalinkone');
+            const linkTwo = $(this).data('vcaalinktwo');
+            const linkThree = $(this).data('vcaalinkthree');
+
+            $('#vcaalinkId').val(linkId);
+            $('#vcaalinkOne').val(linkOne);
+            $('#vcaalinkTwo').val(linkTwo);
+            $('#vcaalinkThree').val(linkThree);
+        });
+
+        // CLASSROOM SUBMIT FORM
+        $('#vcaalinksForm').on('submit', function (e) {
+            e.preventDefault();
+
+            const formData = $(this).serialize();
+
+            $.ajax({
+                url: '../../controller/criteria.php',
+                method: 'POST',
+                data: formData,
+                success: function (data) {
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+
 
 
 
