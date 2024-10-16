@@ -1106,7 +1106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                     <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
                         <thead>
                             <tr class="bg-danger text-center align-middle">
-                                <th>Category</th>
+                                <th style="max-width: 200px !important; ">Category</th>
                                 <th>Link</th>
                                 <th>Action</th>
                             </tr>
@@ -1120,7 +1120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 while ($subjectResult = mysqli_fetch_assoc($result)) {
                                     ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td style="max-width: 200px !important; ">
+                                            <?php echo htmlspecialchars($subjectResult['categories']); ?>
+                                        </td>
                                         <td>
                                             <ul style="list-style: none; padding: 0; margin: 0;">
                                                 <?php
@@ -1177,7 +1179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                     <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
                         <thead>
                             <tr class="bg-danger text-center align-middle">
-                                <th>Category</th>
+                                <th style="max-width: 300px;">Category</th>
                                 <th>Link</th>
                                 <th>Action</th>
                             </tr>
@@ -1191,7 +1193,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 while ($subjectResult = mysqli_fetch_assoc($result)) {
                                     ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td style="max-width: 300px;">
+                                            <?php echo htmlspecialchars($subjectResult['categories']); ?>
+                                        </td>
                                         <td>
                                             <ul style="list-style: none; padding: 0; margin: 0;">
                                                 <?php

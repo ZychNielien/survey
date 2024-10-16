@@ -393,6 +393,12 @@ $semestersJson = json_encode($semesters);
 
                     </div>
 
+                    <div class="form-group">
+
+                        <button class="btn btn-success" id="printBtn">Print</button>
+
+                    </div>
+
                 </div>
 
                 <canvas id="lineChart"></canvas>
@@ -477,7 +483,6 @@ $semestersJson = json_encode($semesters);
         });
 
     </script>
-
     <script>
         const subjects = <?php echo $subjectsJson; ?>;
         const subjectData = <?php echo $subjectDataJson; ?>;
@@ -595,7 +600,6 @@ $semestersJson = json_encode($semesters);
         updateChart();
 
     </script>
-
     <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../../public/js/sweetalert2@11.js"></script>
 
@@ -630,6 +634,45 @@ $semestersJson = json_encode($semesters);
                 } else {
                     textbox.text(filesCount + ' files selected');
                 }
+            });
+
+            function printPartOfPage(elementId) {
+                var originalCanvas = document.getElementById(elementId);
+
+                // Create a new window for printing
+                var windowUrl = 'about:blank';
+                var uniqueName = new Date();
+                var windowName = 'Print' + uniqueName.getTime();
+                var printWindow = window.open(windowUrl, windowName, 'width=800,height=600');
+
+                printWindow.document.write('<html><head><title>Print Canvas</title></head><body>');
+                printWindow.document.write('<canvas id="printCanvas" width="500" height="300" style="border:1px solid #ccc;"></canvas>'); // Adjust height here
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+
+                // Draw the original canvas content onto the new canvas with high resolution
+                var printCanvas = printWindow.document.getElementById('printCanvas');
+                var printCtx = printCanvas.getContext('2d');
+
+                // Set the scale for higher quality
+                const scaleFactor = 0.65; // Adjust this for better quality, e.g., 2 for 200% scaling
+                printCanvas.width = originalCanvas.width * scaleFactor; // Set print canvas width
+                printCanvas.height = originalCanvas.height * scaleFactor; // Set print canvas height
+
+                printCtx.scale(scaleFactor, scaleFactor); // Scale context for better quality
+                printCtx.drawImage(originalCanvas, 0, 0); // Draw the original canvas
+
+                // Print the window after a timeout to ensure the canvas is rendered
+                setTimeout(function () {
+                    printWindow.print();
+                    printWindow.close();
+                }, 100);
+            }
+
+            // Bind print function to button click
+            $('#printBtn').click(function () {
+                printPartOfPage('lineChart'); // Pass the ID of the canvas
             });
         });
 

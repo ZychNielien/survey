@@ -218,19 +218,40 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="../../controller/changepassAdminFaculty.php" method="POST">
+                    <form action="../../controller/changepassAdminFaculty.php" method="POST" class="needs-validation">
                         <div class="mb-3">
                             <label for="exampleInputPassword1" class="form-label">Current Password</label>
                             <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
                         </div>
                         <div class="mb-3">
-                            <label for="exampleInputPassword1" class="form-label">New Password</label>
-                            <input type="password" class="form-control" name="newpass" id="exampleInputPassword2">
+                            <label for="validationPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" name="newpass" id="validationPassword">
+                            <div class="progress" style="height: 5px;">
+                                <div id="progressbar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                    role="progressbar" style="width: 10%;" aria-valuenow="50" aria-valuemin="0"
+                                    aria-valuemax="100">
+                                </div>
+
+                            </div>
+                            <small id="passwordHelpBlock" class="form-text text-muted">
+                                Your password must be 8-20 characters long, must contain special characters "!@#$%&*_?",
+                                numbers, lower and upper letters only.
+                            </small>
+
+                            <div id="feedbackin" class="valid-feedback">
+                                Strong Password!
+                            </div>
+                            <div id="feedbackirn" class="invalid-feedback">
+                                Atlead 8 characters,
+                                Number, special character
+                                Caplital Letter and Small letters
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="exampleInputPassword1" class="form-label">Re-enter New
                                 Password</label>
-                            <input type="password" class="form-control" name="conpass" id="exampleInputPassword3">
+                            <input type="password" class="form-control" name="conpass" id="exampleInputPassword3"
+                                disabled>
                         </div>
 
                 </div>
@@ -275,7 +296,102 @@ $userRow = mysqli_fetch_assoc($usersql_query);
             $(".menuBox").on("click", function () {
                 $(".sidebar").toggleClass("close");
             });
+
+
+            (function () {
+                'use strict';
+                window.addEventListener('load', function () {
+                    const forms = document.getElementsByClassName('needs-validation');
+
+                    Array.prototype.filter.call(forms, function (form) {
+                        const passwordInput = form.validationPassword;
+                        const feedbackIn = document.getElementById("feedbackin");
+                        const feedbackIrn = document.getElementById("feedbackirn");
+                        const progressBar = document.getElementById("progressbar");
+
+                        passwordInput.addEventListener('keypress', function (event) {
+                            const chr = String.fromCharCode(event.which);
+                            const criteria = [
+                                /[!@#$%&*_?]/, // Special Character
+                                /[A-Z]/,       // Uppercase
+                                /[0-9]/,       // Numbers
+                                /[a-z]/        // Lowercase
+                            ];
+
+                            const isValidInput = criteria.some(regex => regex.test(chr));
+                            const isMaxLength = passwordInput.value.length < 20;
+
+                            if (!isValidInput && isMaxLength) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                        });
+
+                        passwordInput.addEventListener('keyup', function () {
+                            const criteria = [
+                                /[!@#$%&*_?]/,
+                                /[A-Z]/,
+                                /[0-9]/,
+                                /[a-z]/
+                            ];
+
+                            const messages = [
+                                "Special Character",
+                                "Uppercase Letter",
+                                "Number",
+                                "Lowercase Letter"
+                            ];
+
+                            const validationResults = criteria.map(regex => regex.test(passwordInput.value));
+                            const score = validationResults.reduce((sum, result) => sum + (result ? 1 : 0), 0);
+                            const progressMessages = messages.filter((_, index) => !validationResults[index]);
+                            const strengthLevels = ["Way too Weak", "Very Weak", "Weak", "Medium", "Strong"];
+                            let strength = strengthLevels[Math.min(score, strengthLevels.length - 1)];
+                            let progressValue = Math.min(score * 25, 100);
+
+                            feedbackIn.textContent = strength + (progressMessages.length ? " You need: " + progressMessages.join(", ") : "");
+                            progressBar.className = "progress-bar progress-bar-striped progress-bar-animated " + (score < 2 ? "bg-danger" : score < 4 ? "bg-warning" : "bg-success");
+                            progressBar.style.width = progressValue + "%";
+
+                            form.verifyPassword.disabled = !passwordInput.checkValidity();
+                        });
+                    });
+                }, false);
+            })();
+
         });
+        document.addEventListener("DOMContentLoaded", function () {
+            const newPasswordInput = document.getElementById('validationPassword');
+            const reEnterPasswordInput = document.getElementById('exampleInputPassword3');
+            const feedbackIn = document.getElementById('feedbackin');
+            const feedbackIrn = document.getElementById('feedbackirn');
+            const progressBar = document.getElementById('progressbar');
+
+            // Regular expression for password validation
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%&*_?])[A-Za-z0-9!@#$%&*_?]{8,20}$/;
+
+            newPasswordInput.addEventListener('input', function () {
+                const password = newPasswordInput.value;
+
+                // Validate password
+                if (passwordRegex.test(password)) {
+                    feedbackIn.style.display = 'block';
+                    feedbackIrn.style.display = 'none';
+                    progressBar.style.width = '100%'; // Change this according to your logic
+
+                    // Enable the re-enter password input if the new password is valid
+                    reEnterPasswordInput.disabled = false;
+                } else {
+                    feedbackIn.style.display = 'none';
+                    feedbackIrn.style.display = 'block';
+                    progressBar.style.width = '10%'; // Reset or adjust according to your logic
+
+                    // Disable the re-enter password input if the new password is invalid
+                    reEnterPasswordInput.disabled = true;
+                }
+            });
+        });
+
     </script>
     <!-- BootStrap -->
     <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
