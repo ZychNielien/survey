@@ -170,7 +170,8 @@ include "../../model/dbconnection.php";
                                                                 <label for="academic" class="mr-2 mb-0">Academic
                                                                     Year:</label>
                                                                 <input type="text" id="academic" name="academic_year"
-                                                                    class="form-control no-border" style="flex: 1;">
+                                                                    class="form-control no-border" readonly
+                                                                    style="flex: 1;">
                                                             </div>
                                                         </th>
                                                     </tr>

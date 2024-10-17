@@ -367,6 +367,10 @@ $semestersJson = json_encode($semesters);
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-success" onclick="printPartOfPage('result')">Print
+                                Content</button>
+                        </div>
                     </form>
 
                     <div class="vcaaRecommendation mt-2">
@@ -375,7 +379,6 @@ $semestersJson = json_encode($semesters);
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
                 </div>
             </div>
         </div>
@@ -385,6 +388,65 @@ $semestersJson = json_encode($semesters);
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
     <script>
+        function printPartOfPage(elementId) {
+            var printContent = document.getElementById(elementId);
+            var windowUrl = 'about:blank';
+            var uniqueName = new Date();
+            var windowName = 'Print' + uniqueName.getTime();
+            var printWindow = window.open(windowUrl, windowName, 'width=1000,height=1000');
+
+            printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Print</title>
+                <style>
+                    table {
+                        width:100% !important;
+                        border-collapse: collapse !important;
+                        text-align: center !important;
+                    }
+                    table tr {
+                        background-color: white !important;
+                        color: black !important;
+                    }
+                    th, td  {
+                        border: 1px solid black !important;
+                    }
+                    th:last-child,
+                    td:last-child {
+                        display: none !important;
+                    }
+                    .ulo {
+                        width: 100% !important;
+                        display: flex !important;
+                        justify-content:  space-evenly !important;
+                    }
+                    .ulo h5 {
+                        font-size: 18px !important;
+                        text-align: center !important;   
+                    }
+                </style>
+            </head>
+            <body>
+                <h2 style="text-align: center;">VCAA Evaluation Results</h2>
+                <h3 >Faculty : <?php echo $userRow['first_name'] . ' ' . $userRow['last_name'] ?></h3>
+                ${printContent.innerHTML}
+            </body>
+        </html>
+    `);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+
+            // Close the print window after printing
+            printWindow.close();
+        }
+    </script>
+    <script>
+
+
+
         var averageRating = <?php echo json_encode($average); ?>;
 
         if (typeof averageRating !== 'number' || isNaN(averageRating)) {

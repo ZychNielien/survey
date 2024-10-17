@@ -115,13 +115,17 @@ if (!$sqlSubject_query) {
 if (mysqli_num_rows($sqlSubject_query) > 0) {
     while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
         ?>
-
-        <div class="d-flex justify-content-between">
-            <h5>(Semester:
-                <?php echo htmlspecialchars($subject['semester']) ?>,
-                Academic Year :
-                <?php echo htmlspecialchars($subject['academic_year']) ?> )
-            </h5>
+        <div class="d-flex justify-content-between mx-3">
+            <div>
+                <h5>Semester:
+                    <span class="fw-bold"><?php echo htmlspecialchars($subject['semester']) ?></span>
+                </h5>
+            </div>
+            <div>
+                <h5> Academic Year :
+                    <span class="fw-bold"><?php echo htmlspecialchars($subject['academic_year']) ?></span>
+                </h5>
+            </div>
         </div>
 
         <table class="table table-striped table-bordered text-center align-middle mb-5">

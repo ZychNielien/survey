@@ -211,6 +211,10 @@ $preferredSchedule = $result->fetch_assoc();
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="mb-3">
+                        <button type="button" class="btn btn-success" onclick="printPartOfPage('classroomResult')">Print
+                            Content</button>
+                    </div>
                     </form>
 
                     <div class="overflow-auto" style="max-height: 500px">
@@ -351,6 +355,62 @@ $preferredSchedule = $result->fetch_assoc();
 
 
 <script>
+
+function printPartOfPage(elementId) {
+        var printContent = document.getElementById(elementId);
+        var windowUrl = 'about:blank';
+        var uniqueName = new Date();
+        var windowName = 'Print' + uniqueName.getTime();
+        var printWindow = window.open(windowUrl, windowName, 'width=1000,height=1000');
+
+        printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Print</title>
+                <style>
+                    table {
+                        width:100% !important;
+                        border-collapse: collapse !important;
+                        text-align: center !important;
+                    }
+                    table tr {
+                        background-color: white !important;
+                        color: black !important;
+                    }
+                    th, td  {
+                        border: 1px solid black !important;
+                    }
+                    th:last-child,
+                    td:last-child {
+                        display: none !important;
+                    }
+                    .ulo {
+                        width: 100% !important;
+                        display: flex !important;
+                        justify-content:  space-evenly !important;
+                    }
+                    .ulo h5 {
+                        font-size: 18px !important;
+                        text-align: center !important;   
+                    }
+                </style>
+            </head>
+            <body>
+                <h2 style="text-align: center;">Classroom Observation Results</h2>
+                <h3 >Faculty : <?php echo $userRow['first_name'] . ' ' . $userRow['last_name'] ?></h3>
+                ${printContent.innerHTML}
+            </body>
+        </html>
+    `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+
+        // Close the print window after printing
+        printWindow.close();
+    }
+
     $(document).ready(function () {
 
         fetchFilteredResults();

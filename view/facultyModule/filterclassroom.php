@@ -129,7 +129,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
     while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
         ?>
 
-        <div class="d-flex justify-content-between mx-3">
+        <div class=" ulo d-flex justify-content-between mx-3">
             <div>
                 <h5>Semester:
                     <span class="fw-bold"><?php echo htmlspecialchars($subject['semester']) ?></span>

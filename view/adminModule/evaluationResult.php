@@ -55,7 +55,7 @@ include "../../model/dbconnection.php";
                 ?>
 
                 <!-- FILTER FOR SEMESTER AND ACADEMIC YEAR -->
-                <form method="POST" action="" class="mb-4 d-flex justify-content-evenly text-center">
+                <form method="POST" action="" class="mb-4 d-flex justify-content-evenly align-items-center text-center">
                     <div class="mb-3">
                         <label for="academic_year" class="form-label">Academic Year:</label>
                         <select id="academic_year" name="academic_year" class="form-select">
@@ -74,7 +74,12 @@ include "../../model/dbconnection.php";
                             <?php endforeach; ?>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-success" onclick="printPartOfPage('result')">Print
+                            Content</button>
+                    </div>
                 </form>
+
 
                 <!-- RESULT OF DATA FROM THE STUDENTS EVALUATION -->
                 <div id="result"></div>
@@ -239,6 +244,62 @@ include "../../model/dbconnection.php";
 </section>
 
 <script>
+
+    function printPartOfPage(elementId) {
+        var printContent = document.getElementById(elementId);
+        var windowUrl = 'about:blank';
+        var uniqueName = new Date();
+        var windowName = 'Print' + uniqueName.getTime();
+        var printWindow = window.open(windowUrl, windowName, 'width=1000,height=1000');
+
+        printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Print</title>
+                <style>
+                    table {
+                        width:100% !important;
+                        border-collapse: collapse !important;
+                        text-align: center !important;
+                    }
+                    table tr {
+                        background-color: white !important;
+                        color: black !important;
+                    }
+                    th, td  {
+                        border: 1px solid black !important;
+                    }
+                    th:last-child,
+                    td:last-child {
+                        display: none !important;
+                    }
+                    .ulo {
+                        width: 100% !important;
+                        display: flex !important;
+                        justify-content:  space-evenly !important;
+                    }
+                    .ulo h5 {
+                        font-size: 18px !important;
+                        text-align: center !important;   
+                    }
+                </style>
+            </head>
+            <body>
+                <h2 style="text-align: center;">Performance Evaluation Instrument for Faculty Development</h2>
+                <h3 >Faculty : <?php echo $userRow['first_name'] . ' ' . $userRow['last_name'] ?></h3>
+                ${printContent.innerHTML}
+            </body>
+        </html>
+    `);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+
+        // Close the print window after printing
+        printWindow.close();
+    }
+
     $(document).ready(function () {
         fetchFilteredResults();
 
