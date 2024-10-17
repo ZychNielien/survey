@@ -18,7 +18,6 @@ function getVerbalInterpretationAndLinks($averageRating, $categories, $selectedS
         'links' => []
     ];
 
-    // Determine interpretation based on average rating
     if ($averageRating < 0 || $averageRating > 5) {
         $result['interpretation'] = 'No description';
     } else {
@@ -26,7 +25,6 @@ function getVerbalInterpretationAndLinks($averageRating, $categories, $selectedS
         $result['interpretation'] = $interpretations[(int) $averageRating];
     }
 
-    // Retrieve category links
     $categoryLinks = [];
     $sqlCategoryLinks = "SELECT * FROM classroomcategories";
     $sqlCategoryLinks_query = mysqli_query($con, $sqlCategoryLinks);
@@ -40,14 +38,12 @@ function getVerbalInterpretationAndLinks($averageRating, $categories, $selectedS
         ];
     }
 
-    // Retrieve subject-specific links
     $sql = "SELECT linkOne, linkTwo, linkThree FROM subject WHERE subject_code = ?";
     $stmt = mysqli_prepare($con, $sql);
     mysqli_stmt_bind_param($stmt, 's', $selectedSubject);
     mysqli_stmt_execute($stmt);
     $resultSet = mysqli_stmt_get_result($stmt);
 
-    // Initialize content knowledge and relevance links
     $contentKnowledgeLinks = [];
 
     if ($subject = mysqli_fetch_assoc($resultSet)) {
@@ -58,12 +54,10 @@ function getVerbalInterpretationAndLinks($averageRating, $categories, $selectedS
         ];
     }
 
-    // If category links for the selected category are empty, use subject links for CONTENT KNOWLEDGE AND RELEVANCE
     if (empty($categoryLinks[$categories]['linkOne']) && empty($categoryLinks[$categories]['linkTwo']) && empty($categoryLinks[$categories]['linkThree'])) {
         $categoryLinks['CONTENT KNOWLEDGE AND RELEVANCE'] = $contentKnowledgeLinks;
     }
 
-    // Add recommendation links if average rating is less than 2
     if ($averageRating < 2 && !empty($categoryLinks[$categories])) {
         foreach (['linkOne', 'linkTwo', 'linkThree'] as $linkKey) {
             if (!empty($categoryLinks[$categories][$linkKey])) {
@@ -75,9 +69,7 @@ function getVerbalInterpretationAndLinks($averageRating, $categories, $selectedS
         }
     }
 
-    // Default message if no links are available
     if (empty($result['links'])) {
-        // Add links from CONTENT KNOWLEDGE AND RELEVANCE if the selected category has no links
         foreach (['linkOne', 'linkTwo', 'linkThree'] as $linkKey) {
             if (!empty($contentKnowledgeLinks[$linkKey])) {
                 $result['links'][] = [
@@ -137,7 +129,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
     while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
         ?>
 
-        <div class="d-flex justify-content-between mx-3">
+        <div class=" ulo d-flex justify-content-between mx-3">
             <div>
                 <h5>Semester:
                     <span class="fw-bold"><?php echo htmlspecialchars($subject['semester']) ?></span>
@@ -234,19 +226,18 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                                 foreach ($interpretationData['links'] as $link) {
                                                     if (is_array($link) && !empty($link['text'])) {
                                                         $text = htmlspecialchars($link['text']);
-                                                        $url = !empty($link['url']) ? htmlspecialchars($link['url']) : ''; // Check for URL
-                
-                                                        // Display link if URL is present, otherwise just text
+                                                        $url = !empty($link['url']) ? htmlspecialchars($link['url']) : '';
+
                                                         if (!empty($url)) {
                                                             echo "<li><a href=\"$url\" target=\"_blank\">$text</a></li>";
                                                         } else {
-                                                            echo "<li>$text</li>"; // Just display text without a link if no URL
+                                                            echo "<li>$text</li>";
                                                         }
                                                     }
                                                 }
                                                 echo "</ul>";
                                             } else {
-                                                echo htmlspecialchars($interpretationData['links']);
+                                                echo htmlspecialchars(is_string($interpretationData['links']) ? $interpretationData['links'] : '');
                                             }
                                         } else {
                                             echo "No recommendation needed.";
@@ -276,6 +267,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "No records found.";
+    echo "<h2 style='text-align: center; color: red;'>No record found.</h2>";
 }
 ?>

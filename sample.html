@@ -3,81 +3,41 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Chart.js Print Example</title>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <style>
-        /* On-screen styles */
-        #myChart {
-            width: 150px;  /* Smaller size for on-screen display */
-            height: 200px; /* Smaller height for on-screen display */
-            margin: auto;
-            border: 1px solid #ccc; /* Optional border for visibility */
-        }
-        #printButton {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        /* Print styles */
-        @media print {
-            body * {
-                visibility: hidden; /* Hide everything else */
-            }
-            #myChart, #myChart * {
-                visibility: visible; /* Show only the chart */
-            }
-            #myChart {
-                position: absolute; /* Position chart for print */
-                left: 0;
-                top: 0;
-                width: 100vw !important; /* Set to 100% of the viewport width */
-                height: auto !important; /* Height adjusts automatically */
-                max-height: 100vh; /* Ensure it fits the viewport height */
-                border: none; /* Remove border if any */
-            }
-        }
-    </style>
+        <title>Print Specific Part of Page</title>
     </head>
     <body>
-        <h1>My Chart.js Chart</h1>
-        <canvas id="myChart" width="300" height="200"></canvas>
-        <button id="printButton">Print Chart</button>
+
+        <!-- Example content to print -->
+        <div id="printableContent" hidden>
+            <h1>Content to Print</h1>
+            <p>This part of the page will be printed when the button is
+                clicked.</p>
+        </div>
+
+        <!-- Button to trigger printing -->
+        <button type="button"
+            onclick="printPartOfPage('printableContent')">Print Content</button>
 
         <script>
-        const data = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-            datasets: [{
-                label: 'Monthly Sales',
-                data: [65, 59, 80, 81, 56, 55, 40],
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderWidth: 1
-            }]
-        };
+    function printPartOfPage(elementId) {
+        var printContent = document.getElementById(elementId);
+        var windowUrl = 'about:blank';
+        var uniqueName = new Date();
+        var windowName = 'Print' + uniqueName.getTime();
+        var printWindow = window.open(windowUrl, windowName, 'width=1000,height=1000');
 
-        const config = {
-            type: 'line',
-            data: data,
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        };
+        // Write content to the new window
+        printWindow.document.write(printContent.innerHTML);
 
-        const myChart = new Chart(
-            document.getElementById('myChart'),
-            config
-        );
+        // Close the document, focus the window, and trigger printing
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
 
-        document.getElementById('printButton').addEventListener('click', function() {
-            window.print(); // Use the browser's print function
-        });
-    </script>
+        // Close the print window after printing
+        printWindow.close();
+    }
+</script>
+
     </body>
 </html>

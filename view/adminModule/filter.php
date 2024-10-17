@@ -60,7 +60,6 @@ function getVerbalInterpretationAndLinks($averageRating, $category, $selectedSub
         ];
     }
 
-    // Add relevant links for ratings less than 2
     if ($averageRating < 2) {
         if (!empty($categoryLinks[$category])) {
 
@@ -88,7 +87,6 @@ function getVerbalInterpretationAndLinks($averageRating, $category, $selectedSub
 
     }
 
-    // If no links are added, provide a fallback
     if (empty($result['links'])) {
         $result['links'][] = ['text' => 'No links available for this category', 'url' => ''];
     }
@@ -97,7 +95,6 @@ function getVerbalInterpretationAndLinks($averageRating, $category, $selectedSub
 }
 
 
-// FUNCTION FOR REMOVING UNDESIRABLE CHARACTERS
 function sanitizeColumnName($name)
 {
     return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
@@ -136,13 +133,22 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
     while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
         ?>
 
-        <div class="d-flex justify-content-between">
-            <h5><?php echo htmlspecialchars($subject['subject']) ?></h5>
-            <h5>(Semester:
-                <?php echo htmlspecialchars($subject['semester']) ?>,
-                Academic Year :
-                <?php echo htmlspecialchars($subject['academic_year']) ?> )
-            </h5>
+        <div class="d-flex justify-content-between mx-3">
+            <div>
+                <h5>Semester:
+                    <span class="fw-bold"><?php echo htmlspecialchars($subject['semester']) ?></span>
+                </h5>
+            </div>
+            <div>
+                <h5>Subject:
+                    <span class="fw-bold"><?php echo htmlspecialchars($subject['subject']) ?></span>
+                </h5>
+            </div>
+            <div>
+                <h5> Academic Year :
+                    <span class="fw-bold"><?php echo htmlspecialchars($subject['academic_year']) ?></span>
+                </h5>
+            </div>
         </div>
 
         <table class="table table-striped table-bordered text-center align-middle mb-5">
@@ -215,46 +221,31 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                 $linkTwo = $subject['linkTwo'];
                                 $linkThree = $subject['linkThree'];
 
-                                // Get interpretation and links based on the rating and category
                                 $interpretationData = getVerbalInterpretationAndLinks($averageRating, $categories, $selectedSubject, $con);
                                 ?>
                                 <tr>
-                                    <!-- Category -->
                                     <td><?php echo htmlspecialchars($categories); ?></td>
-
-                                    <!-- Average Rating -->
                                     <td><?php echo number_format((float) $averageRating, 2, '.', ''); ?></td>
-
-                                    <!-- Verbal Interpretation -->
                                     <td><?php echo htmlspecialchars($interpretationData['interpretation']); ?></td>
-
-                                    <!-- Links/Recommendations -->
                                     <td>
                                         <?php
-                                        // Only show recommendations for ratings less than 2
                                         if ($averageRating < 2) {
-                                            // Check if links exist and are in array format
                                             if (is_array($interpretationData['links'])) {
                                                 echo "<ul style='list-style: none; padding: 0; margin: 0;'>";
 
-                                                // Loop through each link and display it
                                                 foreach ($interpretationData['links'] as $link) {
                                                     if (!empty($link['url'])) {
-                                                        // Display clickable link
                                                         echo "<li><a href=\"" . htmlspecialchars($link['url']) . "\" target=\"_blank\">" . htmlspecialchars($link['text']) . "</a></li>";
                                                     } else {
-                                                        // Display just the text if URL is empty
                                                         echo "<li>" . htmlspecialchars($link['text']) . "</li>";
                                                     }
                                                 }
 
                                                 echo "</ul>";
                                             } else {
-                                                // Fallback if links are not in array format
-                                                echo htmlspecialchars($interpretationData['links']);
+                                                echo htmlspecialchars(is_string($interpretationData['links']) ? $interpretationData['links'] : '');
                                             }
                                         } else {
-                                            // For ratings of 2 or above, no recommendation is needed
                                             echo "No recommendation needed.";
                                         }
                                         ?>
@@ -268,7 +259,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                     }
                 }
 
-                // CALCULATE OVERALL AVERAGE FOR THE SUBJECT
                 if ($categoryCount > 0) {
                     $finalAverageRating = $totalAverage / $categoryCount;
                     ?>
@@ -290,6 +280,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "No subjects found for this instructor.";
+    echo "<h2 style='text-align: center; color: red;'>No subjects found for this instructor.</h2>";
 }
 ?>

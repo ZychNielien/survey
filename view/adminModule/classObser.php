@@ -66,29 +66,24 @@ include "components/navBar.php";
     <div class="tab-content p-3 border shadow-md overflow-auto" id="nav-tabContent">
         <div class="tab-pane fade active show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
 
-            <div class="text-center d-flex justify-content-evenly align-items-center">
-                <label for="view-date-select" class="form-label fw-bold px-3 py-2">Select a date one week before
-                    the end of classroom observation for
-                    auto-booking:</label>
-                <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 " id="date-select-auto"
-                    style=" padding-right: 10px; ">
-            </div>
-
-            <!-- DATE SELECTION -->
-            <div class="row justify-content-center align-items-center">
-                <div class="row justify-content-evenly align-items-center ">
-                    <div class="col-md-6 col-lg-4">
-                        <div class="p-4 rounded-4">
-                            <div class="text-center">
-                                <label for="view-date-select" class="form-label fw-bold ">Select
-                                    Date:</label><br>
-                                <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 "
-                                    id="view-date-select" style=" padding-right: 10px; ">
-                            </div>
-                        </div>
-                    </div>
-
+            <div class="d-flex justify-content-evenly">
+                <div class="text-center d-flex flex-column justify-content-center align-items-center">
+                    <label for="view-date-select" class="form-label fw-bold px-3 py-2">Select a date one week before
+                        the end of classroom observation for
+                        auto-booking:</label>
+                    <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 " id="date-select-auto"
+                        style=" padding-right: 10px; ">
                 </div>
+
+                <!-- DATE SELECTION -->
+                <div class="text-center d-flex flex-column justify-content-center align-items-center">
+                    <label for="view-date-select" class="form-label fw-bold ">Select
+                        Date:</label>
+                    <input type="date" class=" shadow-sm rounded-3 px-3 py-2 border-2 " id="view-date-select"
+                        style=" padding-right: 10px; ">
+                </div>
+
+
             </div>
             <div class="d-flex justify-content-end">
 
@@ -580,7 +575,7 @@ include "components/navBar.php";
         if ($preferredScheduleSQL_query && mysqli_num_rows($preferredScheduleSQL_query) > 0) {
             while ($preferredScheduleRow = mysqli_fetch_assoc($preferredScheduleSQL_query)) {
                 ?>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            {
                     name: "<?php echo $preferredScheduleRow['first_name'] . ' ' . $preferredScheduleRow['last_name'] ?>",
                     schedule: {
                         "<?php echo $preferredScheduleRow['dayOfWeek'] ?>": [

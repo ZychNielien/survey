@@ -212,27 +212,51 @@ $userRow = mysqli_fetch_assoc($usersql_query);
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="exampleModalLabel">Change
-                        Password</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Change Password</h5>
                     <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="../../controller/changepassAdminFaculty.php" method="POST">
+                    <form action="../../controller/changepassAdminFaculty.php" method="POST" class="needs-validation">
                         <div class="mb-3">
                             <label for="exampleInputPassword1" class="form-label">Current Password</label>
-                            <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="oldpass" id="exampleInputPassword1">
+                                <button type="button" class="btn btn-outline-secondary" id="toggleOldPass">Show</button>
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label for="exampleInputPassword1" class="form-label">New Password</label>
-                            <input type="password" class="form-control" name="newpass" id="exampleInputPassword2">
+                            <label for="validationPassword" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="newpass" id="validationPassword">
+                                <button type="button" class="btn btn-outline-secondary" id="toggleNewPass">Show</button>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div id="progressbar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                    role="progressbar" style="width: 10%;" aria-valuenow="50" aria-valuemin="0"
+                                    aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small id="passwordHelpBlock" class="form-text text-muted">
+                                Your password must be 8-20 characters long, must contain special characters "!@#$%&*_?",
+                                numbers, lower and upper letters only.
+                            </small>
+                            <div id="feedbackin" class="valid-feedback">
+                                Strong Password!
+                            </div>
+                            <div id="feedbackirn" class="invalid-feedback">
+                                At least 8 characters, Number, special character, Capital Letter, and Small letters.
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label for="exampleInputPassword1" class="form-label">Re-enter New
-                                Password</label>
-                            <input type="password" class="form-control" name="conpass" id="exampleInputPassword3">
+                            <label for="exampleInputPassword3" class="form-label">Re-enter New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="conpass" id="exampleInputPassword3"
+                                    disabled>
+                                <button type="button" class="btn btn-outline-secondary" id="toggleReEnterPass"
+                                    disabled>Show</button>
+                            </div>
                         </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -274,6 +298,131 @@ $userRow = mysqli_fetch_assoc($usersql_query);
 
             $(".menuBox").on("click", function () {
                 $(".sidebar").toggleClass("close");
+            });
+
+
+            (function () {
+                'use strict';
+                window.addEventListener('load', function () {
+                    const forms = document.getElementsByClassName('needs-validation');
+
+                    Array.prototype.filter.call(forms, function (form) {
+                        const passwordInput = form.validationPassword;
+                        const feedbackIn = document.getElementById("feedbackin");
+                        const feedbackIrn = document.getElementById("feedbackirn");
+                        const progressBar = document.getElementById("progressbar");
+
+                        passwordInput.addEventListener('keypress', function (event) {
+                            const chr = String.fromCharCode(event.which);
+                            const criteria = [
+                                /[!@#$%&*_?]/,
+                                /[A-Z]/,
+                                /[0-9]/,
+                                /[a-z]/
+                            ];
+
+                            const isValidInput = criteria.some(regex => regex.test(chr));
+                            const isMaxLength = passwordInput.value.length < 20;
+
+                            if (!isValidInput && isMaxLength) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                        });
+
+                        passwordInput.addEventListener('keyup', function () {
+                            const criteria = [
+                                /[!@#$%&*_?]/,
+                                /[A-Z]/,
+                                /[0-9]/,
+                                /[a-z]/
+                            ];
+
+                            const messages = [
+                                "Special Character",
+                                "Uppercase Letter",
+                                "Number",
+                                "Lowercase Letter"
+                            ];
+
+                            const validationResults = criteria.map(regex => regex.test(passwordInput.value));
+                            const score = validationResults.reduce((sum, result) => sum + (result ? 1 : 0), 0);
+                            const progressMessages = messages.filter((_, index) => !validationResults[index]);
+                            const strengthLevels = ["Way too Weak", "Very Weak", "Weak", "Medium", "Strong"];
+                            let strength = strengthLevels[Math.min(score, strengthLevels.length - 1)];
+                            let progressValue = Math.min(score * 25, 100);
+
+                            feedbackIn.textContent = strength + (progressMessages.length ? " You need: " + progressMessages.join(", ") : "");
+                            progressBar.className = "progress-bar progress-bar-striped progress-bar-animated " + (score < 2 ? "bg-danger" : score < 4 ? "bg-warning" : "bg-success");
+                            progressBar.style.width = progressValue + "%";
+
+                            form.verifyPassword.disabled = !passwordInput.checkValidity();
+                        });
+                    });
+                }, false);
+            })();
+
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const oldPasswordInput = document.getElementById('exampleInputPassword1');
+            const newPasswordInput = document.getElementById('validationPassword');
+            const reEnterPasswordInput = document.getElementById('exampleInputPassword3');
+            const toggleOldPass = document.getElementById('toggleOldPass');
+            const toggleNewPass = document.getElementById('toggleNewPass');
+            const toggleReEnterPass = document.getElementById('toggleReEnterPass');
+
+            function isValidPassword(password) {
+                const minLength = password.length >= 8 && password.length <= 20;
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasLowerCase = /[a-z]/.test(password);
+                const hasNumbers = /\d/.test(password);
+                const hasSpecialChars = /[!@#$%&*_?]/.test(password);
+                return minLength && hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChars;
+            }
+
+            toggleOldPass.addEventListener('click', function () {
+                if (oldPasswordInput.type === "password") {
+                    oldPasswordInput.type = "text";
+                    toggleOldPass.textContent = "Hide";
+                } else {
+                    oldPasswordInput.type = "password";
+                    toggleOldPass.textContent = "Show";
+                }
+            });
+
+            toggleNewPass.addEventListener('click', function () {
+                if (newPasswordInput.type === "password") {
+                    newPasswordInput.type = "text";
+                    toggleNewPass.textContent = "Hide";
+                } else {
+                    newPasswordInput.type = "password";
+                    toggleNewPass.textContent = "Show";
+                }
+            });
+
+            newPasswordInput.addEventListener('input', function () {
+                if (newPasswordInput.value) {
+                    if (isValidPassword(newPasswordInput.value)) {
+                        toggleReEnterPass.disabled = false;
+                        reEnterPasswordInput.disabled = false;
+                    } else {
+                        toggleReEnterPass.disabled = true;
+                        reEnterPasswordInput.disabled = true;
+                    }
+                } else {
+                    toggleReEnterPass.disabled = true;
+                    reEnterPasswordInput.disabled = true;
+                }
+            });
+
+            toggleReEnterPass.addEventListener('click', function () {
+                if (reEnterPasswordInput.type === "password") {
+                    reEnterPasswordInput.type = "text";
+                    toggleReEnterPass.textContent = "Hide";
+                } else {
+                    reEnterPasswordInput.type = "password";
+                    toggleReEnterPass.textContent = "Show";
+                }
             });
         });
     </script>

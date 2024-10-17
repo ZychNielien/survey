@@ -116,12 +116,17 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
     while ($subject = mysqli_fetch_assoc($sqlSubject_query)) {
         ?>
 
-        <div class="d-flex justify-content-between">
-            <h5>(Semester:
-                <?php echo htmlspecialchars($subject['semester']) ?>,
-                Academic Year :
-                <?php echo htmlspecialchars($subject['academic_year']) ?> )
-            </h5>
+        <div class="ulo d-flex justify-content-between mx-3">
+            <div>
+                <h5>Semester:
+                    <span class="fw-bold"><?php echo htmlspecialchars($subject['semester']) ?></span>
+                </h5>
+            </div>
+            <div>
+                <h5> Academic Year :
+                    <span class="fw-bold"><?php echo htmlspecialchars($subject['academic_year']) ?></span>
+                </h5>
+            </div>
         </div>
 
         <table class="table table-striped table-bordered text-center align-middle mb-5">
@@ -200,21 +205,18 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                             if (is_array($interpretationData['links'])) {
                                                 echo "<ul style='list-style: none; padding: 0; margin: 0;'>";
                                                 foreach ($interpretationData['links'] as $link) {
-                                                    // Ensure $link is an array with 'text' and optionally 'url'
                                                     if (is_array($link) && !empty($link['text'])) {
-                                                        $text = is_string($link['text']) ? htmlspecialchars($link['text']) : ''; // Ensure text is a string
+                                                        $text = is_string($link['text']) ? htmlspecialchars($link['text']) : '';
                                                         if (!empty($link['url']) && is_string($link['url'])) {
-                                                            // Ensure url is a string before using htmlspecialchars
                                                             $url = htmlspecialchars($link['url']);
                                                             echo "<li><a href=\"$url\" target=\"_blank\">$text</a></li>";
                                                         } else {
-                                                            echo "<li>$text</li>"; // Only display the text if no URL
+                                                            echo "<li>$text</li>";
                                                         }
                                                     }
                                                 }
                                                 echo "</ul>";
                                             } else {
-                                                // If links is not an array, ensure it's a string before processing
                                                 echo htmlspecialchars(is_string($interpretationData['links']) ? $interpretationData['links'] : '');
                                             }
                                         } else {
@@ -235,12 +237,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                     <tr>
                         <th>Total Average</th>
                         <th><?php echo number_format((float) $finalAverageRating, 2, '.', ''); ?></th>
-                    </tr>
-                    <?php
-                } else {
-                    ?>
-                    <tr>
-                        <td colspan="4">No ratings available for this subject.</td>
+                        <th></th>
                     </tr>
                     <?php
                 }
@@ -250,6 +247,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "No subjects found for this instructor.";
+    echo "<h2 style='text-align: center; color: red;'>No evaluation found for this instructor.</h2>";
 }
 ?>

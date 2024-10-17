@@ -51,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     } elseif ($_POST['action'] === 'clear') {
         $clearSql = "DELETE FROM randomfaculty";
         if ($con->query($clearSql) === TRUE) {
-            $_SESSION['toggle_state'] = 'clear';
 
             echo json_encode(["status" => "success", "message" => "Nabura ang lahat ng random IDs at ang mga napiling Academic Year at Semester."]);
         } else {
@@ -95,8 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
     } elseif ($action === 'clear') {
         $clearSql = "UPDATE `academic_year_semester` SET semester = '', academic_year = '', isOpen = '0' WHERE id=1";
         if ($con->query($clearSql) === TRUE) {
+            $clearSql = "DELETE FROM enrolled_subject";
+            if ($con->query($clearSql) === TRUE) {
 
-            echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
+                echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
+            }
         } else {
             echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
         }
@@ -225,11 +229,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                     <option value="" disabled>Select Academic Year</option>
                                     <?php
                                     $currentYear = date("Y");
-                                    $nextYear = $currentYear + 3; // Extend three years into the future
-                                    
-                                    // Generate future academic year options
+                                    $nextYear = $currentYear + 3;
+
                                     for ($year = $currentYear; $year <= $nextYear; $year++) {
-                                        // Check if this year is the same as the one from the database
                                         $value = "$year-" . ($year + 1);
                                         $selected = (isset($academic_year) && $academic_year === $value) ? 'selected' : '';
                                         echo "<option value='$value' $selected>$year - " . ($year + 1) . "</option>";
@@ -265,11 +267,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                         $categories = htmlspecialchars($row['categories']);
                         $counter = 1;
 
-                        // Query to check if the category has criteria before generating the table
                         $sqlcriteria = "SELECT * FROM `classroomcriteria` WHERE classroomCategories = '$categories'";
                         $resultCriteria = mysqli_query($con, $sqlcriteria);
-                        $hasCriteria = (mysqli_num_rows($resultCriteria) > 0) ? 'yes' : 'no'; // Set flag
-                
+                        $hasCriteria = (mysqli_num_rows($resultCriteria) > 0) ? 'yes' : 'no';
+
                         echo '
             <table class="table table-striped table-bordered text-center align-middle">
                 <thead>
@@ -318,7 +319,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                             ';
                         }
 
-                        // Delete category button
                         echo '
                             <tr>
                                 <td colspan="3">     
@@ -774,12 +774,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                         </div>
                         <div class="d-flex flex-column align-items-center px-2">
                             <select id="yearSelect" class="form-control">
-                                <option value="" disabled>Select Academic Year</option>
+                                <option value="">Select Academic Year</option>
                                 <?php
                                 $currentAcademicYear = date("Y");
-                                $futureYear = $currentAcademicYear + 3; // Extend five years into the future
-                                
-                                // Generate future academic year options
+                                $futureYear = $currentAcademicYear + 3;
+
                                 for ($year = $currentAcademicYear; $year <= $futureYear; $year++) {
                                     echo "<option value='$year-" . ($year + 1) . "'>$year - " . ($year + 1) . "</option>";
                                 }
@@ -1106,7 +1105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                     <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
                         <thead>
                             <tr class="bg-danger text-center align-middle">
-                                <th>Category</th>
+                                <th style="max-width: 200px !important; ">Category</th>
                                 <th>Link</th>
                                 <th>Action</th>
                             </tr>
@@ -1120,11 +1119,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 while ($subjectResult = mysqli_fetch_assoc($result)) {
                                     ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td style="max-width: 200px !important; ">
+                                            <?php echo htmlspecialchars($subjectResult['categories']); ?>
+                                        </td>
                                         <td>
                                             <ul style="list-style: none; padding: 0; margin: 0;">
                                                 <?php
-                                                // Check and display linkOne
                                                 if (!empty($subjectResult['linkOne'])) {
                                                     ?>
                                                     <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
@@ -1132,7 +1132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                                     <?php
                                                 }
 
-                                                // Check and display linkTwo
                                                 if (!empty($subjectResult['linkTwo'])) {
                                                     ?>
                                                     <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
@@ -1177,7 +1176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                     <table class="table table-striped table-bordered text-center align-middle" id="subjectTable">
                         <thead>
                             <tr class="bg-danger text-center align-middle">
-                                <th>Category</th>
+                                <th style="max-width: 300px;">Category</th>
                                 <th>Link</th>
                                 <th>Action</th>
                             </tr>
@@ -1191,11 +1190,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 while ($subjectResult = mysqli_fetch_assoc($result)) {
                                     ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($subjectResult['categories']); ?></td>
+                                        <td style="max-width: 300px;">
+                                            <?php echo htmlspecialchars($subjectResult['categories']); ?>
+                                        </td>
                                         <td>
                                             <ul style="list-style: none; padding: 0; margin: 0;">
                                                 <?php
-                                                // Check and display linkOne
                                                 if (!empty($subjectResult['linkOne'])) {
                                                     ?>
                                                     <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
@@ -1203,7 +1203,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                                     <?php
                                                 }
 
-                                                // Check and display linkTwo
                                                 if (!empty($subjectResult['linkTwo'])) {
                                                     ?>
                                                     <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
@@ -1266,7 +1265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                         <td>
                                             <ul style="list-style: none; padding: 0; margin: 0;">
                                                 <?php
-                                                // Check and display linkOne
+
                                                 if (!empty($subjectResult['linkOne'])) {
                                                     ?>
                                                     <li><a href="<?php echo htmlspecialchars($subjectResult['linkOne']); ?>"
@@ -1274,7 +1273,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                                     <?php
                                                 }
 
-                                                // Check and display linkTwo
                                                 if (!empty($subjectResult['linkTwo'])) {
                                                     ?>
                                                     <li><a href="<?php echo htmlspecialchars($subjectResult['linkTwo']); ?>"
@@ -1411,7 +1409,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 <label for="link" class="form-label">Paste link Three here:</label>
                                 <textarea class="form-control" id="peertopeerlinkThree" name="peertopeerlinkThree"
                                     rows="3"></textarea>
-                                <!-- Change this to 'linkThree' -->
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -1454,7 +1451,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 <label for="link" class="form-label">Paste link Three here:</label>
                                 <textarea class="form-control" id="studentslinkThree" name="studentslinkThree"
                                     rows="3"></textarea>
-                                <!-- Change this to 'linkThree' -->
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -1497,7 +1493,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 <label for="link" class="form-label">Paste link Three here:</label>
                                 <textarea class="form-control" id="classroomlinkThree" name="classroomlinkThree"
                                     rows="3"></textarea>
-                                <!-- Change this to 'linkThree' -->
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -1536,7 +1531,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                                 <label for="link" class="form-label">Paste link Three here:</label>
                                 <textarea class="form-control" id="vcaalinkThree" name="vcaalinkThree"
                                     rows="3"></textarea>
-                                <!-- Change this to 'linkThree' -->
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -1620,7 +1614,6 @@ if (isset($_SESSION['success'])) {
             var classroomAction = classroomType === 'classroomcategory' ? 'deleteClassroomid' : 'classroomdeleteid';
 
             if (classroomType === 'classroomcategory' && hasCriteria === 'yes') {
-                // If the category has criteria, show an alert and block the deletion
                 Swal.fire({
                     title: 'Cannot Delete',
                     text: 'This category has criteria and cannot be deleted.',
@@ -1628,7 +1621,7 @@ if (isset($_SESSION['success'])) {
                     confirmButtonText: 'OK'
                 });
             } else {
-                // If no criteria, show confirmation dialog
+
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "This action cannot be undone!",
@@ -1639,7 +1632,6 @@ if (isset($_SESSION['success'])) {
                     confirmButtonText: 'Yes, delete it!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Proceed with deletion if confirmed
                         window.location.href = `../../controller/criteria.php?${classroomAction}=` + classroomId;
                     }
                 });
@@ -1688,7 +1680,6 @@ if (isset($_SESSION['success'])) {
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect to the deletion script with the question ID
                     window.location.href = `../../controller/criteria.php?questionid=${questionid}`;
                 }
             });
@@ -1732,7 +1723,6 @@ if (isset($_SESSION['success'])) {
             const studentsaction = studentstype === 'category' ? 'deletestudentsCategoryid' : 'studentsdeleteid';
 
             if (studentstype === 'category' && hasCriteria === 'yes') {
-                // If the category has criteria, show an alert and block the deletion
                 Swal.fire({
                     title: 'Cannot Delete',
                     text: 'This category has criteria and cannot be deleted.',
@@ -1794,7 +1784,6 @@ if (isset($_SESSION['success'])) {
             const action = type === 'category' ? 'deleteCategoryid' : 'deletefacultyid';
 
             if (type === 'category' && hasCriteria === 'yes') {
-                // If the category has criteria, show an alert and block the deletion
                 Swal.fire({
                     title: 'Cannot Delete',
                     text: 'This category has criteria and cannot be deleted.',

@@ -170,7 +170,8 @@ include "../../model/dbconnection.php";
                                                                 <label for="academic" class="mr-2 mb-0">Academic
                                                                     Year:</label>
                                                                 <input type="text" id="academic" name="academic_year"
-                                                                    class="form-control no-border" style="flex: 1;">
+                                                                    class="form-control no-border" readonly
+                                                                    style="flex: 1;">
                                                             </div>
                                                         </th>
                                                     </tr>
@@ -447,16 +448,22 @@ include "../../model/dbconnection.php";
                             <td><a href="#" class="view-btn btn btn-success">Print</a></td>
                         </tr>
                         ';
+
+
+
+                                ?>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <?php
                             }
+                        } else {
+                            echo "<h2 style='text-align: center; color: red;'>No evaluation found for this instructor.</h2>";
                         }
-
                         ?>
-                    </tbody>
-                </table>
-                <h1 id="noResults" class="text-center text-danger" style="display: none;">No results found</h1>
-            </div>
-
         </div>
+
     </div>
 
 

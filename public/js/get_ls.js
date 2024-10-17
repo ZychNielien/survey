@@ -15,10 +15,10 @@ $(document).ready(function () {
   $("#year").text(year);
   $("#semester").text(semester);
 
-  if(year == 'FIRST' || year == 'SECOND'){
-    $('#maxunit').text('23');
-  }else{
-    $('#maxunit').text('21');
+  if (year == "FIRST" || year == "SECOND") {
+    $("#maxunit").text("23");
+  } else {
+    $("#maxunit").text("21");
   }
 
   // if(getMajor == 0){
@@ -60,25 +60,15 @@ $(document).ready(function () {
     $('#major').css('display', 'flex');
     Swal.fire({
       title: "Choose your Major",
-      text: "Welcome new Third Year Student",
+      text: "You need to choose your Major",
       icon: "warning",
       showCancelButton: true,
       cancelButtonText: "Close",
       cancelButtonColor: "#d33",
       showConfirmButton: false,
     });
-    $('#usermajor2').css('display', 'none');
-  }else{
-    $('#major').css('display', 'none');
-    $.ajax({
-      url: '../controller/getMajor.php',
-      type: 'GET',
-      data: {srcode: srcode},
-      dataType: 'json',
-      success: function(data){
-        $('#usermajor').text(data[0].major);
-      }
-    })
+  } else {
+    $("#major").css("display", "none");
   }
 
   $.ajax({
@@ -147,9 +137,6 @@ $(document).ready(function () {
             },
           },
         ],
-        "language": {
-            "emptyTable": "No data available in this table"
-        },
         data: data,
       });
     },
@@ -179,14 +166,14 @@ $(document).ready(function () {
         var total_student = data[0].total_slot;
         var UserTotalUnit = JSON.parse(localStorage.getItem("UserTotalUnit"));
         var unit = UserTotalUnit[0].TotalUnits;
-        
+
         const maxU = {
           FIRST: 23,
           SECOND: 23,
           THIRD: 21,
           FOURTH: 21,
         };
-        
+
         if (unit == maxU[year]) {
           Swal.fire({
             title: "Unit Full",

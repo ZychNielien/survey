@@ -68,8 +68,7 @@ if (isset($_POST['checking_viewbtn'])) {
                         </tr>
                         <tr>
                             <td colspan="4" style="font-size: 18px; font-weight: bold; padding: 2px; text-align: center;">FACULTY
-                                PEER TO PEER
-                                EVALUATION INSTRUMENT FOR FACULTY DEVELOPMENT</td>
+                                PERFORMANCE EVALUATION INSTRUMENT FOR FACULTY DEVELOPMENT</td>
                         </tr>
                         <tr>
                             <td colspan="2" style="padding: 0 5px;">
