@@ -691,10 +691,28 @@ $preferredSchedule = $result->fetch_assoc();
             url: '../../controller/classroomObservation.php',
             data: bookingData,
             success: function (response) {
-                Swal.fire("Success!", "Booking has been successfully made!", "success").then(() => {
-                    location.reload();
-                    createReservationTable();
-                });
+                $.ajax({
+                    url: '../../controller/post_obs_tbl.php',
+                    type: 'POST',
+                    data: {
+                        course: course,
+                        name: name,
+                        room: room,
+                        faculty: fromFacultyID,
+                        date: selectedDate,
+                        stime: startTime,
+                        etime: endTime,
+                        slot: selectedSlot,
+                        status: evaluationStatus
+                    },
+                    success: function(data){
+                        Swal.fire("Success!", "Booking has been successfully made!", "success").then(() => {
+                            location.reload();
+                            createReservationTable();
+                        });
+                    }
+                })
+                
             },
             error: function (xhr, status, error) {
                 Swal.fire("Error!", "There was an error processing your request: " + error, "error");

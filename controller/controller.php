@@ -68,11 +68,11 @@ if (isset($_POST['submit_assigned'])) {
     if ($query_run) {
         $_SESSION['status'] = "Save Successfully";
         $_SESSION['status-code'] = "success";
-        header("location:../view/test.php");
+        header("location:../view/adminModule/maintenance.php");
     } else {
         $_SESSION['status'] = "Something is wrong";
         $_SESSION['status-code'] = "error";
-        header("location:../view/test.php");
+        header("location:../view/adminModule/maintenance.php");
     }
 }
 
@@ -86,13 +86,14 @@ if(isset($_POST['submitMajor'])){
     $query_run = mysqli_query($con, $query);
 
     if ($query_run) {
-        $_SESSION['status'] = $major. " has been selected";
+        $_SESSION['status'] = $major. " has been selected, please Login Again";
         $_SESSION['status-code'] = "success";
-        header("location:../view/student_view.php");
+        header('location:../view/loginModule/index.php');
+        session_destroy();
     } else {
         $_SESSION['status'] = "Something is wrong";
         $_SESSION['status-code'] = "error";
-        header("location:../view/student_view.phpstudent_view.php");
+        header("location:../view/student_view.php");
     }
 
 }

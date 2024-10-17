@@ -217,9 +217,9 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                     </ul>
                 </li>
                 <li>
-                    <a href="peertopeer.php" class="
+                    <a href="maintenance.php" class="
                     <?php
-                    if ($page == "peertopeer.php") {
+                    if ($page == "maintenance.php") {
                         echo "linkName active";
                     } else {
                         echo "linkName";

@@ -7,6 +7,7 @@ $(document).ready(function () {
   var year = studentData[0].year_level;
   var semester = studentData[0].semester;
   var srcode = studentData[0].sr_code;
+  var getMajor = studentData[0].major;
 
   $("#lastname").text(lastname);
   $("#firstname").text(firstname);
@@ -20,18 +21,25 @@ $(document).ready(function () {
     $('#maxunit').text('21');
   }
 
+  // if(getMajor == 0){
+  //   $('#submitMajor').on('click', function(){
+  //     $.ajax({
+  //       url: '../controller/getMajor.php',
+  //       type: 'GET',
+  //       data: {srcode: srcode},
+  //       dataType: 'json',
+  //       success: function(data){
+  //         localStorage.setItem('GetMajor', JSON.stringify(data));
+  //       }
+  //     })
+        
+  //   });
+  //   var getM = JSON.parse(localStorage.getItem("GetMajor"));
+  //   var getMajor = getM[0].major;
+  // }
+  
 
-  $.ajax({
-    url: '../controller/getMajor.php',
-    type: 'GET',
-    data: {srcode: srcode},
-    dataType: 'json',
-    success: function(data){
-      localStorage.setItem('GetMajor', JSON.stringify(data));
-    }
-  })
-  var getM = JSON.parse(localStorage.getItem("GetMajor"));
-  var getMajor = getM[0].major;
+  
 
 
   $.ajax({
@@ -40,12 +48,12 @@ $(document).ready(function () {
     dataType: 'json',
     success: function(data){
       localStorage.setItem('GetSemester', JSON.stringify(data));
+      console.log(data);
     }
   })
   var getSem = JSON.parse(localStorage.getItem("GetSemester"));
   var GetSems = getSem[0].semester;
   $('#getSem, #getSem2').text(GetSems);
-
 
 
   if(year == 'THIRD' && semester == 'FIRST' && getMajor == 0){

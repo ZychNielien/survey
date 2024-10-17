@@ -687,7 +687,7 @@ if (!isset($_SESSION['studentSRCode'])) {
                 class="fa-regular fa-circle-xmark"></i> Close</button>
             </div>
             <div>
-              <button type="submit" name="submitMajor" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Submit</button>
+              <button type="submit" id="submitMajor" name="submitMajor" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Submit</button>
             </div>
           </form>
         </div>

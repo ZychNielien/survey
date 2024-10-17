@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+if (isset($_SESSION['studentSRCode'])) {
+  header('Location: ../../view/student_view.php');
+  exit();
+}
 ?>
 
 <!DOCTYPE html>
