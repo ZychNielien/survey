@@ -192,7 +192,7 @@ $preferredSchedule = $result->fetch_assoc();
                     ?>
 
                     <!-- FILTER FOR SEMESTER AND ACADEMIC YEAR -->
-                    <form method="POST" action="" class="mb-4 d-flex justify-content-evenly text-center">
+                    <form method="POST" action="" class="mb-4 d-flex justify-content-evenly align-items-center text-center">
                         <div class="mb-3">
                             <label for="academic_year" class="form-label">Academic Year:</label>
                             <select id="academic_year" name="academic_year" class="form-select">
