@@ -44,7 +44,7 @@ $preferredSchedule = $result->fetch_assoc();
 
                     <?php
                     $facultyID = $userRow['faculty_Id'];
-                    $courseSQL = "SELECT s.subject, s.subject_code
+                    $courseSQL = "SELECT DISTINCT s.subject, s.subject_code
                                   FROM instructor i
                                   JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
                                   JOIN subject s ON a.subject_id = s.subject_id
@@ -284,7 +284,7 @@ $preferredSchedule = $result->fetch_assoc();
 
                     <?php
                     $facultyID = $userRow['faculty_Id'];
-                    $courseSQL = "SELECT s.subject, s.subject_code
+                    $courseSQL = "SELECT DISTINCT s.subject, s.subject_code
               FROM instructor i
               JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
               JOIN subject s ON a.subject_id = s.subject_id

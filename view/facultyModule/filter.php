@@ -251,12 +251,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                         <th><?php echo number_format((float) $finalAverageRating, 2, '.', ''); ?></th>
                     </tr>
                     <?php
-                } else {
-                    ?>
-                    <tr>
-                        <td colspan="4">No ratings available for this subject.</td>
-                    </tr>
-                    <?php
                 }
                 ?>
             </tbody>
@@ -264,6 +258,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "No subjects found for this instructor.";
+    echo "<h2 style='text-align: center; color: red;'>No subjects found for this instructor.</h2>";
 }
 ?>

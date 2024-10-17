@@ -50,9 +50,10 @@ $userRow = mysqli_fetch_assoc($usersql_query);
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="separator profile">
+        <div class="separator profile" style="max-height: 250px;">
             <div class="profileImg">
-                <img src="../<?php echo $userRow['image']; ?>" style="border-radius: 10px;" alt="User Image">
+                <img src="../<?php echo $userRow['image']; ?>"
+                    style="border-radius: 10px; max-height: 150px; max-width: 150px" alt="User Image">
 
             </div>
             <div class="profileInfo">
@@ -144,6 +145,28 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                         <li>
                             <a href="questionsTab.php" class="linkName">
                                 Evaluation Tab
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="vcaa.php" class="
+                    <?php
+                    if ($page == "vcaa.php") {
+                        echo "linkName active";
+                    } else {
+                        echo "linkName";
+                    }
+                    ?>
+                    ">
+                        <i class="material-icons">assignment_turned_in</i>
+                        <span>VCAA</span>
+
+                    </a>
+                    <ul class="subMenu blank">
+                        <li>
+                            <a href="vcaa.php" class="linkName">
+                                VCAA
                             </a>
                         </li>
                     </ul>
@@ -338,7 +361,7 @@ $userRow = mysqli_fetch_assoc($usersql_query);
                 <img src="../../public/picture/bsu.png" alt>
             </div>
             <div class="headerName">
-                <h1 class="fw-bold">Faculty Evaluation Portal</h1>
+                <h1 class="fw-bold">Administrator Evaluation Portal</h1>
             </div>
             <div class="bsuIcon">
                 <img src="../../public/picture/cics.png" alt>

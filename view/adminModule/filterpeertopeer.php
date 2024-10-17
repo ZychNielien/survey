@@ -243,6 +243,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "No subjects found for this instructor.";
+    echo "<h2 style='text-align: center; color: red;'>No evaluation found for this instructor.</h2>";
 }
 ?>

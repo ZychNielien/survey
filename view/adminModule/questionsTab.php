@@ -51,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     } elseif ($_POST['action'] === 'clear') {
         $clearSql = "DELETE FROM randomfaculty";
         if ($con->query($clearSql) === TRUE) {
-            $_SESSION['toggle_state'] = 'clear';
 
             echo json_encode(["status" => "success", "message" => "Nabura ang lahat ng random IDs at ang mga napiling Academic Year at Semester."]);
         } else {
@@ -95,8 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
     } elseif ($action === 'clear') {
         $clearSql = "UPDATE `academic_year_semester` SET semester = '', academic_year = '', isOpen = '0' WHERE id=1";
         if ($con->query($clearSql) === TRUE) {
+            $clearSql = "DELETE FROM enrolled_subject";
+            if ($con->query($clearSql) === TRUE) {
 
-            echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
+                echo json_encode(["status" => "success", "message" => "Evaluation closed."]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
+            }
         } else {
             echo json_encode(["status" => "error", "message" => "Error: " . $con->error]);
         }
@@ -770,12 +774,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['studentaction'])) {
                         </div>
                         <div class="d-flex flex-column align-items-center px-2">
                             <select id="yearSelect" class="form-control">
-                                <option value="" disabled>Select Academic Year</option>
+                                <option value="">Select Academic Year</option>
                                 <?php
                                 $currentAcademicYear = date("Y");
-                                $futureYear = $currentAcademicYear + 3; // Extend five years into the future
-                                
-                                // Generate future academic year options
+                                $futureYear = $currentAcademicYear + 3;
+
                                 for ($year = $currentAcademicYear; $year <= $futureYear; $year++) {
                                     echo "<option value='$year-" . ($year + 1) . "'>$year - " . ($year + 1) . "</option>";
                                 }

@@ -234,7 +234,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
 
                                                 echo "</ul>";
                                             } else {
-                                                echo htmlspecialchars($interpretationData['links']);
+                                                echo htmlspecialchars(is_string($interpretationData['links']) ? $interpretationData['links'] : '');
                                             }
                                         } else {
                                             echo "No recommendation needed.";
@@ -271,6 +271,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "No subjects found for this instructor.";
+    echo "<h2 style='text-align: center; color: red;'>No subjects found for this instructor.</h2>";
 }
 ?>

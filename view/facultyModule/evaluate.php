@@ -447,16 +447,22 @@ include "../../model/dbconnection.php";
                             <td><a href="#" class="view-btn btn btn-success">Print</a></td>
                         </tr>
                         ';
+
+
+
+                                ?>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <?php
                             }
+                        } else {
+                            echo "<h2 style='text-align: center; color: red;'>No evaluation found for this instructor.</h2>";
                         }
-
                         ?>
-                    </tbody>
-                </table>
-                <h1 id="noResults" class="text-center text-danger" style="display: none;">No results found</h1>
-            </div>
-
         </div>
+
     </div>
 
 

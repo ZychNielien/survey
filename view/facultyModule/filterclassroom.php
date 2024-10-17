@@ -237,7 +237,7 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
                                                 }
                                                 echo "</ul>";
                                             } else {
-                                                echo htmlspecialchars($interpretationData['links']);
+                                                echo htmlspecialchars(is_string($interpretationData['links']) ? $interpretationData['links'] : '');
                                             }
                                         } else {
                                             echo "No recommendation needed.";
@@ -267,6 +267,6 @@ if (mysqli_num_rows($sqlSubject_query) > 0) {
         <?php
     }
 } else {
-    echo "No records found.";
+    echo "<h2 style='text-align: center; color: red;'>No record found.</h2>";
 }
 ?>

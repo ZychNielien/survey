@@ -1,14 +1,8 @@
 <?php
 include "components/navBar.php";
-require '../../vendor/autoload.php';
-use PhpOffice\PhpSpreadsheet\IOFactory;
+
 include "../../model/dbconnection.php";
 
-
-function sanitizeColumnName($name)
-{
-    return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
-}
 
 $sqlSAY = "SELECT * FROM `academic_year_semester`";
 $sqlSAY_query = mysqli_query($con, $sqlSAY);
@@ -16,72 +10,6 @@ $SAY = mysqli_fetch_assoc($sqlSAY_query);
 
 $nowSemester = $SAY['semester'];
 $nowAcademicYear = $SAY['academic_year'];
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
-    if ($_FILES['excel_file']['error'] == 0) {
-        $fileTmpPath = $_FILES['excel_file']['tmp_name'];
-        $originalFileName = $_FILES['excel_file']['name'];
-        $uniqueFileName = time() . '_' . $originalFileName;
-        $destinationPath = '../../public/excelFiles/' . $uniqueFileName;
-
-        $fileExtension = pathinfo($originalFileName, PATHINFO_EXTENSION);
-        if (!in_array($fileExtension, ['xls', 'xlsx'])) {
-            $message = "Invalid file type. Only Excel files (.xls, .xlsx) are allowed.";
-        } elseif (
-            !in_array(mime_content_type($fileTmpPath), [
-                'application/vnd.ms-excel',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            ])
-        ) {
-            $message = "Invalid file type. Only Excel files (.xls, .xlsx) are allowed.";
-        } else {
-            $userId = $userRow['faculty_Id'];
-            $result = $con->query("SELECT file_name, id FROM vcaaexcel WHERE faculty_Id = '$userId' AND semester = '$nowSemester' AND academic_year = '$nowAcademicYear' LIMIT 1");
-
-            if ($row = $result->fetch_assoc()) {
-                $oldFileName = $row['file_name'];
-                $recordId = $row['id'];
-
-                if (file_exists('../../public/excelFiles/' . $oldFileName)) {
-                    unlink('../../public/excelFiles/' . $oldFileName);
-                }
-            }
-
-            if (move_uploaded_file($fileTmpPath, $destinationPath)) {
-                try {
-                    $spreadsheet = IOFactory::load($destinationPath);
-                    $sheet = $spreadsheet->getActiveSheet();
-                    $cellValue = $sheet->getCell('D50')->getCalculatedValue();
-
-                    if ($cellValue !== null && $cellValue !== '') {
-                        if (isset($recordId)) {
-                            $stmt = $con->prepare("UPDATE vcaaexcel SET file_name = ?, cell_value = ? WHERE id = ? AND semester = ? AND academic_year = ?");
-                            $stmt->bind_param("ssiis", $uniqueFileName, $cellValue, $recordId, $nowSemester, $nowAcademicYear);
-                        } else {
-                            $stmt = $con->prepare("INSERT INTO vcaaexcel (file_name, cell_value, faculty_Id, semester, academic_year) VALUES (?, ?, ?, ?, ?)");
-                            $stmt->bind_param("ssiss", $uniqueFileName, $cellValue, $userId, $nowSemester, $nowAcademicYear);
-                        }
-
-                        if ($stmt->execute()) {
-                            $message = "Your VCAA has been successfully " . (isset($recordId) ? "updated." : "uploaded.");
-                        } else {
-                            $message = "Error: " . $stmt->error;
-                        }
-                        $stmt->close();
-                    } else {
-                        $message = "Cell value is empty. Data not saved to the database.";
-                    }
-                } catch (Exception $e) {
-                    $message = "Error loading file: " . $e->getMessage();
-                }
-            } else {
-                $message = "Error saving the uploaded file.";
-            }
-        }
-    } else {
-        $message = "Please upload a valid Excel file.";
-    }
-}
 
 $userId = $userRow['faculty_Id'];
 $result = $con->query("SELECT cell_value FROM vcaaexcel WHERE faculty_Id = '$userId' AND semester = '$nowSemester' AND academic_year = '$nowAcademicYear' LIMIT 1");
@@ -307,44 +235,14 @@ $semestersJson = json_encode($semesters);
 
             <div class="currentRating d-flex flex-column justify-content-center  align-items-center w-100">
 
-                <form action="" method="POST" enctype="multipart/form-data" class="mt-4">
-
-                    <?php
-
-                    $evalSQL = "SELECT * FROM `academic_year_semester` WHERE id = 1";
-                    $evalSQL_query = mysqli_query($con, $evalSQL);
-                    $eval = mysqli_fetch_assoc($evalSQL_query);
-
-                    if ($eval['isOpen'] == 0) {
-                        ?>
-                        <div class="file-drop-area">
-                            <label class="choose-file-button" for="excel_file">Choose Excel File</label>
-                            <span class="file-message">or drag and drop files here</span>
-                            <input type="file" name="excel_file" accept=".xlsx, .xls" class="form-control file-input"
-                                id="excel_file">
-                        </div>
-                        <button type="submit" class="btn btn-secondary my-2" disabled>Upload</button>
-
-                        <?php
-
-                    } else {
-                        ?>
-                        <div class="file-drop-area">
-                            <label class="choose-file-button" for="excel_file">Choose Excel File</label>
-                            <span class="file-message">or drag and drop files here</span>
-                            <input type="file" name="excel_file" accept=".xlsx, .xls" required
-                                class="form-control file-input" id="excel_file">
-                        </div>
-                        <button type="submit" class="btn btn-primary my-2">Upload</button>
-
-                        <?php
-                    }
-
-                    ?>
-
-                </form>
-
                 <div class="chart-container  justify-content-center">
+
+                    <div class="d-flex justify-content-center my-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#vcaaResults">
+                            VCAA Results
+                        </button>
+                    </div>
 
                     <h3 class="text-center">Your VCAA Rating</h3>
 
@@ -405,9 +303,83 @@ $semestersJson = json_encode($semesters);
 
             </div>
 
+
+
         </div>
 
     </section>
+
+    <div class="modal fade" id="vcaaResults" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="vcaaResultsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title " id="vcaaResultsLabel">VCAA Results</h5>
+                    <button type="button" class="btn-close bg-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php
+
+                    function sanitizeColumnName($name)
+                    {
+                        return preg_replace('/[^a-zA-Z0-9_]/', '', trim($name));
+                    }
+
+                    $FacultyID = $userRow['faculty_Id'];
+                    $sqlSAY = "SELECT DISTINCT  sf.semester, sf.academic_year 
+        FROM vcaaexcel sf
+        JOIN instructor i ON sf.faculty_Id = i.faculty_Id
+        WHERE sf.faculty_Id = '$FacultyID'";
+
+                    $sqlSAY_query = mysqli_query($con, $sqlSAY);
+
+                    $semesters = [];
+                    $academicYears = [];
+
+                    while ($academicYearSemester = mysqli_fetch_assoc($sqlSAY_query)) {
+                        $semesters[] = $academicYearSemester['semester'];
+                        $academicYears[] = $academicYearSemester['academic_year'];
+                    }
+
+                    $selectedSemester = isset($_POST['semester']) ? $_POST['semester'] : '';
+                    $selectedAcademicYear = isset($_POST['academic_year']) ? $_POST['academic_year'] : '';
+
+                    ?>
+
+                    <!-- FILTER FOR SEMESTER AND ACADEMIC YEAR -->
+                    <form method="POST" action="" class="mb-4 d-flex justify-content-evenly text-center">
+                        <div class="mb-3">
+                            <label for="academic_year" class="form-label">Academic Year:</label>
+                            <select id="academic_year" name="academic_year" class="form-select">
+                                <option value="">Select Academic Year</option>
+                                <?php foreach (array_unique($academicYears) as $year): ?>
+                                    <option value="<?php echo $year; ?>"><?php echo $year; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="semester" class="form-label">Semester:</label>
+                            <select id="semester" name="semester" class="form-select">
+                                <option value="">Select Semester</option>
+                                <?php foreach (array_unique($semesters) as $semester): ?>
+                                    <option value="<?php echo $semester; ?>"><?php echo $semester; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </form>
+
+                    <div class="vcaaRecommendation mt-2">
+                        <div id="result"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../../public/js/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -606,6 +578,12 @@ $semestersJson = json_encode($semesters);
     <script>
         $(document).ready(function () {
 
+            fetchFilteredResults();
+
+            $('#academic_year, #semester').change(function () {
+                fetchFilteredResults();
+            });
+
             <?php if (isset($_SESSION['status'])): ?>
                 Swal.fire({
                     title: '<?php echo $_SESSION['status']; ?>',
@@ -670,6 +648,37 @@ $semestersJson = json_encode($semesters);
                 printPartOfPage('lineChart');
             });
         });
+
+        function fetchFilteredResults() {
+            var semester = $('#semester').val();
+            var academicYear = $('#academic_year').val();
+
+            if (semester === '' && academicYear === '') {
+                $.ajax({
+                    type: 'POST',
+                    url: 'filtervcaa.php',
+                    data: {
+                        fetchAll: true
+                    },
+                    success: function (data) {
+                        $('#result').html(data);
+                    },
+
+                });
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: 'filtervcaa.php',
+                    data: {
+                        semester: semester,
+                        academic_year: academicYear
+                    },
+                    success: function (data) {
+                        $('#result').html(data);
+                    },
+                });
+            }
+        }
 
     </script>
 
