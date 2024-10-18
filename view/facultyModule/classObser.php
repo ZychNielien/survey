@@ -48,7 +48,6 @@ $preferredSchedule = $result->fetch_assoc();
                                   FROM instructor i
                                   JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
                                   JOIN subject s ON a.subject_id = s.subject_id
-                                  JOIN classroomObservation sf ON sf.toFacultyID = a.faculty_Id
                                   WHERE i.faculty_Id = ?";
                     $courseStmt = $con->prepare($courseSQL);
                     $courseStmt->bind_param("s", $facultyID);
@@ -292,7 +291,6 @@ $preferredSchedule = $result->fetch_assoc();
               FROM instructor i
               JOIN assigned_subject a ON i.faculty_Id = a.faculty_Id
               JOIN subject s ON a.subject_id = s.subject_id
-              JOIN classroomObservation sf ON sf.toFacultyID = a.faculty_Id
               WHERE i.faculty_Id = '$facultyID'";
 
                     $courseSQL_query = mysqli_query($con, $courseSQL);
@@ -313,7 +311,7 @@ $preferredSchedule = $result->fetch_assoc();
                         <div class="form-group my-2">
                             <label for="name">Instructor:</label>
                             <input type="text" class="form-control" id="name"
-                                value="<?php echo $userRow["first_name"] . ' ' . $userRow["last_name"]; ?>" required>
+                                value="<?php echo $userRow["first_name"] . ' ' . $userRow["last_name"]; ?>" readonly required>
                             <input type="text" class="form-control" id="fromFacultyID"
                                 value="<?php echo $userRow["faculty_Id"]; ?>" required hidden>
                         </div>
@@ -751,28 +749,10 @@ function printPartOfPage(elementId) {
             url: '../../controller/classroomObservation.php',
             data: bookingData,
             success: function (response) {
-                $.ajax({
-                    url: '../../controller/post_obs_tbl.php',
-                    type: 'POST',
-                    data: {
-                        course: course,
-                        name: name,
-                        room: room,
-                        faculty: fromFacultyID,
-                        date: selectedDate,
-                        stime: startTime,
-                        etime: endTime,
-                        slot: selectedSlot,
-                        status: evaluationStatus
-                    },
-                    success: function(data){
-                        Swal.fire("Success!", "Booking has been successfully made!", "success").then(() => {
-                            location.reload();
-                            createReservationTable();
-                        });
-                    }
-                })
-                
+                Swal.fire("Success!", "Booking has been successfully made!", "success").then(() => {
+                    location.reload();
+                    createReservationTable();
+                });
             },
             error: function (xhr, status, error) {
                 Swal.fire("Error!", "There was an error processing your request: " + error, "error");
